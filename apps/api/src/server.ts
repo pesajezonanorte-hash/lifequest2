@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import router from './routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { initScheduler } from './jobs/scheduler';
+import { prisma } from './lib/prisma';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -38,14 +39,13 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Prisma schema sync endpoint for Vercel
+// Database connection check (schema must be pushed locally via: prisma db push)
 app.post('/api/v1/db/migrate', async (_req, res) => {
   try {
-    const { execSync } = await import('child_process');
-    execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
-    res.json({ status: 'database schema synced' });
+    await prisma.$connect();
+    res.json({ status: 'database connected', note: 'schema must be applied locally via: npm run db:push' });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Database sync failed';
+    const msg = err instanceof Error ? err.message : 'Database connection failed';
     res.status(500).json({ error: msg });
   }
 });
