@@ -38,6 +38,18 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Prisma migrations endpoint for Vercel
+app.post('/api/v1/db/migrate', async (_req, res) => {
+  try {
+    const { execSync } = await import('child_process');
+    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    res.json({ status: 'migrations completed' });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Migration failed';
+    res.status(500).json({ error: msg });
+  }
+});
+
 // ─── Parsing ─────────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
