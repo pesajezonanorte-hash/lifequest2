@@ -18,6 +18,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://tourmaline-sherbet-90125b.netlify.app',
+  'https://lifequest2-web.vercel.app',
 ].filter(Boolean) as string[];
 
 // ─── Seguridad ───────────────────────────────────────────────────────────────
