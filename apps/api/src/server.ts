@@ -54,16 +54,18 @@ app.use('/api/v1', router);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('');
-  console.log('  ╔════════════════════════════════════╗');
-  console.log('  ║  ⚔️  LifeQuest API  •  v2.0.0      ║');
-  console.log(`  ║  🏰 http://localhost:${PORT}/api/v1   ║`);
-  console.log('  ╚════════════════════════════════════╝');
-  console.log('');
-  if (process.env.NODE_ENV !== 'test') {
-    initScheduler();
-  }
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log('');
+    console.log('  ╔════════════════════════════════════╗');
+    console.log('  ║  ⚔️  LifeQuest API  •  v2.0.0      ║');
+    console.log(`  ║  🏰 http://localhost:${PORT}/api/v1   ║`);
+    console.log('  ╚════════════════════════════════════╝');
+    console.log('');
+    if (process.env.NODE_ENV !== 'test') {
+      initScheduler();
+    }
+  });
+}
 
 export default app;
