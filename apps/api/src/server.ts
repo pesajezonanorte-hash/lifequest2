@@ -38,14 +38,14 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Prisma migrations endpoint for Vercel
+// Prisma schema sync endpoint for Vercel
 app.post('/api/v1/db/migrate', async (_req, res) => {
   try {
     const { execSync } = await import('child_process');
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-    res.json({ status: 'migrations completed' });
+    execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
+    res.json({ status: 'database schema synced' });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Migration failed';
+    const msg = err instanceof Error ? err.message : 'Database sync failed';
     res.status(500).json({ error: msg });
   }
 });
