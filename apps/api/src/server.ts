@@ -34,7 +34,7 @@ app.use(
 
 // Root-level health check (for Railway healthcheck probe)
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', version: '6.0.0', timestamp: new Date().toISOString() });
+  res.status(200).json({ status: 'ok' });
 });
 
 // ─── Parsing ─────────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ app.use('/api/v1', router);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('  ╔════════════════════════════════════╗');
   console.log('  ║  ⚔️  LifeQuest API  •  v2.0.0      ║');
