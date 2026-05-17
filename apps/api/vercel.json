@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "npm run build --workspace=@lifequest/api && npx prisma generate && npx prisma migrate deploy",
   "builds": [
     {
       "src": "src/server.ts",
