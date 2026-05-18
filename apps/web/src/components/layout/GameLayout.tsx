@@ -534,8 +534,8 @@ export function GameLayout({ children }: Props) {
 
                 <LiveClock />
 
-                {/* mobile gold + search */}
-                <div className="md:hidden flex items-center gap-2">
+                {/* mobile: gold + search + sabiduría + enfoque */}
+                <div className="md:hidden flex items-center gap-1.5">
                   <GoldCounter gold={user.gold} />
                   <motion.button
                     className="flex h-8 w-8 items-center justify-center rounded-xl"
@@ -545,6 +545,24 @@ export function GameLayout({ children }: Props) {
                     title="Buscar"
                   >
                     <Search size={15} />
+                  </motion.button>
+                  <motion.button
+                    className="flex h-8 w-8 items-center justify-center rounded-xl"
+                    onClick={() => navigate('/wisdom')}
+                    whileTap={{ scale: 0.96 }}
+                    style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: '#fff', border: 'none' }}
+                    title="Sabiduría"
+                  >
+                    <Sparkles size={15} />
+                  </motion.button>
+                  <motion.button
+                    className="flex h-8 w-8 items-center justify-center rounded-xl"
+                    onClick={() => setShowFocus(true)}
+                    whileTap={{ scale: 0.96 }}
+                    style={{ border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--accent-cyan)' }}
+                    title="Modo Enfoque"
+                  >
+                    <Zap size={15} />
                   </motion.button>
                 </div>
 
@@ -643,28 +661,45 @@ export function GameLayout({ children }: Props) {
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-6">
+          <div className="mx-auto max-w-7xl px-4 py-5 pb-6 md:px-6 md:py-6">
             {children}
           </div>
         </main>
 
-        <nav className="md:hidden border-t border-[var(--border)] bg-panel-glass">
-          <div className="flex items-center justify-around px-2 py-2">
-            {NAV_ITEMS.slice(0, 5).map(({ to, icon, label }) => (
+        <nav
+          className="md:hidden border-t border-[var(--border)]"
+          style={{ background: 'color-mix(in oklab, var(--bg) 90%, transparent)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
+        >
+          <div
+            className="flex items-center gap-1 px-2 py-2"
+            style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+          >
+            {[
+              ...NAV_ITEMS,
+              { to: '/character', icon: <User size={18} />, label: 'Personaje', hint: '', group: 'me' as const, accent: false },
+              { to: '/achievements', icon: <Trophy size={18} />, label: 'Logros', hint: '', group: 'me' as const, accent: false },
+              { to: '/settings', icon: <Settings size={18} />, label: 'Ajustes', hint: '', group: 'me' as const, accent: false },
+            ].map(({ to, icon, label, accent }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={to === '/'}
                 onClick={() => audio.play('blip')}
-                className={({ isActive }) => [
-                  'flex min-w-[64px] flex-col items-center gap-1 rounded-xl px-2 py-2 transition-colors',
-                  isActive
-                    ? 'bg-[var(--bg-panel-light)] text-[var(--text-primary)]'
-                    : 'text-[var(--text-secondary)]',
-                ].join(' ')}
               >
-                <div>{icon}</div>
-                <span className="text-[11px] font-medium">{label}</span>
+                {({ isActive }) => (
+                  <div
+                    className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-colors"
+                    style={{
+                      minWidth: 56,
+                      flexShrink: 0,
+                      background: isActive ? 'color-mix(in oklab, var(--primary) 14%, transparent)' : 'transparent',
+                      color: isActive ? 'var(--primary)' : accent ? 'var(--c-xp)' : 'var(--text-3)',
+                    }}
+                  >
+                    <div style={{ lineHeight: 0 }}>{icon}</div>
+                    <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500, whiteSpace: 'nowrap' }}>{label}</span>
+                  </div>
+                )}
               </NavLink>
             ))}
           </div>
@@ -683,11 +718,11 @@ export function GameLayout({ children }: Props) {
       {/* FAB de acciones rápidas */}
       <QuickActionsFAB />
 
-      {/* Focus Mode Fab */}
+      {/* Focus Mode Fab — solo desktop */}
       <motion.button
         onClick={() => setShowFocus(true)}
         whileTap={{ scale: 0.94 }}
-        className="fixed bottom-6 right-[4.5rem] md:bottom-8 md:right-24 z-40 w-10 h-10 rounded-full flex items-center justify-center shadow-md border border-[var(--border)] bg-[var(--bg-panel)]"
+        className="hidden md:flex fixed bottom-8 right-24 z-40 w-10 h-10 rounded-full items-center justify-center shadow-md border border-[var(--border)] bg-[var(--bg-panel)]"
         style={{ color: 'var(--accent-cyan)' }}
         title="Modo Enfoque"
       >
