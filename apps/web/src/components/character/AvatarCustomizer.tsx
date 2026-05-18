@@ -114,6 +114,41 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
               </motion.div>
 
               <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto">
+                <div>
+                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
+                    GÉNERO
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {(['male', 'female'] as const).map((gender) => (
+                      <motion.button
+                        key={gender}
+                        onClick={() => {
+                          update('bodyType')(gender);
+                          setConfig((c) => {
+                            const femaleStyles: HairStyle[] = ['long', 'short', 'recogido', 'trenzas', 'ondulado', 'afro'];
+                            const maleStyles: HairStyle[] = ['short', 'medium', 'long', 'shaved', 'copete', 'afro'];
+                            const validStyles = gender === 'female' ? femaleStyles : maleStyles;
+                            return {
+                              ...c,
+                              bodyType: gender,
+                              hairStyle: validStyles.includes(c.hairStyle) ? c.hairStyle : validStyles[0],
+                            };
+                          });
+                        }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
+                          config.bodyType === gender
+                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
+                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
+                        }`}
+                      >
+                        {gender === 'male' ? '♂️ Masculino' : '♀️ Femenino'}
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex justify-center py-2">
                   <motion.div
                     key={JSON.stringify(config)}

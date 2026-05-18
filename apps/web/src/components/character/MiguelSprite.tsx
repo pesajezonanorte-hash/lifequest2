@@ -113,8 +113,10 @@ export function MiguelSprite({
             )}
             {hairStyle === 'afro' && (
               <>
-                <rect x="7" y="3" width="18" height="5" fill={hairColor} />
-                <rect x="6" y="4" width="20" height="8" fill={hairColor} />
+                <rect x="6" y="2" width="20" height="6" fill={hairColor} />
+                <rect x="5" y="5" width="22" height="10" fill={hairColor} />
+                <circle cx="10" cy="4" r="3" fill={hairColor} />
+                <circle cx="22" cy="4" r="3" fill={hairColor} />
               </>
             )}
           </>
@@ -152,8 +154,10 @@ export function MiguelSprite({
             )}
             {hairStyle === 'afro' && (
               <>
-                <rect x="7" y="3" width="18" height="5" fill={hairColor} />
-                <rect x="6" y="4" width="20" height="8" fill={hairColor} />
+                <rect x="6" y="2" width="20" height="6" fill={hairColor} />
+                <rect x="5" y="5" width="22" height="10" fill={hairColor} />
+                <circle cx="10" cy="4" r="3" fill={hairColor} />
+                <circle cx="22" cy="4" r="3" fill={hairColor} />
               </>
             )}
           </>
