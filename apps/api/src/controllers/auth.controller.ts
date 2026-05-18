@@ -47,7 +47,7 @@ export async function refresh(req: Request, res: Response): Promise<void> {
     const { accessToken, user } = await authService.refreshAccessToken(token);
     res.json({ accessToken, user });
   } catch {
-    res.clearCookie('refreshToken', { path: '/api/v1/auth' });
+    res.clearCookie('refreshToken', { path: '/api/v1' });
     res.status(401).json({ error: 'Sesión expirada. Inicia sesión de nuevo.' });
   }
 }
