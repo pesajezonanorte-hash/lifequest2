@@ -50,7 +50,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/love',        icon: <Heart size={18} />,             label: 'Jardín',      hint: 'Amor',          group: 'zones' },
   { to: '/journal',     icon: <NotebookPen size={18} />,       label: 'Diario',      hint: 'Notas',         group: 'zones' },
   { to: '/shop',        icon: <ShoppingBag size={18} />,       label: 'Mercado',     hint: 'Tienda',        group: 'zones' },
-  { to: '/wisdom',      icon: <Sparkles size={18} />,          label: 'El Sabio',    hint: 'Sabiduría',     group: 'zones', accent: true },
+  { to: '/wisdom',      icon: <Sparkles size={18} />,          label: 'Sabiduría',    hint: 'Sabiduría',     group: 'zones', accent: true },
   // Social
   { to: '/leaderboard', icon: <Globe size={18} />,             label: 'Mundo',       hint: 'Ranking',       group: 'social' },
   { to: '/challenges',  icon: <Crosshair size={18} />,         label: 'Retos',       hint: 'Jefes',         group: 'social' },
@@ -579,7 +579,7 @@ export function GameLayout({ children }: Props) {
                   {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} className="text-red-400" />}
                 </motion.button>
 
-                {/* sabio CTA */}
+                {/* sabiduría CTA */}
                 <motion.button
                   onClick={() => navigate('/wisdom')}
                   whileTap={{ scale: 0.97 }}
@@ -592,7 +592,7 @@ export function GameLayout({ children }: Props) {
                   }}
                 >
                   <Sparkles size={15} />
-                  El Sabio
+                  Sabiduría
                 </motion.button>
 
                 <motion.button
