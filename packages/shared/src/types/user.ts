@@ -28,6 +28,7 @@ export interface User {
 }
 
 export interface AvatarConfig {
+  bodyType?: 'male' | 'female';
   hairColor: string;
   skinColor: string;
   shirtColor: string;

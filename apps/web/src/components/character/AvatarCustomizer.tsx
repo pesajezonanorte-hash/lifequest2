@@ -21,6 +21,7 @@ interface Props {
 export function AvatarCustomizer({ isOpen, onClose }: Props) {
   const { user, updateUser } = useAuthStore();
   const [config, setConfig] = useState<AvatarConfig>(user?.avatarConfig ?? {
+    bodyType: 'male',
     hairColor: '#2c1810', skinColor: '#c68642', shirtColor: '#4d96ff',
     pants: '#37474f', accessory: null, pet: null,
   });
@@ -72,6 +73,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
                   <motion.div key={JSON.stringify(config)} initial={{ scale: 0.9 }} animate={{ scale: 1 }}>
                     <MiguelSprite
                       size={100}
+                      bodyType={config.bodyType}
                       hairColor={config.hairColor}
                       skinColor={config.skinColor}
                       shirtColor={config.shirtColor}

@@ -73,6 +73,7 @@ export default function OnboardingPage() {
     setBirthDate(data.birthDate);
     setTimezone(data.timezone);
     setGender(data.gender);
+    setAvatarConfig((current) => ({ ...current, bodyType: data.gender }));
     goNext();
   };
 
@@ -194,6 +195,7 @@ export default function OnboardingPage() {
               )}
               {step === 2 && (
                 <AvatarStep
+                  gender={gender}
                   initialConfig={avatarConfig}
                   onNext={handleAvatar}
                   onBack={goBack}

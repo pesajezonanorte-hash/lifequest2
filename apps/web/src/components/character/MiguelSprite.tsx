@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 
 interface Props {
   size?: number;
+  bodyType?: 'male' | 'female';
   hairColor?: string;
   skinColor?: string;
   shirtColor?: string;
@@ -11,14 +12,13 @@ interface Props {
 
 export function MiguelSprite({
   size = 64,
+  bodyType = 'male',
   hairColor = '#2c1810',
   skinColor = '#c68642',
   shirtColor = '#4d96ff',
   pantsColor = '#37474f',
   animate = 'idle',
 }: Props) {
-  const scale = size / 32;
-
   const idleVariants = {
     animate: {
       scaleY: [1, 0.97, 1, 0.97, 1],
@@ -64,11 +64,25 @@ export function MiguelSprite({
         style={{ imageRendering: 'pixelated' }}
       >
         {/* Cabello */}
-        <rect x="10" y="2" width="12" height="4" fill={hairColor} />
-        <rect x="9"  y="3" width="1"  height="6" fill={hairColor} />
-        <rect x="22" y="3" width="1"  height="6" fill={hairColor} />
-        <rect x="10" y="6" width="2"  height="2" fill={hairColor} />
-        <rect x="20" y="6" width="2"  height="2" fill={hairColor} />
+        {bodyType === 'female' ? (
+          <>
+            <rect x="9" y="2" width="14" height="4" fill={hairColor} />
+            <rect x="8" y="4" width="2" height="18" fill={hairColor} />
+            <rect x="22" y="4" width="2" height="18" fill={hairColor} />
+            <rect x="10" y="6" width="2" height="3" fill={hairColor} />
+            <rect x="20" y="6" width="2" height="3" fill={hairColor} />
+            <rect x="10" y="18" width="2" height="6" fill={hairColor} />
+            <rect x="20" y="18" width="2" height="6" fill={hairColor} />
+          </>
+        ) : (
+          <>
+            <rect x="10" y="2" width="12" height="4" fill={hairColor} />
+            <rect x="9"  y="3" width="1"  height="6" fill={hairColor} />
+            <rect x="22" y="3" width="1"  height="6" fill={hairColor} />
+            <rect x="10" y="6" width="2"  height="2" fill={hairColor} />
+            <rect x="20" y="6" width="2"  height="2" fill={hairColor} />
+          </>
+        )}
 
         {/* Cara */}
         <rect x="10" y="6"  width="12" height="10" fill={skinColor} />
@@ -86,11 +100,21 @@ export function MiguelSprite({
         <rect x="14" y="16" width="4" height="2" fill={skinColor} />
 
         {/* Cuerpo / camisa */}
-        <rect x="9"  y="18" width="14" height="10" fill={shirtColor} />
-        {/* Detalle camisa */}
-        <rect x="15" y="18" width="2"  height="10" fill={`${shirtColor}88`} />
-        {/* Collar / cuello camisa */}
-        <rect x="12" y="18" width="8"  height="2"  fill={skinColor} />
+        {bodyType === 'female' ? (
+          <>
+            <rect x="10" y="18" width="12" height="4" fill={shirtColor} />
+            <rect x="9" y="22" width="14" height="6" fill={shirtColor} />
+            <rect x="11" y="28" width="10" height="2" fill={shirtColor} />
+            <rect x="15" y="18" width="2" height="10" fill={`${shirtColor}88`} />
+            <rect x="12" y="18" width="8" height="2" fill={skinColor} />
+          </>
+        ) : (
+          <>
+            <rect x="9"  y="18" width="14" height="10" fill={shirtColor} />
+            <rect x="15" y="18" width="2"  height="10" fill={`${shirtColor}88`} />
+            <rect x="12" y="18" width="8"  height="2"  fill={skinColor} />
+          </>
+        )}
 
         {/* Brazos */}
         <rect x="5"  y="18" width="4"  height="8"  fill={shirtColor} />

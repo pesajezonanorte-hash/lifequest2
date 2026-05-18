@@ -48,6 +48,7 @@ export default function CharacterPage() {
             <div className="w-32 h-32 rounded-full bg-[var(--bg-panel-light)] flex items-center justify-center">
               <MiguelSprite
                 size={120}
+                bodyType={avatarCfg.bodyType}
                 hairColor={avatarCfg.hairColor}
                 skinColor={avatarCfg.skinColor}
                 shirtColor={avatarCfg.shirtColor}

@@ -12,13 +12,15 @@ const SHIRT_COLORS = ['#4d96ff', '#ff6b9d', '#4ecdc4', '#6bcf7f', '#ffd23f', '#f
 const PANTS_COLORS = ['#37474f', '#1a237e', '#4e342e', '#1b5e20', '#880e4f', '#263238'];
 
 interface Props {
+  gender: 'male' | 'female';
   initialConfig: Partial<AvatarConfig>;
   onNext: (config: AvatarConfig) => void;
   onBack: () => void;
 }
 
-export function AvatarStep({ initialConfig, onNext, onBack }: Props) {
+export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
   const [config, setConfig] = useState<AvatarConfig>({
+    bodyType: initialConfig.bodyType ?? gender,
     hairColor: initialConfig.hairColor ?? '#2c1810',
     skinColor: initialConfig.skinColor ?? '#c68642',
     shirtColor: initialConfig.shirtColor ?? '#4d96ff',
@@ -57,6 +59,7 @@ export function AvatarStep({ initialConfig, onNext, onBack }: Props) {
         >
           <MiguelSprite
             size={120}
+            bodyType={config.bodyType}
             hairColor={config.hairColor}
             skinColor={config.skinColor}
             shirtColor={config.shirtColor}
