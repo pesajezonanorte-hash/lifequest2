@@ -10,6 +10,7 @@ import { AvatarStep } from '../../components/onboarding/AvatarStep';
 import { GoalsStep } from '../../components/onboarding/GoalsStep';
 import { FirstQuestStep } from '../../components/onboarding/FirstQuestStep';
 import { FinalCelebrationStep } from '../../components/onboarding/FinalCelebrationStep';
+import { getHeroLabelCapitalized } from '../../utils/gender';
 import type { AvatarConfig } from '@lifequest/shared';
 
 const STORAGE_KEY = 'lifequest_onboarding_progress';
@@ -135,12 +136,13 @@ export default function OnboardingPage() {
                 animate={{ opacity: [1, 0.3, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                FORJANDO TU HÉROE...
+                FORJANDO TU {getHeroLabelCapitalized(gender).toUpperCase()}...
               </motion.p>
             </div>
           ) : (
             <FinalCelebrationStep
               displayName={displayName}
+              gender={gender}
               avatarConfig={avatarConfig}
               onEnter={handleEnterCastle}
             />
@@ -151,7 +153,24 @@ export default function OnboardingPage() {
   }
 
   if (step === 0) {
-    return <WelcomeStep onNext={goNext} />;
+    return (
+      <div className="min-h-screen bg-bg-deep flex flex-col">
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="max-w-sm w-full">
+            <IdentityStep
+              initialName={displayName}
+              initialGender={gender}
+              onNext={handleIdentity}
+              onBack={() => {}}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 1) {
+    return <WelcomeStep gender={gender} onNext={goNext} />;
   }
 
   return (
@@ -174,9 +193,9 @@ export default function OnboardingPage() {
         <h1 className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>
           🏰 LIFEQUEST
         </h1>
-        <OnboardingProgress currentStep={step - 1} totalSteps={TOTAL_STEPS} />
+        <OnboardingProgress currentStep={step - 2} totalSteps={TOTAL_STEPS} />
         <p className="font-vt text-text-secondary text-lg">
-          Paso {step} de {TOTAL_STEPS}
+          Paso {step - 1} de {TOTAL_STEPS}
         </p>
       </div>
 
@@ -185,14 +204,6 @@ export default function OnboardingPage() {
         <div className="max-w-sm w-full">
           <AnimatePresence mode="wait">
             <motion.div key={step}>
-              {step === 1 && (
-                <IdentityStep
-                  initialName={displayName}
-                  initialGender={gender}
-                  onNext={handleIdentity}
-                  onBack={goBack}
-                />
-              )}
               {step === 2 && (
                 <AvatarStep
                   gender={gender}

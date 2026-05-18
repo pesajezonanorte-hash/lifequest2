@@ -1,22 +1,29 @@
 import { motion } from 'framer-motion';
+import type { HairStyle, Accessory, Expression } from '@lifequest/shared';
 
 interface Props {
   size?: number;
   bodyType?: 'male' | 'female';
+  hairStyle?: HairStyle;
   hairColor?: string;
   skinColor?: string;
   shirtColor?: string;
   pantsColor?: string;
+  accessory?: Accessory;
+  expression?: Expression;
   animate?: 'idle' | 'celebrate' | 'hurt' | 'none';
 }
 
 export function MiguelSprite({
   size = 64,
   bodyType = 'male',
+  hairStyle = 'short',
   hairColor = '#2c1810',
   skinColor = '#c68642',
   shirtColor = '#4d96ff',
   pantsColor = '#37474f',
+  accessory = 'none',
+  expression = 'normal',
   animate = 'idle',
 }: Props) {
   const idleVariants = {
@@ -63,24 +70,92 @@ export function MiguelSprite({
         xmlns="http://www.w3.org/2000/svg"
         style={{ imageRendering: 'pixelated' }}
       >
-        {/* Cabello */}
+        {/* Cabello - diferentes estilos */}
         {bodyType === 'female' ? (
           <>
-            <rect x="9" y="2" width="14" height="4" fill={hairColor} />
-            <rect x="8" y="4" width="2" height="18" fill={hairColor} />
-            <rect x="22" y="4" width="2" height="18" fill={hairColor} />
-            <rect x="10" y="6" width="2" height="3" fill={hairColor} />
-            <rect x="20" y="6" width="2" height="3" fill={hairColor} />
-            <rect x="10" y="18" width="2" height="6" fill={hairColor} />
-            <rect x="20" y="18" width="2" height="6" fill={hairColor} />
+            {/* Female hair styles */}
+            {(hairStyle === 'long' || hairStyle === 'ondulado') && (
+              <>
+                <rect x="9" y="2" width="14" height="4" fill={hairColor} />
+                <rect x="8" y="4" width="2" height="4" fill={hairColor} />
+                <rect x="22" y="4" width="2" height="4" fill={hairColor} />
+                <rect x="8" y="8" width="2" height="14" fill={hairColor} />
+                <rect x="22" y="8" width="2" height="14" fill={hairColor} />
+                <rect x="10" y="5" width="2" height="2" fill={hairColor} />
+                <rect x="20" y="5" width="2" height="2" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'short' && (
+              <>
+                <rect x="10" y="2" width="12" height="4" fill={hairColor} />
+                <rect x="9"  y="3" width="1"  height="4" fill={hairColor} />
+                <rect x="22" y="3" width="1"  height="4" fill={hairColor} />
+                <rect x="10" y="6" width="2" height="2" fill={hairColor} />
+                <rect x="20" y="6" width="2" height="2" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'recogido' && (
+              <>
+                <rect x="11" y="2" width="10" height="3" fill={hairColor} />
+                <rect x="9" y="3" width="14" height="2" fill={hairColor} />
+                <rect x="12" y="5" width="8" height="1" fill={hairColor} />
+                <rect x="20" y="6" width="2" height="2" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'trenzas' && (
+              <>
+                <rect x="10" y="2" width="12" height="3" fill={hairColor} />
+                <rect x="8" y="5" width="2" height="8" fill={hairColor} />
+                <rect x="22" y="5" width="2" height="8" fill={hairColor} />
+                <rect x="9" y="13" width="2" height="4" fill={hairColor} />
+                <rect x="21" y="13" width="2" height="4" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'afro' && (
+              <>
+                <rect x="7" y="3" width="18" height="5" fill={hairColor} />
+                <rect x="6" y="4" width="20" height="8" fill={hairColor} />
+              </>
+            )}
           </>
         ) : (
           <>
-            <rect x="10" y="2" width="12" height="4" fill={hairColor} />
-            <rect x="9"  y="3" width="1"  height="6" fill={hairColor} />
-            <rect x="22" y="3" width="1"  height="6" fill={hairColor} />
-            <rect x="10" y="6" width="2"  height="2" fill={hairColor} />
-            <rect x="20" y="6" width="2"  height="2" fill={hairColor} />
+            {/* Male hair styles */}
+            {(hairStyle === 'short' || hairStyle === 'medium') && (
+              <>
+                <rect x="10" y="2" width="12" height="4" fill={hairColor} />
+                <rect x="9"  y="3" width="1"  height="6" fill={hairColor} />
+                <rect x="22" y="3" width="1"  height="6" fill={hairColor} />
+                <rect x="10" y="6" width="2"  height="2" fill={hairColor} />
+                <rect x="20" y="6" width="2"  height="2" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'shaved' && (
+              <>
+                <rect x="10" y="3" width="12" height="1" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'copete' && (
+              <>
+                <rect x="11" y="1" width="10" height="6" fill={hairColor} />
+                <rect x="9"  y="4" width="14" height="2" fill={hairColor} />
+                <rect x="10" y="6" width="2"  height="1" fill={hairColor} />
+                <rect x="20" y="6" width="2"  height="1" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'long' && (
+              <>
+                <rect x="9" y="2" width="14" height="4" fill={hairColor} />
+                <rect x="8" y="4" width="2" height="8" fill={hairColor} />
+                <rect x="22" y="4" width="2" height="8" fill={hairColor} />
+              </>
+            )}
+            {hairStyle === 'afro' && (
+              <>
+                <rect x="7" y="3" width="18" height="5" fill={hairColor} />
+                <rect x="6" y="4" width="20" height="8" fill={hairColor} />
+              </>
+            )}
           </>
         )}
 
@@ -92,9 +167,31 @@ export function MiguelSprite({
         {/* Brillo en ojos */}
         <rect x="13" y="9"  width="1" height="1" fill="white" />
         <rect x="19" y="9"  width="1" height="1" fill="white" />
-        {/* Boca */}
-        <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
-        <rect x="14" y="14" width="4" height="1" fill="#c0392b" />
+        {/* Expresión - Boca */}
+        {expression === 'smile' && (
+          <>
+            <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
+            <rect x="13" y="14" width="2" height="1" fill="#c0392b" />
+            <rect x="17" y="14" width="2" height="1" fill="#c0392b" />
+          </>
+        )}
+        {expression === 'serious' && (
+          <>
+            <rect x="13" y="14" width="6" height="1" fill="#8b4513" />
+          </>
+        )}
+        {expression === 'determined' && (
+          <>
+            <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
+            <rect x="14" y="14" width="4" height="1" fill="#ff0000" />
+          </>
+        )}
+        {expression === 'normal' && (
+          <>
+            <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
+            <rect x="14" y="14" width="4" height="1" fill="#c0392b" />
+          </>
+        )}
 
         {/* Cuello */}
         <rect x="14" y="16" width="4" height="2" fill={skinColor} />
@@ -102,11 +199,16 @@ export function MiguelSprite({
         {/* Cuerpo / camisa */}
         {bodyType === 'female' ? (
           <>
-            <rect x="10" y="18" width="12" height="4" fill={shirtColor} />
-            <rect x="9" y="22" width="14" height="6" fill={shirtColor} />
-            <rect x="11" y="28" width="10" height="2" fill={shirtColor} />
-            <rect x="15" y="18" width="2" height="10" fill={`${shirtColor}88`} />
-            <rect x="12" y="18" width="8" height="2" fill={skinColor} />
+            {/* Bust/chest area - wider */}
+            <rect x="9" y="18" width="14" height="3" fill={shirtColor} />
+            {/* Waist - narrower for hourglass shape */}
+            <rect x="10" y="21" width="12" height="2" fill={shirtColor} />
+            {/* Lower torso - wider again */}
+            <rect x="9" y="23" width="14" height="4" fill={shirtColor} />
+            {/* Center seam/shadow */}
+            <rect x="15" y="18" width="2" height="9" fill={`${shirtColor}88`} />
+            {/* Shoulder/neck area */}
+            <rect x="13" y="16" width="6" height="2" fill={skinColor} />
           </>
         ) : (
           <>
@@ -139,6 +241,41 @@ export function MiguelSprite({
 
         {/* Sombra bajo los pies */}
         <ellipse cx="16" cy="40" rx="8" ry="1" fill="rgba(0,0,0,0.3)" />
+
+        {/* Accesorios */}
+        {accessory === 'glasses' && (
+          <>
+            <rect x="11" y="8" width="2" height="2" fill="none" stroke="#333333" strokeWidth="0.5" />
+            <rect x="19" y="8" width="2" height="2" fill="none" stroke="#333333" strokeWidth="0.5" />
+            <rect x="13" y="9" width="6" height="1" fill="none" stroke="#333333" strokeWidth="0.5" />
+          </>
+        )}
+        {accessory === 'cap' && (
+          <>
+            <rect x="8" y="1" width="16" height="3" fill="#d4a017" />
+            <rect x="9" y="2" width="14" height="2" fill="#c8a000" />
+            <polygon points="8,4 10,6 22,6 24,4" fill="#d4a017" />
+          </>
+        )}
+        {accessory === 'headband' && (
+          <>
+            <rect x="7" y="5" width="18" height="2" fill="#ff69b4" />
+            <rect x="8" y="6" width="1" height="1" fill="#c0392b" />
+            <rect x="23" y="6" width="1" height="1" fill="#c0392b" />
+          </>
+        )}
+        {accessory === 'earrings' && (
+          <>
+            <rect x="8" y="10" width="1" height="2" fill="#ffd700" />
+            <rect x="23" y="10" width="1" height="2" fill="#ffd700" />
+          </>
+        )}
+        {accessory === 'scarf' && (
+          <>
+            <polygon points="12,17 14,19 18,19 20,17" fill="#e74c3c" />
+            <polygon points="13,18 14,20 18,20 19,18" fill="#c0392b" />
+          </>
+        )}
       </svg>
     </motion.div>
   );

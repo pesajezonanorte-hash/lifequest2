@@ -4,12 +4,16 @@ import { MiguelSprite } from '../character/MiguelSprite';
 import { PixelButton } from '../ui/PixelButton';
 import { PixelPanel } from '../ui/PixelPanel';
 import { ColorPicker } from './ColorPicker';
-import type { AvatarConfig } from '@lifequest/shared';
+import type { AvatarConfig, HairStyle, Accessory, Expression } from '@lifequest/shared';
 
 const HAIR_COLORS = ['#2c1810', '#4a3728', '#8b4513', '#d4a017', '#c8a2c8', '#708090', '#1a1a1a', '#ff6b6b'];
 const SKIN_COLORS = ['#fde8d0', '#f5c89f', '#c68642', '#a0522d', '#7b3f2c', '#4a2010'];
 const SHIRT_COLORS = ['#4d96ff', '#ff6b9d', '#4ecdc4', '#6bcf7f', '#ffd23f', '#ff6347', '#9b59b6', '#2c3e50', '#e74c3c', '#1abc9c'];
 const PANTS_COLORS = ['#37474f', '#1a237e', '#4e342e', '#1b5e20', '#880e4f', '#263238'];
+const HAIR_STYLES_MALE: HairStyle[] = ['short', 'medium', 'long', 'shaved', 'copete', 'afro'];
+const HAIR_STYLES_FEMALE: HairStyle[] = ['long', 'short', 'recogido', 'trenzas', 'ondulado', 'afro'];
+const ACCESSORIES: Accessory[] = ['none', 'glasses', 'cap', 'headband', 'earrings', 'scarf'];
+const EXPRESSIONS: Expression[] = ['normal', 'smile', 'serious', 'determined'];
 
 interface Props {
   gender: 'male' | 'female';
@@ -21,17 +25,21 @@ interface Props {
 export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
   const [config, setConfig] = useState<AvatarConfig>({
     bodyType: initialConfig.bodyType ?? gender,
+    hairStyle: (initialConfig.hairStyle as HairStyle) ?? (gender === 'female' ? 'long' : 'short'),
     hairColor: initialConfig.hairColor ?? '#2c1810',
     skinColor: initialConfig.skinColor ?? '#c68642',
     shirtColor: initialConfig.shirtColor ?? '#4d96ff',
     pants: initialConfig.pants ?? '#37474f',
-    accessory: null,
+    accessory: (initialConfig.accessory as Accessory) ?? 'none',
+    expression: (initialConfig.expression as Expression) ?? 'normal',
     pet: null,
   });
 
   const update = (key: keyof AvatarConfig) => (value: string) => {
     setConfig((c) => ({ ...c, [key]: value }));
   };
+
+  const hairStyles = gender === 'female' ? HAIR_STYLES_FEMALE : HAIR_STYLES_MALE;
 
   return (
     <motion.div
@@ -60,20 +68,86 @@ export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
           <MiguelSprite
             size={120}
             bodyType={config.bodyType}
+            hairStyle={config.hairStyle}
             hairColor={config.hairColor}
             skinColor={config.skinColor}
             shirtColor={config.shirtColor}
             pantsColor={config.pants}
+            accessory={config.accessory}
+            expression={config.expression}
             animate="idle"
           />
         </motion.div>
       </div>
 
       <PixelPanel className="p-4 space-y-4">
+        <div>
+          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+            ESTILO DE CABELLO
+          </label>
+          <div className="grid grid-cols-3 gap-1">
+            {hairStyles.map((style) => (
+              <button
+                key={style}
+                onClick={() => update('hairStyle')(style)}
+                className={`py-1 px-1 text-xs font-vt border-2 transition-colors ${
+                  config.hairStyle === style
+                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
+                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
+                }`}
+              >
+                {style}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <ColorPicker label="COLOR DE CABELLO" value={config.hairColor} colors={HAIR_COLORS} onChange={update('hairColor')} />
         <ColorPicker label="TONO DE PIEL" value={config.skinColor} colors={SKIN_COLORS} onChange={update('skinColor')} />
         <ColorPicker label="COLOR DE CAMISA" value={config.shirtColor} colors={SHIRT_COLORS} onChange={update('shirtColor')} />
         <ColorPicker label="COLOR DE PANTALÓN" value={config.pants} colors={PANTS_COLORS} onChange={update('pants')} />
+
+        <div>
+          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+            ACCESORIOS
+          </label>
+          <div className="grid grid-cols-3 gap-1">
+            {ACCESSORIES.map((acc) => (
+              <button
+                key={acc}
+                onClick={() => update('accessory')(acc)}
+                className={`py-1 px-1 text-xs font-vt border-2 transition-colors ${
+                  config.accessory === acc
+                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
+                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
+                }`}
+              >
+                {acc}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+            EXPRESIÓN
+          </label>
+          <div className="grid grid-cols-2 gap-1">
+            {EXPRESSIONS.map((expr) => (
+              <button
+                key={expr}
+                onClick={() => update('expression')(expr)}
+                className={`py-1 px-1 text-xs font-vt border-2 transition-colors ${
+                  config.expression === expr
+                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
+                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
+                }`}
+              >
+                {expr}
+              </button>
+            ))}
+          </div>
+        </div>
       </PixelPanel>
 
       <div className="flex gap-3">

@@ -27,13 +27,19 @@ export interface User {
   createdAt: string;
 }
 
+export type HairStyle = 'short' | 'medium' | 'long' | 'shaved' | 'copete' | 'afro' | 'recogido' | 'trenzas' | 'ondulado';
+export type Accessory = 'none' | 'glasses' | 'cap' | 'headband' | 'earrings' | 'scarf';
+export type Expression = 'normal' | 'smile' | 'serious' | 'determined';
+
 export interface AvatarConfig {
   bodyType?: 'male' | 'female';
+  hairStyle: HairStyle;
   hairColor: string;
   skinColor: string;
   shirtColor: string;
   pants: string;
-  accessory: string | null;
+  accessory: Accessory;
+  expression: Expression;
   pet: string | null;
 }
 

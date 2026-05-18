@@ -49,10 +49,13 @@ export default function CharacterPage() {
               <MiguelSprite
                 size={120}
                 bodyType={avatarCfg.bodyType}
+                hairStyle={avatarCfg.hairStyle}
                 hairColor={avatarCfg.hairColor}
                 skinColor={avatarCfg.skinColor}
                 shirtColor={avatarCfg.shirtColor}
                 pantsColor={avatarCfg.pants}
+                accessory={avatarCfg.accessory}
+                expression={avatarCfg.expression}
                 animate="idle"
               />
             </div>
