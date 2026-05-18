@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { MiguelSprite } from '../character/MiguelSprite';
 import { PixelButton } from '../ui/PixelButton';
+import { getWelcomeLabel, getHeroLabelCapitalized } from '../../utils/gender';
 
 interface Props {
+  gender: 'male' | 'female';
   onNext: () => void;
 }
 
@@ -14,7 +16,7 @@ const STARS = Array.from({ length: 60 }, (_, i) => ({
   delay: Math.random() * 3,
 }));
 
-export function WelcomeStep({ onNext }: Props) {
+export function WelcomeStep({ gender, onNext }: Props) {
   return (
     <div className="relative min-h-screen bg-bg-deep flex flex-col items-center justify-center overflow-hidden px-4">
       {/* Estrellas */}
@@ -40,9 +42,9 @@ export function WelcomeStep({ onNext }: Props) {
             className="font-pixel text-accent-gold leading-relaxed"
             style={{ fontSize: '14px', textShadow: '3px 3px 0 #0d0620' }}
           >
-            BIENVENIDO,
+            {getWelcomeLabel(gender).toUpperCase()},
             <br />
-            <span className="text-white">HÉROE</span>
+            <span className="text-white">{getHeroLabelCapitalized(gender).toUpperCase()}</span>
           </h1>
         </motion.div>
 
@@ -79,7 +81,7 @@ export function WelcomeStep({ onNext }: Props) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          El destino del reino depende de ti, héroe.
+          El destino del reino depende de ti, {getHeroLabelCapitalized(gender).toLowerCase()}.
         </motion.p>
 
         <motion.div

@@ -79,44 +79,84 @@ function LifeScoreWidget({ score }: { score: LifeScore }) {
   const quests   = Math.round(score.breakdown.quests   ?? 0);
   const habits   = Math.round(score.breakdown.habits   ?? 0);
   const finances = Math.round(score.breakdown.finances ?? 0);
+  const rows = [
+    { label: 'Misiones', value: quests,   color: '#ec4899' },
+    { label: 'Hábitos',  value: habits,   color: '#3b82f6' },
+    { label: 'Finanzas', value: finances, color: '#f59e0b' },
+  ];
   return (
-    <PixelPanel className="p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">⭐ LIFE SCORE</h3>
-        <span className="text-xs text-[var(--text-secondary)]">Tu puntuación global</span>
-      </div>
-      <div className="flex items-center gap-4">
-        <ProgressRings
-          size={150}
-          stroke={11}
-          gap={3}
-          centerLabel={score.total}
-          centerSubLabel="/ 100"
-          rings={[
-            { progress: quests,   color: '#ff5e8a' },
-            { progress: habits,   color: '#48dbfb' },
-            { progress: finances, color: '#ffd23f' },
-          ]}
-        />
-        <div className="flex-1 space-y-2 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ff5e8a' }} />
-            <span className="flex-1 text-[var(--text-secondary)]">Misiones</span>
-            <span className="text-[var(--text-primary)] font-semibold">{quests}</span>
+    <div
+      style={{
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 18,
+        padding: 22,
+        boxShadow: 'var(--shadow-rest)',
+      }}
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: 'color-mix(in oklab, var(--primary) 14%, transparent)',
+            color: 'var(--primary)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          ⭐
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--primary)' }}>
+            Life Score
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#48dbfb' }} />
-            <span className="flex-1 text-[var(--text-secondary)]">Hábitos</span>
-            <span className="text-[var(--text-primary)] font-semibold">{habits}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ffd23f' }} />
-            <span className="flex-1 text-[var(--text-secondary)]">Finanzas</span>
-            <span className="text-[var(--text-primary)] font-semibold">{finances}</span>
+          <div className="text-[13px] mt-0.5 font-medium" style={{ color: 'var(--text)' }}>
+            tu balance entre misiones, hábitos y finanzas
           </div>
         </div>
       </div>
-    </PixelPanel>
+
+      <div className="flex flex-col items-center gap-4">
+        <ProgressRings
+          size={210}
+          stroke={14}
+          gap={4}
+          centerLabel={score.total}
+          centerSubLabel="/ 100"
+          rings={[
+            { progress: rows[0].value, color: rows[0].color },
+            { progress: rows[1].value, color: rows[1].color },
+            { progress: rows[2].value, color: rows[2].color },
+          ]}
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+          {rows.map((r) => (
+            <div
+              key={r.label}
+              className="flex items-center gap-2"
+              style={{
+                padding: '8px 10px',
+                borderRadius: 10,
+                background: 'var(--bg-soft)',
+                border: '1px solid var(--border-soft)',
+              }}
+            >
+              <span
+                style={{
+                  width: 8, height: 8, borderRadius: 999,
+                  background: r.color, boxShadow: `0 0 6px ${r.color}80`,
+                }}
+              />
+              <span className="flex-1 text-[12px] font-medium" style={{ color: 'var(--text-2)' }}>
+                {r.label}
+              </span>
+              <span className="text-[13px] font-bold tabular-nums" style={{ color: 'var(--text)' }}>
+                {r.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -194,7 +234,7 @@ export default function DashboardPage() {
         {showClassModal && <ClassSelectionModal onClose={() => setShowClassModal(false)} />}
       </AnimatePresence>
 
-      <GreetingHeader displayName={user.displayName} currentStreak={user.currentStreak} createdAt={user.createdAt} />
+      <GreetingHeader displayName={user.displayName} currentStreak={user.currentStreak} createdAt={user.createdAt} gender={user.avatarConfig?.bodyType ?? 'male'} />
 
       {/* Primeros pasos — solo para usuarios nuevos */}
       <FirstStepsWidget
@@ -251,7 +291,7 @@ export default function DashboardPage() {
         <PixelPanel animate className="p-4 md:col-span-1">
           <div className="flex flex-col items-center gap-3">
             <div className="w-24 h-24 rounded-full bg-[var(--bg-panel-light)] flex items-center justify-center">
-              <MiguelSprite size={80} hairColor={avatarCfg.hairColor} skinColor={avatarCfg.skinColor} shirtColor={avatarCfg.shirtColor} pantsColor={avatarCfg.pants} animate="idle" />
+              <MiguelSprite size={80} bodyType={avatarCfg.bodyType} hairStyle={avatarCfg.hairStyle} hairColor={avatarCfg.hairColor} skinColor={avatarCfg.skinColor} shirtColor={avatarCfg.shirtColor} pantsColor={avatarCfg.pants} accessory={avatarCfg.accessory} expression={avatarCfg.expression} animate="idle" />
             </div>
 
             <div className="text-center">

@@ -15,7 +15,7 @@ import {
   UtensilsCrossed, Moon, Wallet, BookOpen, Heart, NotebookPen,
   ShoppingBag, Globe, Crosshair, Users, Skull, CalendarDays,
   Target, Sun, Sparkles, Trophy, Settings, User,
-  Volume2, VolumeX, UserPlus, Zap, Search,
+  Volume2, VolumeX, UserPlus, Zap, Search, Castle, ChevronRight,
 } from 'lucide-react';
 import { FocusMode } from '../ui/FocusMode';
 import { AnimatePresence as AP } from 'framer-motion';
@@ -30,31 +30,44 @@ interface NavItem {
   icon: ReactNode;
   label: string;
   hint: string;
+  group: 'main' | 'zones' | 'social' | 'me';
+  accent?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/',            icon: <LayoutDashboard size={18} />,   label: 'Inicio',    hint: 'El Castillo' },
-  { to: '/quests',      icon: <Swords size={18} />,            label: 'Misiones',  hint: 'Registro' },
-  { to: '/habits',      icon: <Flame size={18} />,             label: 'Hábitos',   hint: 'Rutina' },
-  { to: '/history',     icon: <BarChart3 size={18} />,         label: 'Historial', hint: 'Actividad' },
-  { to: '/stats',       icon: <TrendingUp size={18} />,        label: 'Stats',     hint: 'Personaje' },
-  { to: '/gym',         icon: <Dumbbell size={18} />,          label: 'Gym',       hint: 'El Coliseo' },
-  { to: '/food',        icon: <UtensilsCrossed size={18} />,   label: 'Comida',    hint: 'La Posada' },
-  { to: '/sleep',       icon: <Moon size={18} />,              label: 'Sueño',     hint: 'La Torre' },
-  { to: '/finances',    icon: <Wallet size={18} />,            label: 'Finanzas',  hint: 'La Bóveda' },
-  { to: '/learning',    icon: <BookOpen size={18} />,          label: 'Aprendiz.', hint: 'Biblioteca' },
-  { to: '/love',        icon: <Heart size={18} />,             label: 'Amor',      hint: 'Jardín' },
-  { to: '/journal',     icon: <NotebookPen size={18} />,       label: 'Diario',    hint: 'Notas' },
-  { to: '/shop',        icon: <ShoppingBag size={18} />,       label: 'Tienda',    hint: 'Inventario' },
-  { to: '/leaderboard', icon: <Globe size={18} />,             label: 'Mundo',     hint: 'Ranking' },
-  { to: '/challenges',  icon: <Crosshair size={18} />,         label: 'Retos',     hint: 'Jefes' },
-  { to: '/guild',       icon: <Users size={18} />,             label: 'Gremio',    hint: 'Club social' },
-  { to: '/season',      icon: <Skull size={18} />,             label: 'Campaña',   hint: 'Historia' },
-  { to: '/agenda',      icon: <CalendarDays size={18} />,      label: 'Agenda',    hint: 'Calendario' },
-  { to: '/goals',       icon: <Target size={18} />,            label: 'Metas',     hint: 'Maestras' },
-  { to: '/rituals',     icon: <Sun size={18} />,               label: 'Rituales',  hint: 'Rutinas' },
-  { to: '/glow-up',     icon: <Sparkles size={18} />,          label: 'El Espejo', hint: 'Transformación' },
-  { to: '/wisdom',      icon: <BookOpen size={18} />,          label: 'Sabiduría', hint: 'Biblioteca' },
+  // Aventura
+  { to: '/',            icon: <Castle size={18} />,            label: 'Castillo',    hint: 'Dashboard',     group: 'main' },
+  { to: '/quests',      icon: <Swords size={18} />,            label: 'Misiones',    hint: 'Registro',      group: 'main' },
+  { to: '/habits',      icon: <Flame size={18} />,             label: 'Hábitos',     hint: 'Rutina',        group: 'main' },
+  { to: '/stats',       icon: <TrendingUp size={18} />,        label: 'Estadísticas',hint: 'Life Score',    group: 'main' },
+  { to: '/history',     icon: <BarChart3 size={18} />,         label: 'Historial',   hint: 'Actividad',     group: 'main' },
+  // Zonas del reino
+  { to: '/gym',         icon: <Dumbbell size={18} />,          label: 'Coliseo',     hint: 'Gym',           group: 'zones' },
+  { to: '/finances',    icon: <Wallet size={18} />,            label: 'Bóveda',      hint: 'Finanzas',      group: 'zones' },
+  { to: '/food',        icon: <UtensilsCrossed size={18} />,   label: 'Posada',      hint: 'Comida',        group: 'zones' },
+  { to: '/sleep',       icon: <Moon size={18} />,              label: 'Torre',       hint: 'Sueño',         group: 'zones' },
+  { to: '/learning',    icon: <BookOpen size={18} />,          label: 'Biblioteca',  hint: 'Aprendizaje',   group: 'zones' },
+  { to: '/love',        icon: <Heart size={18} />,             label: 'Jardín',      hint: 'Amor',          group: 'zones' },
+  { to: '/journal',     icon: <NotebookPen size={18} />,       label: 'Diario',      hint: 'Notas',         group: 'zones' },
+  { to: '/shop',        icon: <ShoppingBag size={18} />,       label: 'Mercado',     hint: 'Tienda',        group: 'zones' },
+  { to: '/wisdom',      icon: <Sparkles size={18} />,          label: 'El Sabio',    hint: 'Sabiduría',     group: 'zones', accent: true },
+  // Social
+  { to: '/leaderboard', icon: <Globe size={18} />,             label: 'Mundo',       hint: 'Ranking',       group: 'social' },
+  { to: '/challenges',  icon: <Crosshair size={18} />,         label: 'Retos',       hint: 'Jefes',         group: 'social' },
+  { to: '/guild',       icon: <Users size={18} />,             label: 'Gremio',      hint: 'Amigos',        group: 'social' },
+  { to: '/season',      icon: <Skull size={18} />,             label: 'Campaña',     hint: 'Historia',      group: 'social' },
+  // Tú
+  { to: '/agenda',      icon: <CalendarDays size={18} />,      label: 'Agenda',      hint: 'Calendario',    group: 'me' },
+  { to: '/goals',       icon: <Target size={18} />,            label: 'Metas',       hint: 'Maestras',      group: 'me' },
+  { to: '/rituals',     icon: <Sun size={18} />,               label: 'Rituales',    hint: 'Rutinas',       group: 'me' },
+  { to: '/glow-up',     icon: <Sparkles size={18} />,          label: 'El Espejo',   hint: 'Transformación',group: 'me' },
+];
+
+const NAV_GROUPS: { id: NavItem['group']; label: string }[] = [
+  { id: 'main',   label: 'Aventura' },
+  { id: 'zones',  label: 'Zonas del reino' },
+  { id: 'social', label: 'Mundo' },
+  { id: 'me',     label: 'Tú' },
 ];
 
 function LiveClock() {
@@ -205,186 +218,428 @@ export function GameLayout({ children }: Props) {
   const mpPct = user ? (user.mp / user.maxMp) * 100 : 0;
   const xpPct = user ? (user.xp / user.xpToNextLevel) * 100 : 0;
 
+  const xpPctSide = user ? Math.round((user.xp / user.xpToNextLevel) * 100) : 0;
+
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      <aside className="hidden md:flex w-[220px] flex-shrink-0 flex-col border-r border-[var(--border)] bg-[var(--bg-panel)]">
-        <div className="border-b border-[var(--border)] px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--bg-panel-light)]">
-              <LayoutDashboard size={20} />
+      <aside
+        className="hidden md:flex w-[264px] flex-shrink-0 flex-col relative overflow-hidden"
+        style={{
+          background: 'color-mix(in oklab, var(--surface) 60%, var(--bg))',
+          borderRight: '1px solid var(--border)',
+        }}
+      >
+        {/* bg glow */}
+        <div
+          className="pointer-events-none"
+          style={{
+            position: 'absolute', top: -80, left: -60, width: 240, height: 240,
+            borderRadius: '50%', filter: 'blur(60px)', opacity: 0.55,
+            background: 'radial-gradient(circle, color-mix(in oklab, var(--primary) 30%, transparent), transparent 70%)',
+          }}
+        />
+
+        {/* brand */}
+        <div className="relative flex items-center gap-2.5 px-[22px] pt-[22px] pb-4">
+          <div
+            className="flex h-[34px] w-[34px] items-center justify-center text-white"
+            style={{
+              borderRadius: 10,
+              background: 'linear-gradient(160deg, #8b5cf6, #ec4899)',
+              boxShadow: '0 6px 18px rgba(139,92,246,.45)',
+            }}
+          >
+            <Castle size={18} />
+          </div>
+          <div>
+            <div className="text-[17px] font-extrabold tracking-[-0.02em] leading-none">
+              Life<span style={{ color: 'var(--primary)' }}>Quest</span>
             </div>
-            <div>
-              <p className="text-[15px] font-semibold tracking-[-0.01em]">LifeQuest</p>
-              <p className="text-xs text-[var(--text-secondary)]">Modern RPG OS</p>
+            <div className="mt-[2px] text-[10.5px] font-semibold uppercase tracking-[0.1em]" style={{ color: 'var(--text-3)' }}>
+              v0.3 · alpha
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-4">
-          <div className="space-y-1">
-            {NAV_ITEMS.map(({ to, icon, label, hint }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === '/'}
-                onClick={() => audio.play('blip')}
-                className={({ isActive }) => [
-                  'group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all',
-                  isActive
-                    ? 'bg-[var(--bg-panel-light)] text-[var(--text-primary)] shadow-sm'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-panel-light)] hover:text-[var(--text-primary)]',
-                ].join(' ')}
-              >
-                {({ isActive }) => (
-                  <>
-                    <div className={isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]'}>
-                      {icon}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{label}</p>
-                      <p className="truncate text-[11px] text-[var(--text-muted)]">{hint}</p>
-                    </div>
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </div>
-        </div>
+        {/* nav (grouped) */}
+        <nav className="flex-1 overflow-y-auto px-3 pt-1 pb-5 flex flex-col gap-3.5">
+          {NAV_GROUPS.map((g) => {
+            const items = NAV_ITEMS.filter((n) => n.group === g.id);
+            if (!items.length) return null;
+            return (
+              <div key={g.id}>
+                <div className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--text-3)' }}>
+                  {g.label}
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  {items.map((it) => (
+                    <NavLink
+                      key={it.to}
+                      to={it.to}
+                      end={it.to === '/'}
+                      onClick={() => audio.play('blip')}
+                    >
+                      {({ isActive }) => (
+                        <div
+                          className="relative flex items-center gap-[11px] px-3 py-[9px] transition-colors"
+                          style={{
+                            borderRadius: 10,
+                            fontSize: 13.5,
+                            fontWeight: isActive ? 700 : 500,
+                            color: isActive ? 'var(--text)' : 'var(--text-2)',
+                            background: isActive
+                              ? 'color-mix(in oklab, var(--primary) 14%, transparent)'
+                              : 'transparent',
+                            boxShadow: isActive
+                              ? 'inset 0 0 0 1px color-mix(in oklab, var(--primary) 30%, transparent)'
+                              : 'none',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive)
+                              (e.currentTarget as HTMLDivElement).style.background =
+                                'color-mix(in oklab, var(--text) 5%, transparent)';
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive)
+                              (e.currentTarget as HTMLDivElement).style.background = 'transparent';
+                          }}
+                        >
+                          {isActive && (
+                            <div
+                              style={{
+                                position: 'absolute', left: -12, top: 8, bottom: 8, width: 3,
+                                borderRadius: 999, background: 'var(--primary)',
+                              }}
+                            />
+                          )}
+                          <span
+                            style={{
+                              display: 'flex',
+                              color: isActive ? 'var(--primary)' : it.accent ? 'var(--c-xp)' : 'var(--text-3)',
+                            }}
+                          >
+                            {it.icon}
+                          </span>
+                          <span className="flex-1 truncate">{it.label}</span>
+                          {it.accent && !isActive && (
+                            <span
+                              style={{
+                                width: 6, height: 6, borderRadius: 999,
+                                background: 'var(--c-xp)',
+                                boxShadow: '0 0 8px var(--c-xp)',
+                              }}
+                            />
+                          )}
+                        </div>
+                      )}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
 
-        <div className="border-t border-[var(--border)] px-3 py-3">
-          {[
-            { to: '/character', icon: <User size={18} />, label: 'Personaje', hint: 'Hoja viva' },
-            { to: '/achievements', icon: <Trophy size={18} />, label: 'Logros', hint: 'Tus victorias' },
-            { to: '/settings', icon: <Settings size={18} />, label: 'Ajustes', hint: 'Preferencias' },
-            { to: '/about', icon: <span className="text-[14px]">🏆</span>, label: 'Acerca de', hint: 'v10.0.0' },
-          ].map(({ to, icon, label, hint }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={() => audio.play('blip')}
-              className={({ isActive }) => [
-                'group mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all',
-                isActive
-                  ? 'bg-[var(--bg-panel-light)] text-[var(--text-primary)] shadow-sm'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-panel-light)] hover:text-[var(--text-primary)]',
-              ].join(' ')}
+          {/* secondary */}
+          <div>
+            <div className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--text-3)' }}>
+              Más
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {[
+                { to: '/character', icon: <User size={18} />, label: 'Personaje' },
+                { to: '/achievements', icon: <Trophy size={18} />, label: 'Logros' },
+                { to: '/settings', icon: <Settings size={18} />, label: 'Ajustes' },
+              ].map(({ to, icon, label }) => (
+                <NavLink key={to} to={to} onClick={() => audio.play('blip')}>
+                  {({ isActive }) => (
+                    <div
+                      className="relative flex items-center gap-[11px] px-3 py-[9px] transition-colors"
+                      style={{
+                        borderRadius: 10,
+                        fontSize: 13.5,
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? 'var(--text)' : 'var(--text-2)',
+                        background: isActive
+                          ? 'color-mix(in oklab, var(--primary) 14%, transparent)'
+                          : 'transparent',
+                      }}
+                    >
+                      <span style={{ display: 'flex', color: isActive ? 'var(--primary)' : 'var(--text-3)' }}>{icon}</span>
+                      <span className="flex-1 truncate">{label}</span>
+                    </div>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        </nav>
+
+        {/* hero card */}
+        {user && (
+          <div className="relative px-3 pt-2 pb-4">
+            <button
+              onClick={() => navigate('/character')}
+              className="block w-full text-left"
+              style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
             >
-              <div className="text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]">{icon}</div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{label}</p>
-                <p className="truncate text-[11px] text-[var(--text-muted)]">{hint}</p>
-              </div>
-            </NavLink>
-          ))}
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="border-b border-[var(--border)] bg-panel-glass">
-          <div className="flex items-center gap-3 px-4 py-3 md:px-6">
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="md:hidden flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--bg-panel-light)]">
-                <LayoutDashboard size={18} />
-              </div>
-
-              {user && (
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">{user.displayName}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">Nivel {user.level} aventurero</p>
-                    </div>
-                    <div className="hidden lg:flex items-center gap-2 rounded-full bg-[var(--bg-panel-light)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
-                      <span className="inline-block h-2 w-2 rounded-full bg-[var(--accent-green)]" />
-                      Conectado
-                    </div>
+              <div
+                style={{
+                  padding: 12,
+                  borderRadius: 14,
+                  background:
+                    'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
+                  border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
+                  display: 'flex', flexDirection: 'column', gap: 10,
+                }}
+              >
+                <div className="flex items-center gap-2.5">
+                  <div
+                    style={{
+                      width: 42, height: 42, borderRadius: 12,
+                      background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
+                      border: '1px solid var(--border)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 22,
+                    }}
+                  >
+                    🧙
                   </div>
-
-                  <div className="mt-2 hidden max-w-3xl grid-cols-3 gap-3 lg:grid">
-                    <div>
-                      <div className="mb-1 flex justify-between text-[11px] text-[var(--text-secondary)]">
-                        <span className="font-semibold text-[var(--accent-pink)]">HP</span>
-                        <span>{user.hp}/{user.maxHp}</span>
-                      </div>
-                      <StatBarFill pct={hpPct} color="bg-accent-pink" pulse />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
+                      <span
+                        style={{
+                          fontSize: 9.5,
+                          padding: '1px 5px',
+                          borderRadius: 5,
+                          background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
+                          color: 'var(--c-xp)',
+                          fontWeight: 800,
+                          letterSpacing: '.06em',
+                        }}
+                      >
+                        NV {user.level}
+                      </span>
                     </div>
-                    <div>
-                      <div className="mb-1 flex justify-between text-[11px] text-[var(--text-secondary)]">
-                        <span className="font-semibold text-[var(--accent-cyan)]">MP</span>
-                        <span>{user.mp}/{user.maxMp}</span>
-                      </div>
-                      <StatBarFill pct={mpPct} color="bg-accent-cyan" wave />
-                    </div>
-                    <div>
-                      <div className="mb-1 flex justify-between text-[11px] text-[var(--text-secondary)]">
-                        <span className="font-semibold text-[var(--accent-gold)]">XP</span>
-                        <span>{user.xp}/{user.xpToNextLevel}</span>
-                      </div>
-                      <div className="relative">
-                        <StatBarFill pct={xpPct} color="bg-accent-gold" />
-                        <XPSparkles trigger={xpSparkTrigger} />
-                      </div>
+                    <div className="mt-px text-[11px]" style={{ color: 'var(--text-2)' }}>
+                      Aventurero
                     </div>
                   </div>
                 </div>
+                <div>
+                  <div
+                    className="mb-1 flex justify-between text-[10px] tabular-nums"
+                    style={{ color: 'var(--text-3)' }}
+                  >
+                    <span>XP</span>
+                    <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
+                  </div>
+                  <div
+                    style={{
+                      height: 5,
+                      background: 'var(--ring-track)',
+                      borderRadius: 999,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${xpPctSide}%`,
+                        height: '100%',
+                        background:
+                          'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
+                        boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
+                        transition: 'width 1s cubic-bezier(.22,1,.36,1)',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header
+          className="sticky top-0 z-10"
+          style={{
+            borderBottom: '1px solid var(--border-soft)',
+            background: 'color-mix(in oklab, var(--bg) 80%, transparent)',
+            backdropFilter: 'blur(18px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+          }}
+        >
+          <div className="flex items-center gap-3 px-4 py-3.5 md:gap-4 md:px-8 md:py-[14px]">
+            <div className="md:hidden flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: 'var(--bg-panel-light)' }}>
+              <LayoutDashboard size={18} />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              {user && (
+                <>
+                  <div className="flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: 'var(--text-3)' }}>
+                    <span>El Castillo</span>
+                    <ChevronRight size={11} />
+                    <span style={{ color: 'var(--text-2)' }}>Día a día</span>
+                  </div>
+                  <h1 className="m-0 text-[22px] font-extrabold tracking-[-0.025em] leading-tight" style={{ color: 'var(--text)' }}>
+                    Bienvenido, {user.displayName.split(' ')[0]}
+                  </h1>
+                  <div className="mt-[2px] text-[13px]" style={{ color: 'var(--text-2)' }}>
+                    Nivel {user.level} aventurero · {user.currentStreak} días de racha
+                  </div>
+                </>
               )}
             </div>
 
+            {/* search */}
+            <button
+              className="hidden md:flex items-center gap-2"
+              onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
+              title="Barra de comandos (Ctrl+K)"
+              style={{
+                height: 38, padding: '0 14px', minWidth: 280, maxWidth: 380,
+                background: 'var(--surface)', border: '1px solid var(--border)',
+                borderRadius: 10, color: 'var(--text-3)',
+              }}
+            >
+              <Search size={16} />
+              <span className="flex-1 text-left text-[13px]" style={{ color: 'var(--text-3)' }}>Buscar misión, hábito, gasto…</span>
+              <kbd
+                style={{
+                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                  fontSize: 10, padding: '2px 6px', borderRadius: 4,
+                  background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text-3)',
+                }}
+              >
+                ⌘K
+              </kbd>
+            </button>
+
             {user && (
-              <div className="flex items-center gap-2">
-                <LiveClock />
-                <button
-                  className="hidden md:flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:border-[var(--accent-gold)] transition-colors"
-                  onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
-                  title="Barra de comandos (Ctrl+K)"
+              <>
+                {/* gold pill */}
+                <div
+                  className="hidden md:flex items-center gap-1.5 tabular-nums"
+                  style={{
+                    height: 38, padding: '0 14px',
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    borderRadius: 10, color: 'var(--c-gold)', fontWeight: 700, fontSize: 13,
+                  }}
                 >
-                  <span>⌕ Buscar</span>
-                  <kbd className="bg-[var(--bg-deep)] px-1.5 py-0.5 rounded text-[10px] border border-[var(--border)]">⌃K</kbd>
-                </button>
-                <GoldCounter gold={user.gold} />
-                {/* Add Friends Button */}
+                  <Wallet size={15} />
+                  {user.gold.toLocaleString('es-CO')}
+                </div>
+
+                <LiveClock />
+
+                {/* mobile gold + search */}
+                <div className="md:hidden flex items-center gap-2">
+                  <GoldCounter gold={user.gold} />
+                  <motion.button
+                    className="flex h-8 w-8 items-center justify-center rounded-xl"
+                    onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
+                    whileTap={{ scale: 0.96 }}
+                    style={{ border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-2)' }}
+                    title="Buscar"
+                  >
+                    <Search size={15} />
+                  </motion.button>
+                </div>
+
+                {/* friends */}
                 <motion.button
                   onClick={() => navigate('/guild')}
-                  className="flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] h-8 w-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-gold)] transition-colors"
                   whileTap={{ scale: 0.96 }}
                   title="Añadir amigos"
+                  className="hidden md:flex items-center justify-center"
+                  style={{
+                    width: 38, height: 38, borderRadius: 10,
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    color: 'var(--text-2)',
+                  }}
                 >
                   <UserPlus size={16} />
                 </motion.button>
 
-                {/* Search — mobile only */}
-                <motion.button
-                  className="md:hidden flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] h-8 w-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                  onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
-                  whileTap={{ scale: 0.96 }}
-                  title="Buscar (Ctrl+K)"
-                >
-                  <Search size={15} />
-                </motion.button>
-
-                {/* Notification Bell */}
                 <NotificationBell />
 
-                {/* Audio Toggle */}
                 <motion.button
-                  className="flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] h-8 w-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  className="flex items-center justify-center"
                   onClick={toggleAudio}
                   whileTap={{ scale: 0.96 }}
                   title={audioEnabled ? 'Silenciar audio' : 'Activar audio'}
+                  style={{
+                    width: 38, height: 38, borderRadius: 10,
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    color: 'var(--text-2)',
+                  }}
                 >
                   {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} className="text-red-400" />}
                 </motion.button>
 
+                {/* sabio CTA */}
+                <motion.button
+                  onClick={() => navigate('/wisdom')}
+                  whileTap={{ scale: 0.97 }}
+                  className="hidden lg:flex items-center gap-2"
+                  style={{
+                    height: 38, padding: '0 14px',
+                    background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+                    color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                    boxShadow: '0 6px 18px rgba(139,92,246,.35)',
+                  }}
+                >
+                  <Sparkles size={15} />
+                  El Sabio
+                </motion.button>
+
                 <motion.button
                   onClick={handleLogout}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] px-3 py-1.5 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   whileTap={{ scale: 0.96 }}
+                  className="hidden md:block text-[12px] font-semibold"
+                  style={{
+                    padding: '0 14px', height: 38, borderRadius: 10,
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    color: 'var(--text-2)',
+                  }}
                 >
                   Salir
                 </motion.button>
-              </div>
+
+                {/* invisible xp sparkles trigger */}
+                <span className="hidden"><XPSparkles trigger={xpSparkTrigger} /></span>
+              </>
             )}
           </div>
+
+          {/* mobile compact stat strip */}
+          {user && (
+            <div className="md:hidden grid grid-cols-3 gap-2 px-4 pb-3">
+              <div>
+                <div className="mb-1 flex justify-between text-[10px] tabular-nums" style={{ color: 'var(--text-2)' }}>
+                  <span style={{ color: 'var(--c-hp)', fontWeight: 700 }}>HP</span>
+                  <span>{user.hp}/{user.maxHp}</span>
+                </div>
+                <StatBarFill pct={hpPct} color="bg-accent-pink" pulse />
+              </div>
+              <div>
+                <div className="mb-1 flex justify-between text-[10px] tabular-nums" style={{ color: 'var(--text-2)' }}>
+                  <span style={{ color: 'var(--c-mp)', fontWeight: 700 }}>MP</span>
+                  <span>{user.mp}/{user.maxMp}</span>
+                </div>
+                <StatBarFill pct={mpPct} color="bg-accent-cyan" wave />
+              </div>
+              <div>
+                <div className="mb-1 flex justify-between text-[10px] tabular-nums" style={{ color: 'var(--text-2)' }}>
+                  <span style={{ color: 'var(--c-xp)', fontWeight: 700 }}>XP</span>
+                  <span>{user.xp}/{user.xpToNextLevel}</span>
+                </div>
+                <StatBarFill pct={xpPct} color="bg-accent-gold" />
+              </div>
+            </div>
+          )}
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">

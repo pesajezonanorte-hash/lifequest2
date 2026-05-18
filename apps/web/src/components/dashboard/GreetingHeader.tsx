@@ -1,10 +1,12 @@
 import { useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { getHeroLabel } from '../../utils/gender';
 
 interface Props {
   displayName: string;
   currentStreak: number;
   createdAt: string;
+  gender?: 'male' | 'female';
   questsCompletedYesterday?: number;
 }
 
@@ -20,11 +22,13 @@ function getMotivationalPhrase(
   streak: number,
   questsYesterday: number,
   daysSinceJoin: number,
+  gender: 'male' | 'female' = 'male',
 ): string {
+  const hero = getHeroLabel(gender);
   if (streak >= 30) return `${streak} días invicto, ${firstName}. Eres una leyenda.`;
   if (streak >= 14) return `${streak} días de racha, ${firstName}. El reino entero te observa.`;
   if (streak >= 7)  return `${streak} días imparables, ${firstName}. El fuego no se apaga.`;
-  if (questsYesterday > 0) return `Ayer conquistaste el día, héroe. ¿Qué harás hoy?`;
+  if (questsYesterday > 0) return `Ayer conquistaste el día, ${hero}. ¿Qué harás hoy?`;
   if (daysSinceJoin <= 3)  return `Bienvenido al mundo de LifeQuest, ${firstName}. Tu leyenda comienza.`;
   return `La aventura continúa, ${firstName}. ¿A qué esperas?`;
 }
@@ -32,7 +36,7 @@ function getMotivationalPhrase(
 const DAYS_ES   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-export function GreetingHeader({ displayName, currentStreak, createdAt, questsCompletedYesterday = 0 }: Props) {
+export function GreetingHeader({ displayName, currentStreak, createdAt, gender = 'male', questsCompletedYesterday = 0 }: Props) {
   const parallaxRef = useRef<HTMLDivElement>(null);
 
   // Parallax on scroll
@@ -61,40 +65,59 @@ export function GreetingHeader({ displayName, currentStreak, createdAt, questsCo
       dateStr:       `${day.charAt(0).toUpperCase() + day.slice(1)} ${date} de ${month}`,
       daysSinceJoin: days,
       firstName:     first,
-      phrase:        getMotivationalPhrase(first, currentStreak, questsCompletedYesterday, days),
+      phrase:        getMotivationalPhrase(first, currentStreak, questsCompletedYesterday, days, gender),
     };
-  }, [displayName, currentStreak, createdAt, questsCompletedYesterday]);
+  }, [displayName, currentStreak, createdAt, questsCompletedYesterday, gender]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl mb-1" style={{ background: 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-purple) 100%)', minHeight: '120px' }}>
-      {/* Parallax decorative layer */}
+    <div
+      className="relative overflow-hidden mb-1"
+      style={{
+        borderRadius: 18,
+        background: `
+          radial-gradient(circle at 85% 20%, color-mix(in oklab, #ec4899 28%, transparent), transparent 50%),
+          radial-gradient(circle at 15% 80%, color-mix(in oklab, #6366f1 32%, transparent), transparent 55%),
+          linear-gradient(135deg, color-mix(in oklab, var(--primary) 14%, var(--surface)), var(--surface))
+        `,
+        border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
+        boxShadow: '0 18px 50px rgba(0,0,0,.18), 0 2px 4px rgba(0,0,0,.04)',
+      }}
+    >
       <div
         ref={parallaxRef}
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.08) 0%, transparent 60%)',
+          backgroundImage:
+            'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.04) 0%, transparent 60%)',
           willChange: 'transform',
         }}
       />
 
       <motion.div
-        className="relative p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+        className="relative flex flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:py-7"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <div className="space-y-1">
-          <h1 className="font-pixel text-white" style={{ fontSize: '13px', textShadow: '1px 1px 0 rgba(0,0,0,0.3)' }}>
-            {greeting}, {firstName} ⚔️
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="text-[13px] font-medium" style={{ color: 'var(--text-2)' }}>
+            {greeting},
+          </div>
+          <h1
+            className="m-0 truncate text-[28px] sm:text-[32px] font-extrabold tracking-[-0.03em] leading-[1.05]"
+            style={{ color: 'var(--text)' }}
+          >
+            {firstName} <span style={{ color: 'var(--primary)' }}>⚔️</span>
           </h1>
-          <p className="font-vt text-white/80 text-xl">
+          <div className="text-[13px]" style={{ color: 'var(--text-2)' }}>
             {dateStr} · Día {daysSinceJoin} en LifeQuest
-          </p>
+          </div>
           <motion.p
-            className="font-vt text-white/90 text-xl italic"
+            className="mt-1 text-[14px] italic"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
+            style={{ color: 'var(--text-2)' }}
           >
             "{phrase}"
           </motion.p>
@@ -102,9 +125,15 @@ export function GreetingHeader({ displayName, currentStreak, createdAt, questsCo
 
         {currentStreak > 0 && (
           <motion.div
-            className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 self-start"
+            className="flex items-center gap-2 self-start sm:self-center"
             animate={{ scale: [1, 1.03, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 12,
+              background: 'color-mix(in oklab, var(--c-amber) 14%, transparent)',
+              border: '1px solid color-mix(in oklab, var(--c-amber) 28%, transparent)',
+            }}
           >
             <motion.span
               className="text-xl"
@@ -114,8 +143,15 @@ export function GreetingHeader({ displayName, currentStreak, createdAt, questsCo
               🔥
             </motion.span>
             <div>
-              <p className="font-pixel text-white/70" style={{ fontSize: '7px' }}>RACHA</p>
-              <p className="font-vt text-white text-xl">{currentStreak} días</p>
+              <p
+                className="font-bold uppercase tracking-[0.08em]"
+                style={{ fontSize: 10, color: 'var(--c-amber)' }}
+              >
+                RACHA
+              </p>
+              <p className="text-[18px] font-extrabold tabular-nums leading-none mt-0.5" style={{ color: 'var(--text)' }}>
+                {currentStreak} días
+              </p>
             </div>
           </motion.div>
         )}

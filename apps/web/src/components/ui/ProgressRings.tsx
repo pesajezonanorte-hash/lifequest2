@@ -23,7 +23,6 @@ export function ProgressRings({
   centerLabel,
   centerSubLabel,
 }: Props) {
-  const trackColor = 'rgba(255,255,255,0.08)';
   const cx = size / 2;
   const cy = size / 2;
 
@@ -50,7 +49,7 @@ export function ProgressRings({
                   cy={cy}
                   r={r}
                   fill="none"
-                  stroke={trackColor}
+                  stroke={`color-mix(in oklab, ${ring.color} 12%, transparent)`}
                   strokeWidth={stroke}
                 />
                 <motion.circle
@@ -64,7 +63,8 @@ export function ProgressRings({
                   strokeDasharray={`${circumference} ${circumference}`}
                   initial={{ strokeDashoffset: circumference }}
                   animate={{ strokeDashoffset: offset }}
-                  transition={{ duration: 1.1, ease: 'easeOut', delay: i * 0.1 }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 }}
+                  style={{ filter: `drop-shadow(0 0 6px ${ring.color}55)` }}
                 />
               </g>
             );

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MiguelSprite } from '../character/MiguelSprite';
 import { PixelButton } from '../ui/PixelButton';
+import { getForgedLabel } from '../../utils/gender';
 import type { AvatarConfig } from '@lifequest/shared';
 
 const STATS = [
@@ -14,11 +15,12 @@ const STATS = [
 
 interface Props {
   displayName: string;
+  gender: 'male' | 'female';
   avatarConfig: Partial<AvatarConfig>;
   onEnter: () => void;
 }
 
-export function FinalCelebrationStep({ displayName, avatarConfig, onEnter }: Props) {
+export function FinalCelebrationStep({ displayName, avatarConfig, gender, onEnter }: Props) {
   const [visibleStats, setVisibleStats] = useState(0);
   const [showButton, setShowButton] = useState(false);
 
@@ -65,10 +67,14 @@ export function FinalCelebrationStep({ displayName, avatarConfig, onEnter }: Pro
       >
         <MiguelSprite
           size={120}
+          bodyType={avatarConfig.bodyType}
+          hairStyle={avatarConfig.hairStyle}
           hairColor={avatarConfig.hairColor}
           skinColor={avatarConfig.skinColor}
           shirtColor={avatarConfig.shirtColor}
           pantsColor={avatarConfig.pants}
+          accessory={avatarConfig.accessory}
+          expression={avatarConfig.expression}
           animate="celebrate"
         />
       </motion.div>
@@ -85,7 +91,7 @@ export function FinalCelebrationStep({ displayName, avatarConfig, onEnter }: Pro
         >
           ¡{displayName}
           <br />
-          <span className="text-white">HA SIDO FORJADO!</span>
+          <span className="text-white">{getForgedLabel(gender)}!</span>
         </h2>
       </motion.div>
 
