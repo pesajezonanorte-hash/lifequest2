@@ -3,36 +3,23 @@ import type { Response } from 'express';
 import { requireAuth } from '../middleware/auth.middleware';
 import type { AuthRequest } from '../middleware/auth.middleware';
 import { prisma } from '../lib/prisma';
+import { signOAuthState, verifyOAuthState } from '../lib/oauth-state';
 
 const router = Router();
-router.use(requireAuth);
 
-// ─── Google Calendar ──────────────────────────────────────────────────────────
-
-router.get('/google/auth', (req: AuthRequest, res: Response): void => {
-  const clientId     = process.env.GOOGLE_CLIENT_ID;
-  const redirectUri  = process.env.GOOGLE_REDIRECT_URI ?? `${process.env.API_URL ?? 'http://localhost:3001'}/api/v1/integrations/google/callback`;
-
-  if (!clientId) { res.status(500).json({ error: 'GOOGLE_CLIENT_ID no configurado' }); return; }
-
-  const params = new URLSearchParams({
-    client_id:     clientId,
-    redirect_uri:  redirectUri,
-    response_type: 'code',
-    scope: [
-      'https://www.googleapis.com/auth/calendar',
-      'https://www.googleapis.com/auth/tasks',
-    ].join(' '),
-    access_type:   'offline',
-    prompt:        'consent',
-    state:         req.userId!,
-  });
-
-  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
-});
+// ─── OAuth Callbacks (NO auth header — browser redirect from provider) ─────
+// These MUST be defined BEFORE router.use(requireAuth). The userId is taken
+// from the signed `state` JWT, NEVER from a request body / unsigned query.
 
 router.get('/google/callback', async (req: AuthRequest, res: Response): Promise<void> => {
-  const { code, state: userId } = req.query as { code: string; state: string };
+  const { code, state } = req.query as { code?: string; state?: string };
+  const webUrl = process.env.WEB_URL ?? 'http://localhost:5173';
+  if (!code || !state) { res.redirect(`${webUrl}/settings/integrations?google=error`); return; }
+
+  let userId: string;
+  try { userId = verifyOAuthState(state, 'google'); }
+  catch { res.redirect(`${webUrl}/settings/integrations?google=error`); return; }
+
   const clientId      = process.env.GOOGLE_CLIENT_ID!;
   const clientSecret  = process.env.GOOGLE_CLIENT_SECRET!;
   const redirectUri   = process.env.GOOGLE_REDIRECT_URI ?? `${process.env.API_URL ?? 'http://localhost:3001'}/api/v1/integrations/google/callback`;
@@ -53,11 +40,115 @@ router.get('/google/callback', async (req: AuthRequest, res: Response): Promise<
       },
     });
 
-    res.redirect(`${process.env.WEB_URL ?? 'http://localhost:5173'}/settings/integrations?google=connected`);
+    res.redirect(`${webUrl}/settings/integrations?google=connected`);
   } catch (error) {
     console.error('[Integrations] Google callback error:', error);
-    res.redirect(`${process.env.WEB_URL ?? 'http://localhost:5173'}/settings/integrations?google=error`);
+    res.redirect(`${webUrl}/settings/integrations?google=error`);
   }
+});
+
+router.get('/spotify/callback', async (req: AuthRequest, res: Response): Promise<void> => {
+  const { code, state } = req.query as { code?: string; state?: string };
+  const webUrl = process.env.WEB_URL ?? 'http://localhost:5173';
+  if (!code || !state) { res.redirect(`${webUrl}/settings/integrations?spotify=error`); return; }
+
+  let userId: string;
+  try { userId = verifyOAuthState(state, 'spotify'); }
+  catch { res.redirect(`${webUrl}/settings/integrations?spotify=error`); return; }
+
+  const clientId     = process.env.SPOTIFY_CLIENT_ID!;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET!;
+  const redirectUri  = process.env.SPOTIFY_REDIRECT_URI ?? `${process.env.API_URL ?? 'http://localhost:3001'}/api/v1/integrations/spotify/callback`;
+
+  try {
+    const creds = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        Authorization:  `Basic ${creds}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri }),
+    });
+    const tokens = (await tokenRes.json()) as { access_token: string; refresh_token?: string };
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        spotifyAccessToken:  tokens.access_token,
+        spotifyRefreshToken: tokens.refresh_token ?? undefined,
+      },
+    });
+
+    res.redirect(`${webUrl}/settings/integrations?spotify=connected`);
+  } catch (error) {
+    console.error('[Integrations] Spotify callback error:', error);
+    res.redirect(`${webUrl}/settings/integrations?spotify=error`);
+  }
+});
+
+router.get('/googlefit/callback', async (req: AuthRequest, res: Response): Promise<void> => {
+  const { code, state } = req.query as { code?: string; state?: string };
+  const webUrl = process.env.WEB_URL ?? 'http://localhost:5173';
+  if (!code || !state) { res.redirect(`${webUrl}/settings/integrations?googlefit=error`); return; }
+
+  let userId: string;
+  try { userId = verifyOAuthState(state, 'googlefit'); }
+  catch { res.redirect(`${webUrl}/settings/integrations?googlefit=error`); return; }
+
+  const clientId     = process.env.GOOGLE_CLIENT_ID!;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
+  const redirectUri  = process.env.GOOGLEFIT_REDIRECT_URI ?? `${process.env.API_URL ?? 'http://localhost:3001'}/api/v1/integrations/googlefit/callback`;
+
+  try {
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, grant_type: 'authorization_code' }),
+    });
+    const tokens = (await tokenRes.json()) as { access_token: string; refresh_token?: string };
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        googleAccessToken:  tokens.access_token,
+        googleRefreshToken: tokens.refresh_token ?? undefined,
+        googleFitConnected: true,
+      },
+    });
+
+    res.redirect(`${webUrl}/settings/integrations?googlefit=connected`);
+  } catch (error) {
+    console.error('[Integrations] Google Fit callback error:', error);
+    res.redirect(`${webUrl}/settings/integrations?googlefit=error`);
+  }
+});
+
+// ─── All other routes require auth ───────────────────────────────────────────
+router.use(requireAuth);
+
+// ─── Google Calendar ──────────────────────────────────────────────────────────
+
+router.get('/google/auth', (req: AuthRequest, res: Response): void => {
+  const clientId     = process.env.GOOGLE_CLIENT_ID;
+  const redirectUri  = process.env.GOOGLE_REDIRECT_URI ?? `${process.env.API_URL ?? 'http://localhost:3001'}/api/v1/integrations/google/callback`;
+
+  if (!clientId) { res.status(500).json({ error: 'GOOGLE_CLIENT_ID no configurado' }); return; }
+
+  const params = new URLSearchParams({
+    client_id:     clientId,
+    redirect_uri:  redirectUri,
+    response_type: 'code',
+    scope: [
+      'https://www.googleapis.com/auth/calendar',
+      'https://www.googleapis.com/auth/tasks',
+    ].join(' '),
+    access_type:   'offline',
+    prompt:        'consent',
+    state:         signOAuthState({ userId: req.userId!, provider: 'google' }),
+  });
+
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
 });
 
 router.delete('/google/disconnect', async (req: AuthRequest, res: Response): Promise<void> => {
@@ -76,7 +167,6 @@ router.post('/google/sync', async (req: AuthRequest, res: Response): Promise<voi
 
   if (!user.googleAccessToken) { res.status(401).json({ error: 'Google no conectado' }); return; }
 
-  // Sync upcoming quests with deadlines to Google Calendar
   const quests = await prisma.quest.findMany({
     where: { userId: req.userId!, status: 'ACTIVE', deadline: { not: null } },
     take: 20,
@@ -90,7 +180,7 @@ router.post('/google/sync', async (req: AuthRequest, res: Response): Promise<voi
         description: quest.description ?? '',
         start: { dateTime: quest.deadline!.toISOString() },
         end:   { dateTime: new Date(quest.deadline!.getTime() + 60 * 60 * 1000).toISOString() },
-        colorId: '11', // Tomato
+        colorId: '11',
       };
       await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
         method:  'POST',
@@ -101,15 +191,13 @@ router.post('/google/sync', async (req: AuthRequest, res: Response): Promise<voi
         body: JSON.stringify(event),
       });
       synced++;
-    } catch { /* skip individual failures */ }
+    } catch { /* skip */ }
   }
 
   res.json({ synced });
 });
 
 // ─── Spotify ──────────────────────────────────────────────────────────────────
-
-// ─── Spotify helpers ──────────────────────────────────────────────────────────
 
 async function getSpotifyToken(userId: string): Promise<string | null> {
   const user = await prisma.user.findUniqueOrThrow({
@@ -166,43 +254,10 @@ router.get('/spotify/auth', (req: AuthRequest, res: Response): void => {
     response_type:'code',
     redirect_uri: redirectUri,
     scope:        'user-read-currently-playing user-read-playback-state user-modify-playback-state playlist-read-private user-library-modify streaming',
-    state:        req.userId!,
+    state:        signOAuthState({ userId: req.userId!, provider: 'spotify' }),
   });
 
   res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`);
-});
-
-router.get('/spotify/callback', async (req: AuthRequest, res: Response): Promise<void> => {
-  const { code, state: userId } = req.query as { code: string; state: string };
-  const clientId     = process.env.SPOTIFY_CLIENT_ID!;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET!;
-  const redirectUri  = process.env.SPOTIFY_REDIRECT_URI ?? `${process.env.API_URL ?? 'http://localhost:3001'}/api/v1/integrations/spotify/callback`;
-
-  try {
-    const creds = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-    const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        Authorization:  `Basic ${creds}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: redirectUri }),
-    });
-    const tokens = (await tokenRes.json()) as { access_token: string; refresh_token?: string };
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        spotifyAccessToken:  tokens.access_token,
-        spotifyRefreshToken: tokens.refresh_token ?? undefined,
-      },
-    });
-
-    res.redirect(`${process.env.WEB_URL ?? 'http://localhost:5173'}/settings/integrations?spotify=connected`);
-  } catch (error) {
-    console.error('[Integrations] Spotify callback error:', error);
-    res.redirect(`${process.env.WEB_URL ?? 'http://localhost:5173'}/settings/integrations?spotify=error`);
-  }
 });
 
 router.get('/spotify/now-playing', async (req: AuthRequest, res: Response): Promise<void> => {
@@ -355,41 +410,10 @@ router.get('/googlefit/auth', (req: AuthRequest, res: Response): void => {
     ].join(' '),
     access_type: 'offline',
     prompt:      'consent',
-    state:       `fit_${req.userId!}`,
+    state:       signOAuthState({ userId: req.userId!, provider: 'googlefit' }),
   });
 
   res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`);
-});
-
-router.get('/googlefit/callback', async (req: AuthRequest, res: Response): Promise<void> => {
-  const { code, state } = req.query as { code: string; state: string };
-  const userId = state.replace('fit_', '');
-  const clientId     = process.env.GOOGLE_CLIENT_ID!;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-  const redirectUri  = process.env.GOOGLEFIT_REDIRECT_URI ?? `${process.env.API_URL ?? 'http://localhost:3001'}/api/v1/integrations/googlefit/callback`;
-
-  try {
-    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, grant_type: 'authorization_code' }),
-    });
-    const tokens = (await tokenRes.json()) as { access_token: string; refresh_token?: string };
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        googleAccessToken:  tokens.access_token,
-        googleRefreshToken: tokens.refresh_token ?? undefined,
-        googleFitConnected: true,
-      },
-    });
-
-    res.redirect(`${process.env.WEB_URL ?? 'http://localhost:5173'}/settings/integrations?googlefit=connected`);
-  } catch (error) {
-    console.error('[Integrations] Google Fit callback error:', error);
-    res.redirect(`${process.env.WEB_URL ?? 'http://localhost:5173'}/settings/integrations?googlefit=error`);
-  }
 });
 
 router.get('/googlefit/today', async (req: AuthRequest, res: Response): Promise<void> => {

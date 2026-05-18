@@ -6,6 +6,7 @@ import { PixelButton } from '../../components/ui/PixelButton';
 import type { Meal } from '@lifequest/shared';
 import * as mealService from '../../services/meal.service';
 import { MacroGoalsWidget, AIQuickLog, SavedMealsPanel } from '../../components/food/NutritionExtras';
+import { SageContextButton } from '../../components/sage/SageContextButton';
 
 const MEAL_TYPES = [
   { key: 'BREAKFAST', label: 'Desayuno', icon: '🌅' },
@@ -160,7 +161,10 @@ export default function FoodPage() {
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>🍖 LA POSADA</h1>
           <p className="font-vt text-text-secondary text-base">Alimenta al héroe — {new Date().toLocaleDateString('es-CO')}</p>
         </div>
-        <PixelButton variant="primary" onClick={() => setShowModal(true)}>+ REGISTRAR</PixelButton>
+        <div className="flex items-center gap-2">
+          <SageContextButton message="¿Cómo está mi alimentación esta semana? ¿Qué puedo mejorar?" label="Pídele consejo al Sabio" />
+          <PixelButton variant="primary" onClick={() => setShowModal(true)}>+ REGISTRAR</PixelButton>
+        </div>
       </div>
 
       {/* Tabs */}

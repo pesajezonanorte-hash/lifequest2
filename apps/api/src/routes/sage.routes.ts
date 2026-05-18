@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.middleware';
+import { sageLimiter } from '../middleware/rate-limit.middleware';
 import * as sage from '../controllers/sage.controller';
 
 const router = Router();
 router.use(requireAuth);
+router.use(sageLimiter);
 
 router.post('/chat',             sage.chat);
 router.post('/suggest-quests',   sage.suggestQuests);

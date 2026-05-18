@@ -7,6 +7,7 @@ import { useBootstrapAuth } from './hooks/useAuth';
 import { GameLayout } from './components/layout/GameLayout';
 import { SplashScreen } from './components/animations/SplashScreen';
 import { SageWidget } from './components/sage/SageWidget';
+import { FeedbackButton } from './components/ui/FeedbackButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 const LoginPage        = lazy(() => import('./pages/Login'));
@@ -41,6 +42,7 @@ const GlowUpPage       = lazy(() => import('./pages/GlowUp'));
 const WisdomPage       = lazy(() => import('./pages/Wisdom'));
 const NotFoundPage     = lazy(() => import('./pages/NotFound'));
 const AboutPage        = lazy(() => import('./pages/About'));
+const FAQPage          = lazy(() => import('./pages/FAQ'));
 
 // Page transition variants (context-aware)
 const pageVariants = {
@@ -115,6 +117,7 @@ function AnimatedRoutes() {
           <Route path="/glow-up"                  element={<GlowUpPage />} />
           <Route path="/wisdom"                   element={<WisdomPage />} />
           <Route path="/about"                    element={<AboutPage />} />
+          <Route path="/faq"                      element={<FAQPage />} />
           <Route path="*"             element={<NotFoundPage />} />
         </Routes>
       </motion.div>
@@ -216,6 +219,7 @@ export default function App() {
                     </GameLayout>
                   </ErrorBoundary>
                   <SageWidget />
+                  <FeedbackButton />
                 </ProtectedRoute>
               }
             />

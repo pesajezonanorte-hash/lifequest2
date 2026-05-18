@@ -6,6 +6,7 @@ import { PixelButton } from '../../components/ui/PixelButton';
 import type { Relationship, LoveDashboard, ImportantDate } from '@lifequest/shared';
 import * as loveService from '../../services/love.service';
 import api from '../../lib/api';
+import { SageContextButton } from '../../components/sage/SageContextButton';
 
 interface GiftIdea { id: string; title: string; description?: string; estimatedPrice?: number; isPurchased: boolean; forPerson?: string }
 
@@ -241,7 +242,10 @@ export default function LovePage() {
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>💖 JARDÍN DEL CORAZÓN</h1>
           <p className="font-vt text-text-secondary text-base">Lo que importa en tu vida</p>
         </div>
-        {!rel && <PixelButton variant="primary" onClick={() => setShowSetup(true)}>CONFIGURAR</PixelButton>}
+        <div className="flex items-center gap-2">
+          <SageContextButton message="¿Cómo puedo cuidar mejor las relaciones que importan?" label="Pídele consejo al Sabio" />
+          {!rel && <PixelButton variant="primary" onClick={() => setShowSetup(true)}>CONFIGURAR</PixelButton>}
+        </div>
       </div>
 
       {/* Tabs */}

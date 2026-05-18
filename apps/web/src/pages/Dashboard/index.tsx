@@ -27,6 +27,7 @@ import { SageScrollsWidget } from '../../components/dashboard/SageScrollsWidget'
 import { SageDailyTip } from '../../components/dashboard/SageDailyTip';
 import { FirstStepsWidget } from '../../components/dashboard/FirstStepsWidget';
 import { SkeletonCard } from '../../components/ui/Skeleton';
+import { ProgressRings } from '../../components/ui/ProgressRings';
 
 interface HabitSummary {
   id: string;
@@ -75,8 +76,9 @@ const CLASS_TITLES: Record<string, string> = {
 };
 
 function LifeScoreWidget({ score }: { score: LifeScore }) {
-  const color = score.total >= 80 ? 'var(--accent-green)' : score.total >= 60 ? 'var(--accent-gold)' : 'var(--accent-red)';
-  const areas = Object.entries(score.breakdown).map(([k, v]) => ({ label: k, value: v }));
+  const quests   = Math.round(score.breakdown.quests   ?? 0);
+  const habits   = Math.round(score.breakdown.habits   ?? 0);
+  const finances = Math.round(score.breakdown.finances ?? 0);
   return (
     <PixelPanel className="p-4">
       <div className="flex items-center justify-between mb-3">
@@ -84,35 +86,34 @@ function LifeScoreWidget({ score }: { score: LifeScore }) {
         <span className="text-xs text-[var(--text-secondary)]">Tu puntuación global</span>
       </div>
       <div className="flex items-center gap-4">
-        <div className="text-center">
-          <motion.p
-            className="text-5xl font-bold pixel-text"
-            style={{ color }}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', damping: 15 }}
-          >
-            {score.total}
-          </motion.p>
-          <p className="text-xs text-[var(--text-secondary)] mt-1">/100</p>
-        </div>
-        <div className="flex-1 space-y-1">
-          {areas.slice(0, 4).map(({ label, value }) => (
-            <div key={label}>
-              <div className="flex justify-between text-xs mb-0.5">
-                <span className="text-[var(--text-secondary)] capitalize">{label}</span>
-                <span className="text-[var(--text-primary)]">{value}</span>
-              </div>
-              <div className="stat-bar h-1.5">
-                <motion.div
-                  className="stat-bar-fill bg-accent-gold"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${value}%` }}
-                  transition={{ duration: 0.8, delay: 0.1 }}
-                />
-              </div>
-            </div>
-          ))}
+        <ProgressRings
+          size={150}
+          stroke={11}
+          gap={3}
+          centerLabel={score.total}
+          centerSubLabel="/ 100"
+          rings={[
+            { progress: quests,   color: '#ff5e8a' },
+            { progress: habits,   color: '#48dbfb' },
+            { progress: finances, color: '#ffd23f' },
+          ]}
+        />
+        <div className="flex-1 space-y-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ff5e8a' }} />
+            <span className="flex-1 text-[var(--text-secondary)]">Misiones</span>
+            <span className="text-[var(--text-primary)] font-semibold">{quests}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#48dbfb' }} />
+            <span className="flex-1 text-[var(--text-secondary)]">Hábitos</span>
+            <span className="text-[var(--text-primary)] font-semibold">{habits}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ffd23f' }} />
+            <span className="flex-1 text-[var(--text-secondary)]">Finanzas</span>
+            <span className="text-[var(--text-primary)] font-semibold">{finances}</span>
+          </div>
         </div>
       </div>
     </PixelPanel>

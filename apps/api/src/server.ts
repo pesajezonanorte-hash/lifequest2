@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 
 import router from './routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
+import { globalLimiter } from './middleware/rate-limit.middleware';
 import { initScheduler } from './jobs/scheduler';
 import { prisma } from './lib/prisma';
 
@@ -60,6 +61,9 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
+// ─── Rate limiting global ────────────────────────────────────────────────────
+app.use('/api/v1', globalLimiter);
+
 // ─── Rutas ───────────────────────────────────────────────────────────────────
 app.use('/api/v1', router);
 
@@ -68,7 +72,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(Number(PORT), '0.0.0.0', () => {
     console.log('');
     console.log('  ╔════════════════════════════════════╗');
     console.log('  ║  ⚔️  LifeQuest API  •  v2.0.0      ║');

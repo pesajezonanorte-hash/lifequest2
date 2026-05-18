@@ -35,6 +35,7 @@ import wisdomRoutes       from './wisdom.routes';
 // Fase 10
 import searchRoutes       from './search.routes';
 import exportRoutes       from './export.routes';
+import feedbackRoutes     from './feedback.routes';
 
 const router = Router();
 
@@ -75,6 +76,7 @@ router.use('/wisdom',       wisdomRoutes);
 // Fase 10 routes
 router.use('/search',       searchRoutes);
 router.use('/export',       exportRoutes);
+router.use('/feedback',     feedbackRoutes);
 
 router.get('/health', (_req, res) => {
   res.json({ status: 'ok', version: '10.0.0', timestamp: new Date().toISOString() });

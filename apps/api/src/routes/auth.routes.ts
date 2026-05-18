@@ -3,11 +3,12 @@ import { register, login, refresh, logout, me } from '../controllers/auth.contro
 import { validate } from '../middleware/validate.middleware';
 import { requireAuth } from '../middleware/auth.middleware';
 import { registerSchema, loginSchema } from '../schemas/auth.schemas';
+import { loginLimiter, registerLimiter } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
-router.post('/register', validate(registerSchema), register);
-router.post('/login', validate(loginSchema), login);
+router.post('/register', registerLimiter, validate(registerSchema), register);
+router.post('/login', loginLimiter, validate(loginSchema), login);
 router.post('/refresh', refresh);
 router.post('/logout', requireAuth, logout);
 router.get('/me', requireAuth, me);

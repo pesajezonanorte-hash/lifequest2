@@ -10,7 +10,7 @@ interface Props {
   onBack: () => void;
 }
 
-export function IdentityStep({ initialName = 'Miguel Ángel', onNext, onBack }: Props) {
+export function IdentityStep({ initialName = '', onNext, onBack }: Props) {
   const [name, setName] = useState(initialName);
   const [birthDate, setBirthDate] = useState('');
   const [timezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone);

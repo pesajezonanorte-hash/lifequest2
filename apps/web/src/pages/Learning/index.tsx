@@ -8,6 +8,7 @@ import { PixelButton } from '../../components/ui/PixelButton';
 import type { LearningItem, LearningStats } from '@lifequest/shared';
 import * as learningService from '../../services/learning.service';
 import { PomodoroTimer, NotesPanel, VocabPanel } from '../../components/learning/LearningExtras';
+import { SageContextButton } from '../../components/sage/SageContextButton';
 
 const TYPE_ICONS: Record<string, string> = { BOOK: '📖', COURSE: '💻', PODCAST: '🎙️', VIDEO: '🎥', LANGUAGE: '🗣️' };
 const STATUS_LABELS: Record<string, string> = { NOT_STARTED: 'Por empezar', IN_PROGRESS: 'En progreso', COMPLETED: 'Completado', ABANDONED: 'Abandonado' };
@@ -143,7 +144,10 @@ export default function LearningPage() {
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>📚 LA BIBLIOTECA</h1>
           <p className="font-vt text-text-secondary text-base">Conocimiento es poder</p>
         </div>
-        <PixelButton variant="primary" onClick={() => setShowAdd(true)}>+ AGREGAR</PixelButton>
+        <div className="flex items-center gap-2">
+          <SageContextButton message="¿Qué debería estudiar o leer ahora dado lo que llevo en la Biblioteca?" label="Pídele recomendación al Sabio" />
+          <PixelButton variant="primary" onClick={() => setShowAdd(true)}>+ AGREGAR</PixelButton>
+        </div>
       </div>
 
       {/* Main tabs */}

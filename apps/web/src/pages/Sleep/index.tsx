@@ -6,6 +6,7 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import type { SleepLog, SleepStats } from '@lifequest/shared';
 import * as sleepService from '../../services/sleep.service';
+import { SageContextButton } from '../../components/sage/SageContextButton';
 
 const QUALITY_LABELS = ['', '😢 Terrible', '😔 Malo', '😐 Regular', '😊 Bueno', '😄 Excelente'];
 const QUALITY_COLORS = ['', '#ff6b6b', '#ff9f43', '#ffd23f', '#6bcf7f', '#4d96ff'];
@@ -158,7 +159,10 @@ export default function SleepPage() {
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>🌙 TORRE DEL SUEÑO</h1>
           <p className="font-vt text-text-secondary text-base">Tu descanso es tu HP, héroe</p>
         </div>
-        <PixelButton variant="primary" onClick={() => setShowModal(true)}>+ REGISTRAR SUEÑO</PixelButton>
+        <div className="flex items-center gap-2">
+          <SageContextButton message="¿Cómo está mi sueño últimamente? ¿Qué patrones detectas?" label="Pídele consejo al Sabio" />
+          <PixelButton variant="primary" onClick={() => setShowModal(true)}>+ REGISTRAR SUEÑO</PixelButton>
+        </div>
       </div>
 
       {/* Stats */}

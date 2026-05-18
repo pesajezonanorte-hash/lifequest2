@@ -46,7 +46,7 @@ export default function OnboardingPage() {
   const saved = loadSaved();
 
   const [step, setStep] = useState(saved.step ?? 0);
-  const [displayName, setDisplayName] = useState(saved.displayName ?? user?.displayName ?? 'Miguel Ángel');
+  const [displayName, setDisplayName] = useState(saved.displayName ?? user?.displayName ?? '');
   const [birthDate, setBirthDate] = useState(saved.birthDate ?? '');
   const [timezone, setTimezone] = useState(saved.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [avatarConfig, setAvatarConfig] = useState<Partial<AvatarConfig>>(saved.avatarConfig ?? user?.avatarConfig ?? {});

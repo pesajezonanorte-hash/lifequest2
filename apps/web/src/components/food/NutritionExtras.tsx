@@ -7,7 +7,7 @@ import api from '../../lib/api';
 interface NutritionGoal { calories: number; protein: number; carbs: number; fat: number }
 interface DailyMacros { calories: number; protein: number; carbs: number; fat: number; goal: NutritionGoal | null }
 interface SavedMeal { id: string; name: string; calories?: number; protein?: number; carbs?: number; fat?: number }
-interface AIParsed { name: string; estimatedCalories: number; estimatedProtein: number; estimatedCarbs: number; estimatedFat: number }
+interface AIParsed { name: string; estimatedCalories: number; estimatedProtein: number; estimatedCarbs: number; estimatedFat: number; aiAvailable?: boolean; aiSucceeded?: boolean }
 
 function MacroBar({ label, value, goal, color }: { label: string; value: number; goal: number; color: string }) {
   const pct = goal > 0 ? Math.min((value / goal) * 100, 100) : 0;
@@ -130,13 +130,30 @@ export function AIQuickLog({ onLogged }: { onLogged: (meal: { name: string; calo
   const [parsed, setParsed] = useState<AIParsed | null>(null);
   const [mealType, setMealType] = useState('LUNCH');
 
+  const [aiError, setAiError] = useState<string | null>(null);
+
   async function parse() {
     if (!text.trim()) return;
     setParsing(true);
+    setAiError(null);
     try {
       const r: any = await api.post('/nutrition/ai-parse', { description: text });
       setParsed(r.data);
-    } catch { /* ignore */ } finally { setParsing(false); }
+      if (r.data?.aiAvailable === false) {
+        setAiError('IA no configurada. Puedes registrar manualmente.');
+      } else if (r.data?.aiSucceeded === false) {
+        setAiError('No pude estimar los macros. Puedes editarlos antes de guardar o registrar manualmente.');
+      }
+    } catch (e: any) {
+      setAiError('No se pudo conectar con el Sabio. Registra manualmente.');
+      setParsed({ name: text.trim().slice(0, 80), estimatedCalories: 0, estimatedProtein: 0, estimatedCarbs: 0, estimatedFat: 0, aiAvailable: false, aiSucceeded: false });
+    } finally { setParsing(false); }
+  }
+
+  function updateMacro(key: 'estimatedCalories' | 'estimatedProtein' | 'estimatedCarbs' | 'estimatedFat', val: string) {
+    if (!parsed) return;
+    const n = Math.max(0, Math.round(Number(val.replace(',', '.')) || 0));
+    setParsed({ ...parsed, [key]: n });
   }
 
   async function confirmLog() {
@@ -172,14 +189,33 @@ export function AIQuickLog({ onLogged }: { onLogged: (meal: { name: string; calo
         </PixelButton>
       </div>
 
+      {aiError && (
+        <p className="font-vt text-[var(--accent-gold)] text-sm">⚠ {aiError}</p>
+      )}
       {parsed && (
         <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-          <p className="font-vt text-text-primary text-lg">{parsed.name}</p>
+          <input
+            value={parsed.name}
+            onChange={e => setParsed({ ...parsed, name: e.target.value })}
+            className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-lg px-2 py-1 focus:border-accent-gold outline-none"
+          />
           <div className="grid grid-cols-4 gap-1">
-            {([['Kcal', parsed.estimatedCalories, 'var(--accent-gold)'], ['Prot', parsed.estimatedProtein, 'var(--accent-red)'], ['Carbs', parsed.estimatedCarbs, 'var(--accent-cyan)'], ['Grasa', parsed.estimatedFat, 'var(--accent-purple)']] as [string, number, string][]).map(([label, val, color]) => (
+            {([
+              ['Kcal',  'estimatedCalories', parsed.estimatedCalories, 'var(--accent-gold)'],
+              ['Prot',  'estimatedProtein',  parsed.estimatedProtein,  'var(--accent-red)'],
+              ['Carbs', 'estimatedCarbs',    parsed.estimatedCarbs,    'var(--accent-cyan)'],
+              ['Grasa', 'estimatedFat',      parsed.estimatedFat,      'var(--accent-purple)'],
+            ] as [string, 'estimatedCalories' | 'estimatedProtein' | 'estimatedCarbs' | 'estimatedFat', number, string][]).map(([label, key, val, color]) => (
               <div key={label} className="text-center border border-border-pixel py-2">
                 <p className="font-pixel text-text-secondary" style={{ fontSize: '6px' }}>{label}</p>
-                <p className="font-vt text-xl" style={{ color }}>{Math.round(val)}</p>
+                <input
+                  type="number"
+                  min={0}
+                  value={val}
+                  onChange={e => updateMacro(key, e.target.value)}
+                  className="w-full bg-transparent text-center font-vt text-xl outline-none"
+                  style={{ color }}
+                />
               </div>
             ))}
           </div>

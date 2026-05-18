@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { PixelPanel } from '../../components/ui/PixelPanel';
+import { ProgressRings } from '../../components/ui/ProgressRings';
 import { fetchLifeScore, fetchCorrelations, fetchYearInReview } from '../../services/lifescore.service';
 import type { LifeScore, YearInReview } from '../../services/lifescore.service';
 
@@ -19,38 +20,24 @@ const AREA_COLORS: Record<string, string> = {
   quests: '#4d96ff', learning: '#c77dff', relationships: '#ff9f43', journal: '#48dbfb',
 };
 
-function ScoreRing({ score }: { score: number }) {
-  const circumference = 2 * Math.PI * 70;
-  const color = score >= 75 ? '#6bcf7f' : score >= 50 ? '#ffd23f' : '#ff6b6b';
+function ScoreRing({ score }: { score: LifeScore }) {
+  const quests   = Math.round(score.breakdown.quests   ?? 0);
+  const habits   = Math.round(score.breakdown.habits   ?? 0);
+  const finances = Math.round(score.breakdown.finances ?? 0);
   return (
     <div className="flex justify-center py-4">
-      <div className="relative w-48 h-48">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">
-          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--bg-deep)" strokeWidth="12" />
-          <motion.circle
-            cx="80" cy="80" r="70" fill="none"
-            stroke={color}
-            strokeWidth="12"
-            strokeDasharray={circumference}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset: circumference * (1 - score / 100) }}
-            transition={{ duration: 1.2, ease: 'easeOut' }}
-            strokeLinecap="round"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <motion.p
-            className="font-pixel"
-            style={{ fontSize: '36px', color }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            {score}
-          </motion.p>
-          <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>LIFE SCORE</p>
-        </div>
-      </div>
+      <ProgressRings
+        size={240}
+        stroke={18}
+        gap={5}
+        centerLabel={score.total}
+        centerSubLabel="LIFE SCORE"
+        rings={[
+          { progress: quests,   color: '#ff5e8a' },
+          { progress: habits,   color: '#48dbfb' },
+          { progress: finances, color: '#ffd23f' },
+        ]}
+      />
     </div>
   );
 }
@@ -127,7 +114,12 @@ export default function LifePage() {
       {tab === 'score' && lifeScore && (
         <div className="space-y-4">
           <PixelPanel className="p-4">
-            <ScoreRing score={lifeScore.total} />
+            <ScoreRing score={lifeScore} />
+            <div className="flex justify-center gap-4 mt-3 text-xs flex-wrap">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ff5e8a' }} /><span className="text-[var(--text-secondary)]">Misiones</span></span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#48dbfb' }} /><span className="text-[var(--text-secondary)]">Hábitos</span></span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ffd23f' }} /><span className="text-[var(--text-secondary)]">Finanzas</span></span>
+            </div>
             <p className="text-center font-vt text-text-secondary text-base">
               {lifeScore.total >= 75 ? '🌟 ¡Héroe legendario!' : lifeScore.total >= 50 ? '⚔️ Aventurero en progreso' : '🌱 Comenzando la aventura'}
             </p>

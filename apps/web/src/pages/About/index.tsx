@@ -61,7 +61,7 @@ export default function AboutPage() {
         <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">LifeQuest</h1>
         <p className="text-[var(--text-secondary)] text-sm">RPG de Vida Real · Versión 10.0.0</p>
         <p className="text-[var(--text-muted)] text-xs mt-4 leading-relaxed max-w-md mx-auto">
-          Hecho con dedicación para <span className="text-[var(--accent-gold)] font-semibold">{user?.displayName ?? 'Miguel Ángel Romero Torres'}</span> —
+          {user?.displayName ? <>Hola, <span className="text-[var(--accent-gold)] font-semibold">{user.displayName}</span> — </> : null}
           porque convertir tu vida en un juego es la forma más épica de ganarla.
         </p>
       </motion.div>
