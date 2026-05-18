@@ -26,10 +26,16 @@ export function verifyRefreshToken(token: string): JwtPayload {
   return jwt.verify(token, REFRESH_SECRET) as JwtPayload;
 }
 
+// In production the web (e.g. *.vercel.app) and the API (e.g. *.railway.app)
+// live on different sites, so the refresh-token cookie must be SameSite=None
+// + Secure to be sent on cross-site fetch credentials. In dev (same-site
+// localhost, http) we keep SameSite=Lax which works without HTTPS.
+const IS_PROD = process.env.NODE_ENV === 'production';
+
 export const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: IS_PROD,
+  sameSite: (IS_PROD ? 'none' : 'lax') as 'none' | 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
   path: '/api/v1',
 };

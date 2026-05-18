@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import { useToast } from '../../hooks/useToast';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import { CalendarDays, Music, Activity, Check } from 'lucide-react';
@@ -81,58 +81,97 @@ function IntegrationCard({
   );
 }
 
+const SERVICE_LABEL: Record<string, string> = {
+  google:    'Google Calendar',
+  spotify:   'Spotify',
+  googlefit: 'Google Fit',
+};
+
+const SERVICE_TO_STATUS_KEY: Record<string, keyof Status> = {
+  google:    'googleCalendar',
+  spotify:   'spotify',
+  googlefit: 'googleFit',
+};
+
 export default function IntegrationsPage() {
   const [status, setStatus] = useState<Status>({ googleCalendar: false, spotify: false, googleFit: false });
   const [syncing, setSyncing] = useState<Record<string, boolean>>({});
-  const [searchParams] = useSearchParams();
-  const [toast, setToast] = useState<string | null>(null);
+  const toast = useToast();
 
-  useEffect(() => {
-    api.get<Status>('/integrations/status').then((r) => setStatus(r.data)).catch(() => null);
+  const refetchStatus = useCallback(async () => {
+    try {
+      const r = await api.get<Status>('/integrations/status');
+      setStatus(r.data);
+    } catch {
+      // keep current status; backend may be temporarily unreachable
+    }
   }, []);
 
   useEffect(() => {
-    const google    = searchParams.get('google');
-    const spotify   = searchParams.get('spotify');
-    const googlefit = searchParams.get('googlefit');
+    refetchStatus();
+  }, [refetchStatus]);
 
-    if (google === 'connected')    { setToast('¡Google Calendar conectado!'); setStatus((s) => ({ ...s, googleCalendar: true })); }
-    if (spotify === 'connected')   { setToast('¡Spotify conectado!');        setStatus((s) => ({ ...s, spotify: true })); }
-    if (googlefit === 'connected') { setToast('¡Google Fit conectado!');     setStatus((s) => ({ ...s, googleFit: true })); }
-  }, [searchParams]);
-
+  // Handle OAuth callback redirects: ?{service}={connected|success|error}
   useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(t);
-  }, [toast]);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      let touched = false;
+
+      for (const service of Object.keys(SERVICE_LABEL)) {
+        const v = params.get(service);
+        if (!v) continue;
+        touched = true;
+        const label = SERVICE_LABEL[service];
+
+        if (v === 'connected' || v === 'success') {
+          toast.success(`¡${label} conectado correctamente!`);
+          // optimistic + authoritative refetch
+          const statusKey = SERVICE_TO_STATUS_KEY[service];
+          setStatus((s) => ({ ...s, [statusKey]: true }));
+          refetchStatus();
+        } else if (v === 'error') {
+          toast.error(`No se pudo conectar ${label}. Intenta de nuevo.`);
+        }
+      }
+
+      if (touched) {
+        // Clean the URL so the toast doesn't fire again on reload / re-mount.
+        window.history.replaceState({}, '', '/settings/integrations');
+      }
+    } catch (e) {
+      // Never let URL parsing crash the page.
+      console.error('[Integrations] callback handling failed:', e);
+    }
+    // intentionally only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const syncGoogle = async () => {
     setSyncing((s) => ({ ...s, google: true }));
     try {
       const r = await api.post<{ synced: number }>('/integrations/google/sync') as { data: { synced: number } };
-      setToast(`✅ ${r.data.synced} misiones sincronizadas con Google Calendar`);
+      toast.success(`${r.data.synced} misiones sincronizadas con Google Calendar`);
     } catch {
-      setToast('❌ Error al sincronizar');
+      toast.error('Error al sincronizar con Google Calendar');
     } finally {
       setSyncing((s) => ({ ...s, google: false }));
     }
   };
 
-  const disconnect = async (service: string, endpoint: string) => {
+  const disconnect = async (service: keyof Status, endpoint: string) => {
     try {
       await api.delete(endpoint);
       setStatus((s) => ({ ...s, [service]: false }));
-      setToast('Desconectado correctamente');
+      toast.success('Desconectado correctamente');
     } catch {
-      setToast('Error al desconectar');
+      toast.error('Error al desconectar');
     }
   };
 
   const connectRedirect = (path: string) => {
     const token = useAuthStore.getState().accessToken;
     if (!token) {
-      setToast('❌ Debes iniciar sesión primero');
+      toast.error('Debes iniciar sesión primero');
       return;
     }
     window.location.href = `${BASE}${path}?token=${encodeURIComponent(token)}`;
@@ -147,17 +186,6 @@ export default function IntegrationsPage() {
         </p>
       </div>
 
-      {toast && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className="bg-bg-panel border-2 border-accent-gold p-3 font-vt text-text-primary text-lg"
-        >
-          {toast}
-        </motion.div>
-      )}
-
       <div className="space-y-4">
         <IntegrationCard
           icon={<CalendarDays size={28} className={status.googleCalendar ? 'text-[var(--accent-green)]' : 'text-[var(--text-secondary)]'} />}
@@ -166,7 +194,7 @@ export default function IntegrationsPage() {
           connected={status.googleCalendar}
           onConnect={() => connectRedirect('/integrations/google/auth')}
           onSync={syncGoogle}
-          onDisconnect={() => disconnect('googleCalendar', '/integrations/google/disconnect')}
+          onDisconnect={() => void disconnect('googleCalendar', '/integrations/google/disconnect')}
           syncing={syncing.google}
         />
 
@@ -176,7 +204,7 @@ export default function IntegrationsPage() {
           description="Activa el modo entrenamiento para escuchar tu playlist de gym al iniciar un workout en el Coliseo."
           connected={status.spotify}
           onConnect={() => connectRedirect('/integrations/spotify/auth')}
-          onDisconnect={() => disconnect('spotify', '/integrations/spotify/disconnect')}
+          onDisconnect={() => void disconnect('spotify', '/integrations/spotify/disconnect')}
         />
 
         <IntegrationCard
@@ -185,7 +213,7 @@ export default function IntegrationsPage() {
           description="Importa automáticamente pasos, calorías y datos de sueño de tu wearable para llenar la Torre del Sueño y el Coliseo."
           connected={status.googleFit}
           onConnect={() => connectRedirect('/integrations/googlefit/auth')}
-          onDisconnect={() => disconnect('googleFit', '/integrations/googlefit/disconnect')}
+          onDisconnect={() => void disconnect('googleFit', '/integrations/googlefit/disconnect')}
         />
       </div>
     </div>
