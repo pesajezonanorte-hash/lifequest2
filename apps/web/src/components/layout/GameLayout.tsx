@@ -470,11 +470,41 @@ export function GameLayout({ children }: Props) {
             WebkitBackdropFilter: 'blur(18px) saturate(180%)',
           }}
         >
-          <div className="flex items-center gap-3 px-4 py-3.5 md:gap-4 md:px-8 md:py-[14px]">
-            <div className="md:hidden flex h-10 w-10 items-center justify-center rounded-2xl" style={{ background: 'var(--bg-panel-light)' }}>
-              <LayoutDashboard size={18} />
+          {/* ── MOBILE header ── */}
+          {user && (
+            <div className="md:hidden flex items-center justify-between px-4 pt-3 pb-2 gap-2">
+              <div className="min-w-0">
+                <h1 className="m-0 text-[19px] font-extrabold tracking-[-0.025em] leading-tight truncate" style={{ color: 'var(--text)' }}>
+                  {user.displayName.split(' ')[0]} <span style={{ color: 'var(--primary)' }}>⚔️</span>
+                </h1>
+                <div className="text-[11px] tabular-nums" style={{ color: 'var(--text-3)' }}>
+                  Nv {user.level} · {user.currentStreak} días de racha
+                </div>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                {/* oro compacto */}
+                <div className="flex items-center gap-1 tabular-nums px-2 h-7 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--c-gold)', fontSize: 12, fontWeight: 700 }}>
+                  <Wallet size={12} />{user.gold.toLocaleString('es-CO')}
+                </div>
+                <NotificationBell />
+                <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={toggleAudio} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
+                  {audioEnabled ? <Volume2 size={14} /> : <VolumeX size={14} className="text-red-400" />}
+                </motion.button>
+                <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={() => navigate('/wisdom')} whileTap={{ scale: 0.96 }} style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: '#fff', border: 'none' }} title="Sabiduría">
+                  <Sparkles size={14} />
+                </motion.button>
+                <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={() => setShowFocus(true)} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--accent-cyan)' }} title="Enfoque">
+                  <Zap size={14} />
+                </motion.button>
+                <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }} title="Buscar">
+                  <Search size={14} />
+                </motion.button>
+              </div>
             </div>
+          )}
 
+          {/* ── DESKTOP header ── */}
+          <div className="hidden md:flex items-center gap-4 px-8 py-[14px]">
             <div className="min-w-0 flex-1">
               {user && (
                 <>
@@ -493,140 +523,36 @@ export function GameLayout({ children }: Props) {
               )}
             </div>
 
-            {/* search */}
             <button
-              className="hidden md:flex items-center gap-2"
+              className="flex items-center gap-2"
               onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
               title="Barra de comandos (Ctrl+K)"
-              style={{
-                height: 38, padding: '0 14px', minWidth: 280, maxWidth: 380,
-                background: 'var(--surface)', border: '1px solid var(--border)',
-                borderRadius: 10, color: 'var(--text-3)',
-              }}
+              style={{ height: 38, padding: '0 14px', minWidth: 280, maxWidth: 380, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-3)' }}
             >
               <Search size={16} />
               <span className="flex-1 text-left text-[13px]" style={{ color: 'var(--text-3)' }}>Buscar misión, hábito, gasto…</span>
-              <kbd
-                style={{
-                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                  fontSize: 10, padding: '2px 6px', borderRadius: 4,
-                  background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text-3)',
-                }}
-              >
-                ⌘K
-              </kbd>
+              <kbd style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text-3)' }}>⌘K</kbd>
             </button>
 
             {user && (
               <>
-                {/* gold pill */}
-                <div
-                  className="hidden md:flex items-center gap-1.5 tabular-nums"
-                  style={{
-                    height: 38, padding: '0 14px',
-                    background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: 10, color: 'var(--c-gold)', fontWeight: 700, fontSize: 13,
-                  }}
-                >
-                  <Wallet size={15} />
-                  {user.gold.toLocaleString('es-CO')}
+                <div className="flex items-center gap-1.5 tabular-nums" style={{ height: 38, padding: '0 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--c-gold)', fontWeight: 700, fontSize: 13 }}>
+                  <Wallet size={15} />{user.gold.toLocaleString('es-CO')}
                 </div>
-
                 <LiveClock />
-
-                {/* mobile: gold + search + sabiduría + enfoque */}
-                <div className="md:hidden flex items-center gap-1.5">
-                  <GoldCounter gold={user.gold} />
-                  <motion.button
-                    className="flex h-8 w-8 items-center justify-center rounded-xl"
-                    onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
-                    whileTap={{ scale: 0.96 }}
-                    style={{ border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-2)' }}
-                    title="Buscar"
-                  >
-                    <Search size={15} />
-                  </motion.button>
-                  <motion.button
-                    className="flex h-8 w-8 items-center justify-center rounded-xl"
-                    onClick={() => navigate('/wisdom')}
-                    whileTap={{ scale: 0.96 }}
-                    style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: '#fff', border: 'none' }}
-                    title="Sabiduría"
-                  >
-                    <Sparkles size={15} />
-                  </motion.button>
-                  <motion.button
-                    className="flex h-8 w-8 items-center justify-center rounded-xl"
-                    onClick={() => setShowFocus(true)}
-                    whileTap={{ scale: 0.96 }}
-                    style={{ border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--accent-cyan)' }}
-                    title="Modo Enfoque"
-                  >
-                    <Zap size={15} />
-                  </motion.button>
-                </div>
-
-                {/* friends */}
-                <motion.button
-                  onClick={() => navigate('/guild')}
-                  whileTap={{ scale: 0.96 }}
-                  title="Añadir amigos"
-                  className="hidden md:flex items-center justify-center"
-                  style={{
-                    width: 38, height: 38, borderRadius: 10,
-                    background: 'var(--surface)', border: '1px solid var(--border)',
-                    color: 'var(--text-2)',
-                  }}
-                >
+                <motion.button onClick={() => navigate('/guild')} whileTap={{ scale: 0.96 }} title="Añadir amigos" className="flex items-center justify-center" style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   <UserPlus size={16} />
                 </motion.button>
-
                 <NotificationBell />
-
-                <motion.button
-                  className="flex items-center justify-center"
-                  onClick={toggleAudio}
-                  whileTap={{ scale: 0.96 }}
-                  title={audioEnabled ? 'Silenciar audio' : 'Activar audio'}
-                  style={{
-                    width: 38, height: 38, borderRadius: 10,
-                    background: 'var(--surface)', border: '1px solid var(--border)',
-                    color: 'var(--text-2)',
-                  }}
-                >
+                <motion.button className="flex items-center justify-center" onClick={toggleAudio} whileTap={{ scale: 0.96 }} title={audioEnabled ? 'Silenciar audio' : 'Activar audio'} style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} className="text-red-400" />}
                 </motion.button>
-
-                {/* sabiduría CTA */}
-                <motion.button
-                  onClick={() => navigate('/wisdom')}
-                  whileTap={{ scale: 0.97 }}
-                  className="hidden lg:flex items-center gap-2"
-                  style={{
-                    height: 38, padding: '0 14px',
-                    background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-                    color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                    boxShadow: '0 6px 18px rgba(139,92,246,.35)',
-                  }}
-                >
-                  <Sparkles size={15} />
-                  Sabiduría
+                <motion.button onClick={() => navigate('/wisdom')} whileTap={{ scale: 0.97 }} className="hidden lg:flex items-center gap-2" style={{ height: 38, padding: '0 14px', background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(139,92,246,.35)' }}>
+                  <Sparkles size={15} />Sabiduría
                 </motion.button>
-
-                <motion.button
-                  onClick={handleLogout}
-                  whileTap={{ scale: 0.96 }}
-                  className="hidden md:block text-[12px] font-semibold"
-                  style={{
-                    padding: '0 14px', height: 38, borderRadius: 10,
-                    background: 'var(--surface)', border: '1px solid var(--border)',
-                    color: 'var(--text-2)',
-                  }}
-                >
+                <motion.button onClick={handleLogout} whileTap={{ scale: 0.96 }} className="text-[12px] font-semibold" style={{ padding: '0 14px', height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   Salir
                 </motion.button>
-
-                {/* invisible xp sparkles trigger */}
                 <span className="hidden"><XPSparkles trigger={xpSparkTrigger} /></span>
               </>
             )}
