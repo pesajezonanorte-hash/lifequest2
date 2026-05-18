@@ -80,7 +80,13 @@ export default function RegisterPage() {
 
             <div className="flex items-center gap-4 rounded-3xl border border-[var(--border)] bg-[var(--bg-panel-light)] px-5 py-4">
               <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white">
-                <MiguelSprite size={64} hairColor={hairColor} shirtColor={shirtColor} animate="idle" />
+                <MiguelSprite
+                  size={64}
+                  bodyType={gender}
+                  hairColor={hairColor}
+                  shirtColor={shirtColor}
+                  animate="idle"
+                />
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Vista Previa</p>
