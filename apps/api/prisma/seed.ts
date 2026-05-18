@@ -1,119 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Sembrando base de datos (nivel 1 desde cero)...');
+  console.log('🌱 Inicializando base de datos limpia...');
 
-  const passwordHash = await bcrypt.hash('test1234', 12);
-
-  const miguel = await prisma.user.upsert({
-    where: { email: 'miguel@lifequest.com' },
-    update: {
-      level: 1,
-      xp: 0,
-      xpToNextLevel: 100,
-      gold: 0,
-      hp: 100,
-      maxHp: 100,
-      mp: 100,
-      maxMp: 100,
-      strength: 1,
-      intelligence: 1,
-      charisma: 1,
-      onboardingCompleted: false,
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActivityDate: null,
-      playerClass: null,
-      activeTheme: 'aurora',
-    },
-    create: {
-      email: 'miguel@lifequest.com',
-      username: 'miguel_romero',
-      passwordHash,
-      displayName: 'Miguel Ángel',
-      level: 1,
-      xp: 0,
-      xpToNextLevel: 100,
-      gold: 0,
-      hp: 100,
-      maxHp: 100,
-      mp: 100,
-      maxMp: 100,
-      strength: 1,
-      intelligence: 1,
-      charisma: 1,
-      onboardingCompleted: false,
-      currentStreak: 0,
-      longestStreak: 0,
-      avatarConfig: {
-        hairColor: '#2c1810',
-        skinColor: '#c68642',
-        shirtColor: '#4d96ff',
-        pants: '#37474f',
-        accessory: null,
-        pet: null,
-      },
-      timezone: 'America/Bogota',
-      currency: 'COP',
-      language: 'es',
-      relationshipStatus: 'SINGLE',
-    },
-  });
-
-  console.log('✅ Usuario miguel creado:', miguel.email);
-
-  // Limpiar todos los datos de usuario
-  await prisma.notification.deleteMany({ where: { userId: miguel.id } });
-  await prisma.notificationPreferences.deleteMany({ where: { userId: miguel.id } });
-  await prisma.pushSubscription.deleteMany({ where: { userId: miguel.id } });
-  await prisma.userAchievement.deleteMany({ where: { userId: miguel.id } });
-  await prisma.questCompletion.deleteMany({ where: { userId: miguel.id } });
-  await prisma.quest.deleteMany({ where: { userId: miguel.id } });
-  await prisma.habitLog.deleteMany({ where: { userId: miguel.id } });
-  await prisma.habit.deleteMany({ where: { userId: miguel.id } });
-  await prisma.xpEvent.deleteMany({ where: { userId: miguel.id } });
-  await prisma.workoutExercise.deleteMany({ where: { workout: { userId: miguel.id } } });
-  await prisma.workout.deleteMany({ where: { userId: miguel.id } });
-  await prisma.bodyWeight.deleteMany({ where: { userId: miguel.id } });
-  await prisma.progressPhoto.deleteMany({ where: { userId: miguel.id } });
-  await prisma.sleepLog.deleteMany({ where: { userId: miguel.id } });
-  await prisma.transaction.deleteMany({ where: { userId: miguel.id } });
-  await prisma.recurringTransaction.deleteMany({ where: { userId: miguel.id } });
-  await prisma.debtPayment.deleteMany({ where: { debt: { userId: miguel.id } } });
-  await prisma.debt.deleteMany({ where: { userId: miguel.id } });
-  await prisma.budget.deleteMany({ where: { userId: miguel.id } });
-  await prisma.financialGoal.deleteMany({ where: { userId: miguel.id } });
-  await prisma.journalEntry.deleteMany({ where: { userId: miguel.id } });
-  await prisma.meal.deleteMany({ where: { userId: miguel.id } });
-  await prisma.nutritionGoal.deleteMany({ where: { userId: miguel.id } });
-  await prisma.savedMeal.deleteMany({ where: { userId: miguel.id } });
-  await prisma.learningItem.deleteMany({ where: { userId: miguel.id } });
-  await prisma.relationship.deleteMany({ where: { userId: miguel.id } });
-  await prisma.giftIdea.deleteMany({ where: { userId: miguel.id } });
-  await prisma.inventoryItem.deleteMany({ where: { userId: miguel.id } });
-  await prisma.goalMilestone.deleteMany({ where: { goal: { userId: miguel.id } } });
-  await prisma.masterGoal.deleteMany({ where: { userId: miguel.id } });
-  await prisma.ritualStep.deleteMany({ where: { ritual: { userId: miguel.id } } });
-  await prisma.ritual.deleteMany({ where: { userId: miguel.id } });
-  await prisma.ritualLog.deleteMany({ where: { userId: miguel.id } });
-  await prisma.dailyCheckin.deleteMany({ where: { userId: miguel.id } });
-  await prisma.sageMemory.deleteMany({ where: { userId: miguel.id } });
-  await prisma.sageInsight.deleteMany({ where: { userId: miguel.id } });
-  await prisma.sageScroll.deleteMany({ where: { userId: miguel.id } });
-  await prisma.agendaEvent.deleteMany({ where: { userId: miguel.id } });
-  await prisma.focusSession.deleteMany({ where: { userId: miguel.id } });
-  await prisma.seasonParticipant.deleteMany({ where: { userId: miguel.id } });
-  await prisma.challengeParticipant.deleteMany({ where: { userId: miguel.id } });
-  await prisma.guildMember.deleteMany({ where: { userId: miguel.id } });
-  await prisma.guildMessage.deleteMany({ where: { userId: miguel.id } });
-  await prisma.friendship.deleteMany({ where: { OR: [{ requesterId: miguel.id }, { receiverId: miguel.id }] } });
-
-  console.log('✅ Datos de usuario limpiados');
-
-  // ─── 30 Achievements (catálogo solamente, sin desbloquear ninguno) ──────────
+  // ─── 30 Achievements (catálogo solamente) ────────────────────────────────────
   const achievementDefs = [
     { key: 'first_login',         title: '¡El Héroe Despierta!',      description: 'Iniciaste sesión por primera vez',                          icon: '🌅', category: 'special',  xpReward: 50,   progressType: null,                   progressTarget: null },
     { key: 'first_quest',         title: 'Primera Sangre',            description: 'Completaste tu primera misión',                             icon: '🗡️', category: 'quest',    xpReward: 50,   progressType: 'quest_count',          progressTarget: 1 },
@@ -211,7 +103,7 @@ async function main() {
     { name: 'Plancha',                       muscleGroup: 'Core',     equipment: 'Peso Corporal' },
     { name: 'Crunches',                      muscleGroup: 'Core',     equipment: 'Peso Corporal' },
     { name: 'Elevación de Piernas',          muscleGroup: 'Core',     equipment: 'Peso Corporal' },
-    { name: 'Russian Twists',               muscleGroup: 'Core',     equipment: 'Peso Corporal' },
+    { name: 'Russian Twists',                muscleGroup: 'Core',     equipment: 'Peso Corporal' },
     { name: 'Carrera en Cinta',              muscleGroup: 'Cardio',   equipment: 'Máquina' },
     { name: 'Bicicleta Estática',            muscleGroup: 'Cardio',   equipment: 'Máquina' },
     { name: 'Remo Ergómetro',                muscleGroup: 'Cardio',   equipment: 'Máquina' },
@@ -228,114 +120,38 @@ async function main() {
   }
   console.log(`✅ ${exerciseDefs.length} ejercicios en catálogo`);
 
-  // ─── Rutinas predefinidas para Miguel ────────────────────────────────────────
-  const routineDefs = [
-    {
-      name: 'Push — Empuje',
-      description: 'Pecho, hombros y tríceps',
-      exercises: [
-        { name: 'Press de Banca',                sets: 4, reps: 8  },
-        { name: 'Press Inclinado con Mancuernas', sets: 3, reps: 10 },
-        { name: 'Press Militar',                  sets: 3, reps: 10 },
-        { name: 'Elevaciones Laterales',          sets: 3, reps: 15 },
-        { name: 'Extensión de Tríceps Polea',     sets: 3, reps: 12 },
-        { name: 'Press Francés',                  sets: 3, reps: 10 },
-      ],
-    },
-    {
-      name: 'Pull — Jalón',
-      description: 'Espalda y bíceps',
-      exercises: [
-        { name: 'Dominadas',           sets: 4, reps: 8  },
-        { name: 'Remo con Barra',      sets: 4, reps: 8  },
-        { name: 'Jalón al Pecho',      sets: 3, reps: 12 },
-        { name: 'Curl con Barra',      sets: 3, reps: 10 },
-        { name: 'Curl Martillo',       sets: 3, reps: 12 },
-      ],
-    },
-    {
-      name: 'Legs — Piernas',
-      description: 'Cuádriceps, isquios y gemelos',
-      exercises: [
-        { name: 'Sentadilla',               sets: 4, reps: 8  },
-        { name: 'Prensa de Piernas',        sets: 3, reps: 12 },
-        { name: 'Zancadas',                 sets: 3, reps: 12 },
-        { name: 'Curl de Isquiotibiales',   sets: 3, reps: 12 },
-        { name: 'Elevación de Gemelos',     sets: 4, reps: 20 },
-      ],
-    },
-    {
-      name: 'Full Body',
-      description: 'Cuerpo completo en una sesión',
-      exercises: [
-        { name: 'Sentadilla',      sets: 3, reps: 10 },
-        { name: 'Press de Banca',  sets: 3, reps: 10 },
-        { name: 'Peso Muerto',     sets: 3, reps: 8  },
-        { name: 'Press Militar',   sets: 3, reps: 10 },
-        { name: 'Dominadas',       sets: 3, reps: 8  },
-        { name: 'Plancha',         sets: 3, reps: 1  },
-      ],
-    },
-  ];
-
-  // Look up exercise IDs for the routines
-  const exerciseMap = new Map<string, string>();
-  const allExercises = await prisma.exercise.findMany({ select: { id: true, name: true } });
-  for (const e of allExercises) exerciseMap.set(e.name, e.id);
-
-  for (const r of routineDefs) {
-    const existing = await prisma.routine.findFirst({ where: { userId: miguel.id, name: r.name } });
-    if (!existing) {
-      await prisma.routine.create({
-        data: {
-          userId: miguel.id,
-          name: r.name,
-          description: r.description,
-          exercises: r.exercises.map(e => ({
-            exerciseId: exerciseMap.get(e.name) ?? '',
-            name: e.name,
-            sets: e.sets,
-            reps: e.reps,
-          })) as import('@prisma/client').Prisma.JsonArray,
-          targetDays: [] as import('@prisma/client').Prisma.JsonArray,
-          estimatedDuration: Math.round(r.exercises.reduce((a, e) => a + e.sets * 2.5, 0)),
-        },
-      });
-    }
-  }
-  console.log(`✅ ${routineDefs.length} rutinas predefinidas para Miguel`);
-
   // ─── Temporada inicial ───────────────────────────────────────────────────────
-  const existingSeason = await prisma.season.findFirst({ where: { isActive: true } });
-  if (!existingSeason) {
-    const now = new Date();
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    await prisma.season.create({
-      data: {
-        name:        'La Temporada del Hierro',
-        description: 'El Dragón de la Pereza acecha el reino. ¡Únanse héroes para derrotarlo!',
-        bossName:    'El Dragón de la Pereza',
-        bossHp:      1_000_000,
-        currentHp:   1_000_000,
-        startDate:   now,
-        endDate,
-        isActive:    true,
-        rewards:     [{ type: 'gold', amount: 500 }, { type: 'xp', amount: 1000 }] as import('@prisma/client').Prisma.JsonArray,
-      },
-    });
-    console.log('✅ Temporada inicial creada: El Dragón de la Pereza (1,000,000 HP)');
-  } else {
-    console.log('✅ Temporada activa ya existe:', existingSeason.bossName);
-  }
+  const now = new Date();
+  const seasonEnd = new Date(now);
+  seasonEnd.setMonth(seasonEnd.getMonth() + 1);
 
-  console.log('');
-  console.log('🎉 Seed completo — Usuario en nivel 1 desde cero:');
-  console.log('   Email: miguel@lifequest.com');
-  console.log('   Password: test1234');
-  console.log('   Nivel: 1 | XP: 0/100 | Gold: 0 | Racha: 0 días');
-  console.log('   onboardingCompleted: false → irá al onboarding');
+  await prisma.season.upsert({
+    where: { id: 'season_iron' },
+    update: { bossHp: 1_000_000, currentHp: 1_000_000 },
+    create: {
+      id: 'season_iron',
+      name: 'La Temporada del Hierro',
+      description: 'Primera temporada global. Todos contra un enemigo épico.',
+      bossName: 'Rey del Hierro',
+      bossHp: 1_000_000,
+      currentHp: 1_000_000,
+      startDate: now,
+      endDate: seasonEnd,
+    },
+  });
+
+  console.log('✅ Temporada "La Temporada del Hierro" lista (1M HP)');
+
+  console.log('\n🎉 Base de datos limpia e inicializada correctamente!');
 }
 
 main()
-  .catch((e) => { console.error('❌ Error en seed:', e); process.exit(1); })
-  .finally(async () => { await prisma.$disconnect(); });
+  .then(async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  })
+  .catch(async (e) => {
+    console.error('❌ Error en seed:', e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
