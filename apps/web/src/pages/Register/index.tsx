@@ -31,6 +31,7 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
   const [apiError, setApiError] = useState('');
+  const [gender, setGender] = useState<'male' | 'female'>('male');
   const [hairColor, setHairColor] = useState('#2c1810');
   const [shirtColor, setShirtColor] = useState('#3b82f6');
 
@@ -90,6 +91,26 @@ export default function RegisterPage() {
           </div>
 
           <div className="mb-8 grid gap-4 rounded-3xl border border-[var(--border)] bg-[var(--bg-panel-light)] p-5 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)] mb-3">¿Eres héroe o heroína?</p>
+              <div className="flex gap-3">
+                {(['male', 'female'] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={`flex-1 py-3 border-2 font-vt text-lg transition-colors rounded ${
+                      gender === g
+                        ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10 text-[var(--accent-gold)]'
+                        : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                    }`}
+                  >
+                    {g === 'male' ? '⚔️ Héroe' : '🗡️ Heroína'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Color de cabello</p>
               <div className="mt-3 flex gap-2">
@@ -163,6 +184,7 @@ export default function RegisterPage() {
               icon={<Lock size={16} />}
               error={errors.password?.message}
               autoComplete="new-password"
+              maxLength={128}
               {...register('password')}
             />
 
@@ -173,6 +195,7 @@ export default function RegisterPage() {
               icon={<Lock size={16} />}
               error={errors.confirm?.message}
               autoComplete="new-password"
+              maxLength={128}
               {...register('confirm')}
             />
 

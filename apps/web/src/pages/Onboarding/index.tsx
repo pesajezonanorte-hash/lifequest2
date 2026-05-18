@@ -44,7 +44,8 @@ function save(state: Partial<OnboardingState>) {
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuthStore();
-  const saved = loadSaved();
+  // Reset progress if onboarding was never completed (prevents stale state)
+  const saved = user?.displayName && !user?.onboardingCompleted ? {} : loadSaved();
 
   const [step, setStep] = useState(saved.step ?? 0);
   const [displayName, setDisplayName] = useState(saved.displayName ?? user?.displayName ?? '');
