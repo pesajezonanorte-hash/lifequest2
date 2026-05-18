@@ -204,17 +204,19 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape' && !started) onClose();
     }
-
     window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [started, onClose]);
+
+  useEffect(() => {
     return () => {
-      window.removeEventListener('keydown', onKeyDown);
       clearInterval(intervalRef.current!);
       ambientControllerRef.current?.stop();
       ambientControllerRef.current = null;
       audioContextRef.current?.close().catch(() => null);
       audioContextRef.current = null;
     };
-  }, [started, onClose]);
+  }, []);
 
   useEffect(() => {
     ambientControllerRef.current?.setVolume(ambientVolume / 100);
@@ -308,7 +310,7 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
       addFloatingXP(result.xpEarned, window.innerWidth / 2, window.innerHeight / 2);
       toast.success(result.message);
     } catch {
-      toast.error('Error registrando sesiÃ³n');
+      toast.error('Error registrando sesión');
     } finally {
       setSaving(false);
       onClose();
@@ -364,7 +366,7 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
           {!started && (
             <input
               className="w-full rounded-xl bg-white/5 border border-[var(--border)] px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
-              placeholder="Â¿En quÃ© te vas a enfocar? (opcional)"
+              placeholder="¿En qué te vas a enfocar? (opcional)"
               value={task}
               onChange={(e) => setTask(e.target.value)}
             />
@@ -374,7 +376,7 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-[var(--text-primary)]">Ambiente relajante</p>
-                <p className="text-xs text-[var(--text-muted)]">Puedes dejarlo sonando durante tu sesiÃ³n</p>
+                <p className="text-xs text-[var(--text-muted)]">Puedes dejarlo sonando durante tu sesión</p>
               </div>
               <span className="text-xs font-semibold" style={{ color: preset.color }}>
                 {AMBIENT_SOUNDS.find((item) => item.id === ambientSound)?.label}
@@ -436,8 +438,8 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 {done ? (
                   <div className="text-center">
-                    <div className="text-5xl mb-2">ðŸŽ‰</div>
-                    <p className="text-lg font-bold" style={{ color: preset.color }}>Â¡Completado!</p>
+                    <div className="text-5xl mb-2">🎉</div>
+                    <p className="text-lg font-bold" style={{ color: preset.color }}>¡Completado!</p>
                   </div>
                 ) : (
                   <>
@@ -460,7 +462,7 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
                 className="flex-1 py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2"
                 style={{ background: preset.color, color: 'var(--bg-deep)' }}
               >
-                {saving ? 'Guardando...' : <><Zap size={16} /> +XP â€” Guardar sesiÃ³n</>}
+                {saving ? 'Guardando...' : <><Zap size={16} /> +XP – Guardar sesión</>}
               </motion.button>
             ) : !started ? (
               <motion.button
