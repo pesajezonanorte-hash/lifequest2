@@ -105,8 +105,14 @@ export function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="absolute right-0 top-10 w-80 rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] shadow-xl z-50 overflow-hidden"
+            className="absolute right-0 w-80 max-w-[calc(100vw-1rem)] rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] shadow-2xl z-[100] overflow-hidden"
+            style={{ top: 'calc(100% + 8px)', boxShadow: '0 12px 32px rgba(0,0,0,0.35)' }}
           >
+            {/* Arrow indicator pointing to the bell */}
+            <div
+              className="absolute -top-1.5 right-3 w-3 h-3 rotate-45 border-l border-t border-[var(--border)] bg-[var(--bg-panel)]"
+              aria-hidden
+            />
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
               <span className="font-semibold text-sm text-[var(--text-primary)]">Notificaciones</span>

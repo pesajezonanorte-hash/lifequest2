@@ -28,11 +28,6 @@ async function main() {
       lastActivityDate: null,
       playerClass: null,
       activeTheme: 'aurora',
-      spotifyAccessToken: null,
-      spotifyRefreshToken: null,
-      googleAccessToken: null,
-      googleRefreshToken: null,
-      googleFitConnected: false,
     },
     create: {
       email: 'miguel@lifequest.com',

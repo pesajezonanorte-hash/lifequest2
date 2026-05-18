@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Swords, Flame, Music, NotebookPen, Check } from 'lucide-react';
+import { Swords, Flame, NotebookPen, Check } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 interface Step {
@@ -15,10 +15,9 @@ interface Props {
   questCount: number;
   habitCount: number;
   hasJournalEntry: boolean;
-  spotifyConnected: boolean;
 }
 
-export function FirstStepsWidget({ questCount, habitCount, hasJournalEntry, spotifyConnected }: Props) {
+export function FirstStepsWidget({ questCount, habitCount, hasJournalEntry }: Props) {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
@@ -26,7 +25,6 @@ export function FirstStepsWidget({ questCount, habitCount, hasJournalEntry, spot
     { icon: <Swords size={16} />, label: 'Crea tu primera quest', hint: 'Misiones', to: '/quests', done: questCount > 0 },
     { icon: <Flame size={16} />, label: 'Configura un hábito', hint: 'Hábitos', to: '/habits', done: habitCount > 0 },
     { icon: <NotebookPen size={16} />, label: 'Escribe en el diario', hint: 'Diario', to: '/journal', done: hasJournalEntry },
-    { icon: <Music size={16} />, label: 'Conecta Spotify', hint: 'Integraciones', to: '/settings/integrations', done: spotifyConnected },
   ];
 
   const doneCount = steps.filter((s) => s.done).length;

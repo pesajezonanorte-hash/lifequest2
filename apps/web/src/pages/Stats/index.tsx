@@ -14,6 +14,7 @@ import type { LifeScore } from '../../services/lifescore.service';
 import { getCheckinHistory } from '../../services/checkin.service';
 import type { DailyCheckin } from '../../services/checkin.service';
 import { useAuthStore } from '../../store/authStore';
+import { ProgressRings } from '../../components/ui/ProgressRings';
 
 type Period = 'week' | 'month' | '3months' | 'year';
 const PERIODS: { id: Period; label: string }[] = [
@@ -23,78 +24,41 @@ const PERIODS: { id: Period; label: string }[] = [
   { id: 'year', label: 'Año' },
 ];
 
-// ─── Apple Watch Rings ─────────────────────────────────────────────────────
-
-function WatchRing({
-  pct, color, size, strokeWidth, label, value,
-}: {
-  pct: number; color: string; size: number; strokeWidth: number; label: string; value: string;
-}) {
-  const r = (size - strokeWidth * 2) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - Math.min(pct / 100, 1) * circ;
-  const cx = size / 2;
-  return (
-    <g>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke={color + '22'} strokeWidth={strokeWidth} />
-      <motion.circle
-        cx={cx} cy={cx} r={r}
-        fill="none" stroke={color} strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeDasharray={circ}
-        initial={{ strokeDashoffset: circ }}
-        animate={{ strokeDashoffset: offset }}
-        transition={{ duration: 1.4, ease: [0.4, 0, 0.2, 1] }}
-        transform={`rotate(-90 ${cx} ${cx})`}
-      />
-    </g>
-  );
-}
+// ─── Life Score Rings (Apple Watch style, concentric, completos) ───────────
 
 function LifeScoreRings({ score }: { score: LifeScore }) {
   const SIZE = 200;
-  const rings = [
-    { key: 'quests', label: 'Misiones', color: 'var(--accent-pink)', size: SIZE, sw: 14 },
-    { key: 'habits', label: 'Hábitos', color: 'var(--accent-cyan)', size: SIZE - 32, sw: 14 },
-    { key: 'finance', label: 'Finanzas', color: 'var(--accent-gold)', size: SIZE - 64, sw: 14 },
-  ];
   const bd = score.breakdown as Record<string, number>;
-  const questsPct = bd.quests ?? bd.missions ?? 0;
-  const habitsPct = bd.habits ?? bd.discipline ?? 0;
-  const financePct = bd.finance ?? bd.finances ?? 0;
-  const values = [questsPct, habitsPct, financePct];
+  const questsPct = Math.round(bd.quests ?? bd.missions ?? 0);
+  const habitsPct = Math.round(bd.habits ?? bd.discipline ?? 0);
+  const financePct = Math.round(bd.finance ?? bd.finances ?? 0);
+
+  const legend = [
+    { label: 'Misiones', color: '#ff5e8a', value: questsPct },
+    { label: 'Hábitos',  color: '#48dbfb', value: habitsPct },
+    { label: 'Finanzas', color: '#ffd23f', value: financePct },
+  ];
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative">
-        <svg width={SIZE} height={SIZE}>
-          {rings.map((r, i) => (
-            <WatchRing key={r.key} pct={values[i]} color={r.color} size={r.size} strokeWidth={r.sw}
-              label={r.label} value={`${values[i]}%`}
-            />
-          ))}
-          <motion.text
-            x={SIZE / 2} y={SIZE / 2 - 10}
-            textAnchor="middle" fill="var(--text-primary)"
-            style={{ fontSize: 42, fontWeight: 800 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-          >
-            {score.total}
-          </motion.text>
-          <text x={SIZE / 2} y={SIZE / 2 + 18} textAnchor="middle" fill="var(--text-muted)" style={{ fontSize: 13 }}>
-            Life Score
-          </text>
-        </svg>
-      </div>
-
-      <div className="flex gap-4 mt-3">
-        {rings.map((r, i) => (
-          <div key={r.key} className="flex items-center gap-1.5 text-xs">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: r.color }} />
-            <span className="text-[var(--text-muted)]">{r.label}</span>
-            <span className="font-semibold" style={{ color: r.color }}>{values[i]}%</span>
+      <ProgressRings
+        size={SIZE}
+        stroke={14}
+        gap={4}
+        centerLabel={score.total}
+        centerSubLabel="Life Score"
+        rings={[
+          { progress: questsPct,  color: '#ff5e8a' },
+          { progress: habitsPct,  color: '#48dbfb' },
+          { progress: financePct, color: '#ffd23f' },
+        ]}
+      />
+      <div className="flex gap-4 mt-3 flex-wrap justify-center">
+        {legend.map((l) => (
+          <div key={l.label} className="flex items-center gap-1.5 text-xs">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: l.color }} />
+            <span className="text-[var(--text-muted)]">{l.label}</span>
+            <span className="font-semibold" style={{ color: l.color }}>{l.value}%</span>
           </div>
         ))}
       </div>

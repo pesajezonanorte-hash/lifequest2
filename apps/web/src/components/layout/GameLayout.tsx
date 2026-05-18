@@ -23,7 +23,6 @@ import { CommandPalette } from '../ui/CommandPalette';
 import { NotificationBell } from '../ui/NotificationPanel';
 import { ScrollToTop } from '../ui/ScrollToTop';
 import { OfflineIndicator } from '../ui/OfflineIndicator';
-import { SpotifyPlayer } from '../spotify/SpotifyPlayer';
 import { QuickActionsFAB } from '../ui/QuickActionsFAB';
 
 interface NavItem {
@@ -192,16 +191,6 @@ export function GameLayout({ children }: Props) {
   const { toggleAudio, audioEnabled, xpSparkTrigger } = useUIStore();
   const navigate = useNavigate();
   const [showFocus, setShowFocus] = useState(false);
-  const [spotifyConnected, setSpotifyConnected] = useState(false);
-
-  useEffect(() => {
-    import('../../lib/api').then(({ default: api }) => {
-      api.get<{ spotify: boolean }>('/integrations/status')
-        .then((r) => setSpotifyConnected(r.data.spotify))
-        .catch(() => null);
-    });
-  }, []);
-
   async function handleLogout() {
     try {
       await authService.logout();
@@ -353,10 +342,6 @@ export function GameLayout({ children }: Props) {
                   <kbd className="bg-[var(--bg-deep)] px-1.5 py-0.5 rounded text-[10px] border border-[var(--border)]">⌃K</kbd>
                 </button>
                 <GoldCounter gold={user.gold} />
-                
-                {/* Spotify Player */}
-                <SpotifyPlayer connected={spotifyConnected} />
-
                 {/* Add Friends Button */}
                 <motion.button
                   onClick={() => navigate('/guild')}

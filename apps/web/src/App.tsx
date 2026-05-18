@@ -33,7 +33,6 @@ const ChallengesPage   = lazy(() => import('./pages/Challenges'));
 const GuildPage        = lazy(() => import('./pages/Guild'));
 const StatsPage        = lazy(() => import('./pages/Stats'));
 const SeasonPage       = lazy(() => import('./pages/Season'));
-const IntegrationsPage = lazy(() => import('./pages/Settings/Integrations'));
 const AgendaPage       = lazy(() => import('./pages/Agenda'));
 const LifePage         = lazy(() => import('./pages/Life'));
 const GoalsPage        = lazy(() => import('./pages/Goals'));
@@ -109,7 +108,6 @@ function AnimatedRoutes() {
           <Route path="/guild"        element={<GuildPage />} />
           <Route path="/stats"                    element={<StatsPage />} />
           <Route path="/season"                   element={<SeasonPage />} />
-          <Route path="/settings/integrations"    element={<IntegrationsPage />} />
           <Route path="/agenda"                   element={<AgendaPage />} />
           <Route path="/life"                     element={<LifePage />} />
           <Route path="/goals"                    element={<GoalsPage />} />
@@ -128,11 +126,9 @@ function AnimatedRoutes() {
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuthStore();
   const pathname = window.location.pathname;
-  const isIntegrationRoute = pathname === '/settings/integrations';
-  
   if (isLoading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user && !user.onboardingCompleted && pathname !== '/onboarding' && !isIntegrationRoute) {
+  if (user && !user.onboardingCompleted && pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }
   return <>{children}</>;

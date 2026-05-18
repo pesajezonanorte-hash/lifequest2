@@ -7,7 +7,6 @@ import { useToast } from '../../hooks/useToast';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import * as userService from '../../services/user.service';
-import IntegrationsPage from './Integrations';
 import api from '../../lib/api';
 
 const THEMES = [
@@ -58,7 +57,10 @@ export default function SettingsPage() {
   const [timezone, setTimezone] = useState(user?.timezone ?? 'America/Bogota');
   const [gymPlaylistUrl, setGymPlaylistUrl] = useState(user?.gymPlaylistUrl ?? '');
   const [saving, setSaving] = useState(false);
-  const [section, setSection] = useState<'profile' | 'game' | 'integrations' | 'datos' | 'about'>('profile');
+
+  const validSections = ['profile', 'game', 'datos', 'about'] as const;
+  type Section = typeof validSections[number];
+  const [section, setSection] = useState<Section>('profile');
   const [themeLoading, setThemeLoading] = useState<string | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
   const activeTheme = (user as any)?.activeTheme ?? 'aurora';
@@ -144,7 +146,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex gap-1 overflow-x-auto pb-1">
-        {[['profile', '👤 Perfil'], ['game', '🎮 Juego'], ['integrations', '🔗 Integraciones'], ['datos', '💾 Tus Datos'], ['about', 'ℹ️ Acerca de']].map(([key, label]) => (
+        {[['profile', '👤 Perfil'], ['game', '🎮 Juego'], ['datos', '💾 Tus Datos'], ['about', 'ℹ️ Acerca de']].map(([key, label]) => (
           <button key={key} onClick={() => setSection(key as typeof section)} className={`flex-shrink-0 px-3 py-1.5 border-2 font-pixel transition-all ${section === key ? 'border-accent-gold bg-accent-gold text-bg-deep' : 'border-border-pixel text-text-secondary'}`} style={{ fontSize: '8px' }}>
             {label}
           </button>
@@ -292,16 +294,23 @@ export default function SettingsPage() {
                 </motion.button>
               )}
             </div>
+            {gymPlaylistUrl && extractSpotifyId(gymPlaylistUrl) && (
+              <iframe
+                title="Spotify playlist preview"
+                src={`https://open.spotify.com/embed/playlist/${extractSpotifyId(gymPlaylistUrl)}?theme=0`}
+                width="100%"
+                height={152}
+                frameBorder={0}
+                allow="encrypted-media"
+                style={{ borderRadius: 12, marginTop: 8 }}
+              />
+            )}
           </div>
 
           <PixelButton variant="primary" onClick={saveProfile} disabled={saving}>
             {saving ? 'Guardando...' : 'GUARDAR'}
           </PixelButton>
         </PixelPanel>
-      )}
-
-      {section === 'integrations' && (
-        <IntegrationsPage />
       )}
 
       {section === 'datos' && (

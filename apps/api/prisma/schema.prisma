@@ -110,12 +110,6 @@ model User {
 
   gymPlaylistUrl     String?
 
-  googleAccessToken  String?
-  googleRefreshToken String?
-  spotifyAccessToken String?
-  spotifyRefreshToken String?
-  googleFitConnected Boolean  @default(false)
-
   playerClass    String?
   classChosenAt  DateTime?
   activeTheme    String   @default("aurora")

@@ -131,8 +131,6 @@ export default function DashboardPage() {
   const [showBriefing, setShowBriefing] = useState(false);
   const [lifeScore, setLifeScore] = useState<LifeScore | null>(null);
   const [showClassModal, setShowClassModal] = useState(false);
-  const [spotifyConnected, setSpotifyConnected] = useState(false);
-
   useEffect(() => {
     fetchDashboard()
       .then((data) => {
@@ -143,9 +141,6 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
     fetchUpcoming().then(setUpcomingEvents).catch(() => null);
     fetchLifeScore().then(setLifeScore).catch(() => null);
-    import('../../lib/api').then(({ default: api }) => {
-      api.get<{ spotify: boolean }>('/integrations/status').then((r) => setSpotifyConnected(r.data.spotify)).catch(() => null);
-    });
 
     // Show briefing once per day
     const lastSeen = localStorage.getItem('briefing_seen_date');
@@ -206,7 +201,6 @@ export default function DashboardPage() {
         questCount={dashData?.todayQuests?.length ?? 0}
         habitCount={habits.length}
         hasJournalEntry={false}
-        spotifyConnected={spotifyConnected}
       />
 
       {/* Quick action shortcuts */}

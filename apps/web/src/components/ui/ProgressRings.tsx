@@ -72,22 +72,25 @@ export function ProgressRings({
         </g>
       </svg>
       {(centerLabel !== undefined || centerSubLabel) && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center"
+          style={{ lineHeight: 1 }}
+        >
           {centerLabel !== undefined && (
             <motion.span
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="font-pixel text-[var(--accent-gold)]"
-              style={{ fontSize: size * 0.18, lineHeight: 1 }}
+              className="text-[var(--text-primary)] font-bold tabular-nums"
+              style={{ fontSize: size * 0.26, lineHeight: 1, letterSpacing: '-0.02em' }}
             >
               {centerLabel}
             </motion.span>
           )}
           {centerSubLabel && (
             <span
-              className="font-pixel text-[var(--text-secondary)] mt-1 tracking-wider"
-              style={{ fontSize: Math.max(8, size * 0.045) }}
+              className="text-[var(--text-muted)] uppercase tracking-wider"
+              style={{ fontSize: Math.max(9, size * 0.058), marginTop: size * 0.04, lineHeight: 1 }}
             >
               {centerSubLabel}
             </span>

@@ -159,18 +159,6 @@ export default function LoginPage() {
             </PixelButton>
           </form>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-[var(--border)]" />
-            <span className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)]">O entra en Demo</span>
-            <div className="h-px flex-1 bg-[var(--border)]" />
-          </div>
-
-          <div className="rounded-2xl border border-[var(--border)] bg-gray-900 shadow-md p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Cuenta de prueba</p>
-            <p className="mt-2 text-sm font-medium text-white">miguel@lifequest.com</p>
-            <p className="text-sm text-gray-200">test1234</p>
-          </div>
-
           <p className="mt-6 text-center text-sm text-[var(--text-secondary)]">
             ¿Buscas aventuras?{' '}
             <Link to="/register" className="font-semibold text-[var(--accent-blue)] hover:underline">
