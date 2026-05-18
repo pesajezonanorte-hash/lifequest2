@@ -17,6 +17,34 @@ const HAIR_STYLES_FEMALE: HairStyle[] = ['long', 'short', 'recogido', 'trenzas',
 const ACCESSORIES: Accessory[] = ['none', 'glasses', 'cap', 'headband', 'earrings', 'scarf'];
 const EXPRESSIONS: Expression[] = ['normal', 'smile', 'serious', 'determined'];
 
+const HAIR_STYLE_LABELS: Record<HairStyle, string> = {
+  short: 'Corto',
+  medium: 'Medio',
+  long: 'Largo',
+  shaved: 'Afeitado',
+  copete: 'Copete',
+  afro: 'Afro',
+  recogido: 'Recogido',
+  trenzas: 'Trenzas',
+  ondulado: 'Ondulado',
+};
+
+const ACCESSORY_LABELS: Record<Accessory, string> = {
+  none: 'Ninguno',
+  glasses: 'Gafas',
+  cap: 'Gorro',
+  headband: 'Diadema',
+  earrings: 'Aretes',
+  scarf: 'Bufanda',
+};
+
+const EXPRESSION_LABELS: Record<Expression, string> = {
+  normal: 'Normal',
+  smile: 'Sonriente',
+  serious: 'Serio',
+  determined: 'Decidido',
+};
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -71,20 +99,32 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
             exit={{ opacity: 0, scale: 0.9 }}
           >
             <div className="bg-bg-panel border-4 border-accent-gold shadow-pixel-gold max-w-sm w-full max-h-screen overflow-y-auto">
-              <div className="flex items-center justify-between p-4 border-b-2 border-border-pixel">
-                <h2 className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}>
-                  PERSONALIZAR AVATAR
+              <motion.div className="flex items-center justify-between p-5 border-b-2 border-accent-gold/30 bg-gradient-to-r from-accent-gold/10 to-transparent">
+                <h2 className="font-pixel text-accent-gold tracking-widest" style={{ fontSize: '11px', textShadow: '2px 2px 0 rgba(212, 160, 23, 0.3)' }}>
+                  ✨ PERSONALIZAR ✨
                 </h2>
-                <button onClick={onClose} className="text-text-secondary hover:text-text-primary">
-                  <X size={16} />
-                </button>
-              </div>
+                <motion.button
+                  onClick={onClose}
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="text-text-secondary hover:text-accent-gold transition-colors"
+                >
+                  <X size={18} />
+                </motion.button>
+              </motion.div>
 
-              <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
-                <div className="flex justify-center">
-                  <motion.div key={JSON.stringify(config)} initial={{ scale: 0.9 }} animate={{ scale: 1 }}>
+              <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto">
+                <div className="flex justify-center py-2">
+                  <motion.div
+                    key={JSON.stringify(config)}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className="relative"
+                  >
+                    <div className="absolute inset-0 rounded-2xl" style={{ background: 'radial-gradient(circle at center, rgba(212,160,23,0.1), transparent)' }} />
                     <MiguelSprite
-                      size={100}
+                      size={140}
                       bodyType={config.bodyType}
                       hairStyle={config.hairStyle}
                       hairColor={config.hairColor}
@@ -93,28 +133,30 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
                       pantsColor={config.pants}
                       accessory={config.accessory}
                       expression={config.expression}
-                      animate="idle"
+                      animate="celebrate"
                     />
                   </motion.div>
                 </div>
 
                 <div>
-                  <label className="font-pixel text-text-secondary block mb-1" style={{ fontSize: '7px' }}>
-                    ESTILO DE CABELLO
+                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
+                    ESTILOS DE CABELLO
                   </label>
-                  <div className="grid grid-cols-3 gap-1">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {hairStyles.map((style) => (
-                      <button
+                      <motion.button
                         key={style}
                         onClick={() => update('hairStyle')(style)}
-                        className={`py-0.5 px-1 text-xs font-vt border border-border-pixel transition-colors ${
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
                           config.hairStyle === style
-                            ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                            : 'text-text-secondary hover:border-accent-gold'
+                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
+                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
                         }`}
                       >
-                        {style}
-                      </button>
+                        {HAIR_STYLE_LABELS[style]}
+                      </motion.button>
                     ))}
                   </div>
                 </div>
@@ -125,52 +167,62 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
                 <ColorPicker label="PANTALÓN" value={config.pants} colors={PANTS_COLORS} onChange={update('pants')} />
 
                 <div>
-                  <label className="font-pixel text-text-secondary block mb-1" style={{ fontSize: '7px' }}>
+                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
                     ACCESORIOS
                   </label>
-                  <div className="grid grid-cols-3 gap-1">
+                  <div className="grid grid-cols-3 gap-1.5">
                     {ACCESSORIES.map((acc) => (
-                      <button
+                      <motion.button
                         key={acc}
                         onClick={() => update('accessory')(acc)}
-                        className={`py-0.5 px-1 text-xs font-vt border border-border-pixel transition-colors ${
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
                           config.accessory === acc
-                            ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                            : 'text-text-secondary hover:border-accent-gold'
+                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
+                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
                         }`}
                       >
-                        {acc}
-                      </button>
+                        {ACCESSORY_LABELS[acc]}
+                      </motion.button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="font-pixel text-text-secondary block mb-1" style={{ fontSize: '7px' }}>
+                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
                     EXPRESIÓN
                   </label>
-                  <div className="grid grid-cols-2 gap-1">
+                  <div className="grid grid-cols-2 gap-1.5">
                     {EXPRESSIONS.map((expr) => (
-                      <button
+                      <motion.button
                         key={expr}
                         onClick={() => update('expression')(expr)}
-                        className={`py-0.5 px-1 text-xs font-vt border border-border-pixel transition-colors ${
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
                           config.expression === expr
-                            ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                            : 'text-text-secondary hover:border-accent-gold'
+                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
+                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
                         }`}
                       >
-                        {expr}
-                      </button>
+                        {EXPRESSION_LABELS[expr]}
+                      </motion.button>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-2">
-                  <PixelButton variant="ghost" onClick={onClose} className="flex-1">CANCELAR</PixelButton>
-                  <PixelButton variant="primary" onClick={handleSave} disabled={saving} className="flex-1">
-                    {saving ? 'GUARDANDO...' : 'GUARDAR ✓'}
-                  </PixelButton>
+                <div className="flex gap-3 pt-3 border-t border-border-pixel">
+                  <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <PixelButton variant="ghost" onClick={onClose} className="w-full">
+                      CANCELAR
+                    </PixelButton>
+                  </motion.div>
+                  <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <PixelButton variant="primary" onClick={handleSave} disabled={saving} className="w-full">
+                      {saving ? 'GUARDANDO...' : 'GUARDAR ✨'}
+                    </PixelButton>
+                  </motion.div>
                 </div>
               </div>
             </div>
