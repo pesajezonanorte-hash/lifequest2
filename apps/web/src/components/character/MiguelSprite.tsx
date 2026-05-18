@@ -76,47 +76,45 @@ export function MiguelSprite({
             {/* Female hair styles */}
             {(hairStyle === 'long' || hairStyle === 'ondulado') && (
               <>
-                <rect x="9" y="2" width="14" height="4" fill={hairColor} />
-                <rect x="8" y="4" width="2" height="4" fill={hairColor} />
-                <rect x="22" y="4" width="2" height="4" fill={hairColor} />
-                <rect x="8" y="8" width="2" height="14" fill={hairColor} />
-                <rect x="22" y="8" width="2" height="14" fill={hairColor} />
-                <rect x="10" y="5" width="2" height="2" fill={hairColor} />
-                <rect x="20" y="5" width="2" height="2" fill={hairColor} />
+                <rect x="9" y="1" width="14" height="5" fill={hairColor} />
+                <rect x="8" y="3" width="3" height="6" fill={hairColor} />
+                <rect x="21" y="3" width="3" height="6" fill={hairColor} />
+                <rect x="8" y="8" width="2" height="16" fill={hairColor} />
+                <rect x="22" y="8" width="2" height="16" fill={hairColor} />
               </>
             )}
             {hairStyle === 'short' && (
               <>
-                <rect x="10" y="2" width="12" height="4" fill={hairColor} />
-                <rect x="9"  y="3" width="1"  height="4" fill={hairColor} />
-                <rect x="22" y="3" width="1"  height="4" fill={hairColor} />
-                <rect x="10" y="6" width="2" height="2" fill={hairColor} />
-                <rect x="20" y="6" width="2" height="2" fill={hairColor} />
+                <rect x="10" y="2" width="12" height="5" fill={hairColor} />
+                <rect x="8"  y="3" width="2"  height="4" fill={hairColor} />
+                <rect x="22" y="3" width="2"  height="4" fill={hairColor} />
+                <rect x="10" y="7" width="3" height="1" fill={hairColor} />
+                <rect x="19" y="7" width="3" height="1" fill={hairColor} />
               </>
             )}
             {hairStyle === 'recogido' && (
               <>
-                <rect x="11" y="2" width="10" height="3" fill={hairColor} />
-                <rect x="9" y="3" width="14" height="2" fill={hairColor} />
-                <rect x="12" y="5" width="8" height="1" fill={hairColor} />
-                <rect x="20" y="6" width="2" height="2" fill={hairColor} />
+                <rect x="11" y="1" width="10" height="4" fill={hairColor} />
+                <rect x="9" y="3" width="14" height="3" fill={hairColor} />
+                <rect x="13" y="6" width="6" height="2" fill={hairColor} />
+                <circle cx="19" cy="4" r="2" fill={hairColor} />
               </>
             )}
             {hairStyle === 'trenzas' && (
               <>
-                <rect x="10" y="2" width="12" height="3" fill={hairColor} />
-                <rect x="8" y="5" width="2" height="8" fill={hairColor} />
-                <rect x="22" y="5" width="2" height="8" fill={hairColor} />
-                <rect x="9" y="13" width="2" height="4" fill={hairColor} />
-                <rect x="21" y="13" width="2" height="4" fill={hairColor} />
+                <rect x="10" y="1" width="12" height="4" fill={hairColor} />
+                <rect x="8" y="4" width="3" height="10" fill={hairColor} />
+                <rect x="22" y="4" width="3" height="10" fill={hairColor} />
+                <rect x="9" y="14" width="2" height="3" fill={hairColor} />
+                <rect x="21" y="14" width="2" height="3" fill={hairColor} />
               </>
             )}
             {hairStyle === 'afro' && (
               <>
-                <rect x="6" y="2" width="20" height="6" fill={hairColor} />
-                <rect x="5" y="5" width="22" height="10" fill={hairColor} />
-                <circle cx="10" cy="4" r="3" fill={hairColor} />
-                <circle cx="22" cy="4" r="3" fill={hairColor} />
+                <rect x="5" y="1" width="22" height="7" fill={hairColor} />
+                <rect x="4" y="4" width="24" height="12" fill={hairColor} />
+                <circle cx="9" cy="3" r="3.5" fill={hairColor} />
+                <circle cx="23" cy="3" r="3.5" fill={hairColor} />
               </>
             )}
           </>
@@ -125,39 +123,39 @@ export function MiguelSprite({
             {/* Male hair styles */}
             {(hairStyle === 'short' || hairStyle === 'medium') && (
               <>
-                <rect x="10" y="2" width="12" height="4" fill={hairColor} />
-                <rect x="9"  y="3" width="1"  height="6" fill={hairColor} />
-                <rect x="22" y="3" width="1"  height="6" fill={hairColor} />
-                <rect x="10" y="6" width="2"  height="2" fill={hairColor} />
-                <rect x="20" y="6" width="2"  height="2" fill={hairColor} />
+                <rect x="10" y="1" width="12" height="5" fill={hairColor} />
+                <rect x="8"  y="2" width="2"  height="6" fill={hairColor} />
+                <rect x="22" y="2" width="2"  height="6" fill={hairColor} />
+                <rect x="10" y="6" width="3"  height="2" fill={hairColor} />
+                <rect x="19" y="6" width="3"  height="2" fill={hairColor} />
               </>
             )}
             {hairStyle === 'shaved' && (
               <>
-                <rect x="10" y="3" width="12" height="1" fill={hairColor} />
+                <rect x="10" y="2" width="12" height="2" fill={hairColor} />
               </>
             )}
             {hairStyle === 'copete' && (
               <>
-                <rect x="11" y="1" width="10" height="6" fill={hairColor} />
-                <rect x="9"  y="4" width="14" height="2" fill={hairColor} />
-                <rect x="10" y="6" width="2"  height="1" fill={hairColor} />
-                <rect x="20" y="6" width="2"  height="1" fill={hairColor} />
+                <rect x="11" y="0" width="10" height="7" fill={hairColor} />
+                <rect x="9"  y="3" width="14" height="3" fill={hairColor} />
+                <rect x="10" y="6" width="3"  height="1" fill={hairColor} />
+                <rect x="19" y="6" width="3"  height="1" fill={hairColor} />
               </>
             )}
             {hairStyle === 'long' && (
               <>
-                <rect x="9" y="2" width="14" height="4" fill={hairColor} />
-                <rect x="8" y="4" width="2" height="8" fill={hairColor} />
-                <rect x="22" y="4" width="2" height="8" fill={hairColor} />
+                <rect x="9" y="1" width="14" height="5" fill={hairColor} />
+                <rect x="8" y="3" width="2" height="10" fill={hairColor} />
+                <rect x="22" y="3" width="2" height="10" fill={hairColor} />
               </>
             )}
             {hairStyle === 'afro' && (
               <>
-                <rect x="6" y="2" width="20" height="6" fill={hairColor} />
-                <rect x="5" y="5" width="22" height="10" fill={hairColor} />
-                <circle cx="10" cy="4" r="3" fill={hairColor} />
-                <circle cx="22" cy="4" r="3" fill={hairColor} />
+                <rect x="5" y="1" width="22" height="7" fill={hairColor} />
+                <rect x="4" y="4" width="24" height="12" fill={hairColor} />
+                <circle cx="9" cy="3" r="3.5" fill={hairColor} />
+                <circle cx="23" cy="3" r="3.5" fill={hairColor} />
               </>
             )}
           </>
@@ -249,35 +247,41 @@ export function MiguelSprite({
         {/* Accesorios */}
         {accessory === 'glasses' && (
           <>
-            <rect x="11" y="8" width="2" height="2" fill="none" stroke="#333333" strokeWidth="0.5" />
-            <rect x="19" y="8" width="2" height="2" fill="none" stroke="#333333" strokeWidth="0.5" />
-            <rect x="13" y="9" width="6" height="1" fill="none" stroke="#333333" strokeWidth="0.5" />
+            <circle cx="13" cy="9" r="2" fill="#1a1a1a" />
+            <circle cx="19" cy="9" r="2" fill="#1a1a1a" />
+            <rect x="12" y="8.5" width="2" height="1" fill="#4a90e2" />
+            <rect x="18" y="8.5" width="2" height="1" fill="#4a90e2" />
+            <rect x="15" y="8.5" width="2" height="1" fill="#333333" />
           </>
         )}
         {accessory === 'cap' && (
           <>
-            <rect x="8" y="1" width="16" height="3" fill="#d4a017" />
-            <rect x="9" y="2" width="14" height="2" fill="#c8a000" />
-            <polygon points="8,4 10,6 22,6 24,4" fill="#d4a017" />
+            <rect x="8" y="0" width="16" height="4" fill="#c8a000" />
+            <rect x="9" y="1" width="14" height="2" fill="#d4a017" />
+            <polygon points="8,4 7,6 10,6 22,6 25,6 24,4" fill="#c8a000" />
+            <circle cx="16" cy="2" r="2" fill="#e6c200" />
           </>
         )}
         {accessory === 'headband' && (
           <>
+            <rect x="6" y="4" width="20" height="3" fill="#ff1493" />
             <rect x="7" y="5" width="18" height="2" fill="#ff69b4" />
-            <rect x="8" y="6" width="1" height="1" fill="#c0392b" />
-            <rect x="23" y="6" width="1" height="1" fill="#c0392b" />
+            <circle cx="9" cy="6" r="1" fill="#c0392b" />
+            <circle cx="23" cy="6" r="1" fill="#c0392b" />
           </>
         )}
         {accessory === 'earrings' && (
           <>
-            <rect x="8" y="10" width="1" height="2" fill="#ffd700" />
-            <rect x="23" y="10" width="1" height="2" fill="#ffd700" />
+            <circle cx="8" cy="10" r="1.5" fill="#ffd700" />
+            <circle cx="24" cy="10" r="1.5" fill="#ffd700" />
+            <rect x="7" y="11" width="2" height="2" fill="#ffed4e" />
+            <rect x="23" y="11" width="2" height="2" fill="#ffed4e" />
           </>
         )}
         {accessory === 'scarf' && (
           <>
-            <polygon points="12,17 14,19 18,19 20,17" fill="#e74c3c" />
-            <polygon points="13,18 14,20 18,20 19,18" fill="#c0392b" />
+            <polygon points="12,16 14,18 18,18 20,16 19,18 18,20 14,20 13,18" fill="#e74c3c" />
+            <polygon points="13,17 17,17 17,19 13,19" fill="#c0392b" />
           </>
         )}
       </svg>
