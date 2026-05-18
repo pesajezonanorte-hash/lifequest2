@@ -6,13 +6,15 @@ import { PixelPanel } from '../ui/PixelPanel';
 
 interface Props {
   initialName?: string;
-  onNext: (data: { displayName: string; birthDate: string; timezone: string }) => void;
+  initialGender?: 'male' | 'female';
+  onNext: (data: { displayName: string; birthDate: string; timezone: string; gender: 'male' | 'female' }) => void;
   onBack: () => void;
 }
 
-export function IdentityStep({ initialName = '', onNext, onBack }: Props) {
+export function IdentityStep({ initialName = '', initialGender = 'male', onNext, onBack }: Props) {
   const [name, setName] = useState(initialName);
   const [birthDate, setBirthDate] = useState('');
+  const [gender, setGender] = useState<'male' | 'female'>(initialGender);
   const [timezone] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   const canContinue = name.trim().length > 0;
@@ -34,6 +36,27 @@ export function IdentityStep({ initialName = '', onNext, onBack }: Props) {
       </div>
 
       <PixelPanel className="p-5 space-y-5">
+        <div>
+          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+            ¿ERES HÉROE O HEROÍNA?
+          </label>
+          <div className="flex gap-3">
+            {(['male', 'female'] as const).map((g) => (
+              <button
+                key={g}
+                onClick={() => setGender(g)}
+                className={`flex-1 py-3 border-2 font-vt text-lg transition-colors ${
+                  gender === g
+                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
+                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
+                }`}
+              >
+                {g === 'male' ? '⚔️ Héroe' : '🗡️ Heroína'}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div>
           <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
             ¿CÓMO TE LLAMARÁN EN EL REINO?
@@ -77,7 +100,7 @@ export function IdentityStep({ initialName = '', onNext, onBack }: Props) {
         </PixelButton>
         <PixelButton
           variant="primary"
-          onClick={() => canContinue && onNext({ displayName: name.trim(), birthDate, timezone })}
+          onClick={() => canContinue && onNext({ displayName: name.trim(), birthDate, timezone, gender })}
           disabled={!canContinue}
           className="flex-1"
         >

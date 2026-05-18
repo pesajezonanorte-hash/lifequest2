@@ -20,6 +20,7 @@ interface OnboardingState {
   displayName: string;
   birthDate: string;
   timezone: string;
+  gender: 'male' | 'female';
   avatarConfig: Partial<AvatarConfig>;
   goalCategories: string[];
   mainQuestTitle: string;
@@ -49,6 +50,7 @@ export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState(saved.displayName ?? user?.displayName ?? '');
   const [birthDate, setBirthDate] = useState(saved.birthDate ?? '');
   const [timezone, setTimezone] = useState(saved.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [gender, setGender] = useState<'male' | 'female'>(saved.gender ?? 'male');
   const [avatarConfig, setAvatarConfig] = useState<Partial<AvatarConfig>>(saved.avatarConfig ?? user?.avatarConfig ?? {});
   const [goalCategories, setGoalCategories] = useState<string[]>(saved.goalCategories ?? []);
   const [mainQuestTitle, setMainQuestTitle] = useState(saved.mainQuestTitle ?? '');
@@ -59,16 +61,17 @@ export default function OnboardingPage() {
 
   // Persist progress
   useEffect(() => {
-    save({ step, displayName, birthDate, timezone, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline });
-  }, [step, displayName, birthDate, timezone, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline]);
+    save({ step, displayName, birthDate, timezone, gender, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline });
+  }, [step, displayName, birthDate, timezone, gender, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline]);
 
   const goNext = () => setStep((s) => s + 1);
   const goBack = () => setStep((s) => Math.max(0, s - 1));
 
-  const handleIdentity = (data: { displayName: string; birthDate: string; timezone: string }) => {
+  const handleIdentity = (data: { displayName: string; birthDate: string; timezone: string; gender: 'male' | 'female' }) => {
     setDisplayName(data.displayName);
     setBirthDate(data.birthDate);
     setTimezone(data.timezone);
+    setGender(data.gender);
     goNext();
   };
 
@@ -183,6 +186,7 @@ export default function OnboardingPage() {
               {step === 1 && (
                 <IdentityStep
                   initialName={displayName}
+                  initialGender={gender}
                   onNext={handleIdentity}
                   onBack={goBack}
                 />

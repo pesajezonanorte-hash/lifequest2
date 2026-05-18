@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play, Pause, RotateCcw, Volume2, VolumeX, Zap } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, Zap } from 'lucide-react';
 import { logFocusSession } from '../../services/focus.service';
 import { useUIStore } from '../../store/uiStore';
 import { useToastStore } from '../../hooks/useToast';
@@ -12,32 +12,6 @@ const PRESETS = [
   { label: '90 min', minutes: 90, color: 'var(--accent-green)' },
 ];
 
-const SOUNDS = [
-  { id: 'none', label: 'Silencio', icon: '🔇' },
-  { id: 'rain', label: 'Lluvia', icon: '🌧️' },
-  { id: 'cafe', label: 'Café', icon: '☕' },
-  { id: 'forest', label: 'Bosque', icon: '🌲' },
-];
-
-// Simple oscillator-based ambient sounds (no external files needed)
-function createAmbient(ctx: AudioContext, type: string): AudioNode | null {
-  if (type === 'none') return null;
-  const gainNode = ctx.createGain();
-  gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
-  gainNode.connect(ctx.destination);
-
-  const osc = ctx.createOscillator();
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = type === 'rain' ? 400 : type === 'cafe' ? 800 : 600;
-  filter.Q.value = 0.5;
-  osc.type = 'sawtooth';
-  osc.frequency.value = type === 'rain' ? 80 : type === 'cafe' ? 120 : 60;
-  osc.connect(filter);
-  filter.connect(gainNode);
-  osc.start();
-  return gainNode;
-}
 
 interface Props {
   onClose: () => void;
@@ -52,12 +26,8 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
   const [remaining, setRemaining] = useState(PRESETS[0].minutes * 60);
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
-  const [sound, setSound] = useState('none');
-  const [soundOn, setSoundOn] = useState(false);
   const [task, setTask] = useState(taskLabel ?? '');
   const [saving, setSaving] = useState(false);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const ambientRef = useRef<AudioNode | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { addFloatingXP } = useUIStore();
   const toast = useToastStore();
@@ -75,8 +45,6 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       clearInterval(intervalRef.current!);
-      ambientRef.current = null;
-      audioCtxRef.current?.close();
     };
   }, [started, onClose]);
 
@@ -91,7 +59,6 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
   function handleStart() {
     setStarted(true);
     setRunning(true);
-    if (soundOn && sound !== 'none') startSound();
     intervalRef.current = setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) {
@@ -113,6 +80,7 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
 
   function handleResume() {
     setRunning(true);
+    clearInterval(intervalRef.current!);
     intervalRef.current = setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) { clearInterval(intervalRef.current!); setRunning(false); setDone(true); return 0; }
@@ -129,23 +97,6 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
     setDone(false);
   }
 
-  function startSound() {
-    try {
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      ambientRef.current = createAmbient(audioCtxRef.current, sound);
-    } catch { /* ignore */ }
-  }
-
-  function toggleSound() {
-    const next = !soundOn;
-    setSoundOn(next);
-    if (next && running && sound !== 'none') startSound();
-    else if (!next && ambientRef.current) {
-      (ambientRef.current as any).gain?.setValueAtTime(0, audioCtxRef.current?.currentTime ?? 0);
-    }
-  }
 
   async function handleComplete() {
     const elapsed = totalSecs - remaining;
@@ -254,34 +205,6 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
             </div>
           </div>
 
-          {/* Sounds */}
-          {!done && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-[var(--text-muted)]">Sonido ambiente</span>
-                <button onClick={toggleSound} className="p-1">
-                  {soundOn ? <Volume2 size={14} className="text-[var(--accent-gold)]" /> : <VolumeX size={14} className="text-[var(--text-muted)]" />}
-                </button>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {SOUNDS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setSound(s.id)}
-                    className="flex flex-col items-center gap-1 py-2 rounded-xl text-xs transition-all"
-                    style={{
-                      background: sound === s.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                      border: `1px solid ${sound === s.id ? 'rgba(255,255,255,0.2)' : 'transparent'}`,
-                      color: sound === s.id ? 'var(--text-primary)' : 'var(--text-muted)',
-                    }}
-                  >
-                    <span>{s.icon}</span>
-                    <span>{s.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Controls */}
           <div className="flex gap-3">
