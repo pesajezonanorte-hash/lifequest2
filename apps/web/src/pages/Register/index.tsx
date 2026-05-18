@@ -83,6 +83,7 @@ export default function RegisterPage() {
                 <MiguelSprite
                   size={64}
                   bodyType={gender}
+                  hairStyle={gender === 'female' ? 'long' : 'short'}
                   hairColor={hairColor}
                   shirtColor={shirtColor}
                   animate="idle"
