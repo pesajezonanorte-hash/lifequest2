@@ -5,8 +5,6 @@ interface Props {
   onDone: () => void;
 }
 
-const LOGO_LETTERS = 'LIFEQUEST'.split('');
-
 function PixelStar({ style }: { style: React.CSSProperties }) {
   return (
     <motion.div
@@ -31,41 +29,6 @@ const STARS = Array.from({ length: 80 }, (_, i) => ({
   opacity: 0.2 + ((i * 13) % 60) / 100,
   size: i % 7 === 0 ? 2 : 1,
 }));
-
-function SplashMiguel() {
-  return (
-    <motion.div
-      animate={{ scaleY: [1, 0.97, 1] }}
-      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-    >
-      <svg width="64" height="80" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg" style={{ imageRendering: 'pixelated' }}>
-        <rect x="10" y="2" width="12" height="4" fill="#2c1810" />
-        <rect x="9" y="3" width="1" height="6" fill="#2c1810" />
-        <rect x="22" y="3" width="1" height="6" fill="#2c1810" />
-        <rect x="10" y="6" width="12" height="10" fill="#c68642" />
-        <rect x="12" y="9" width="2" height="2" fill="#1a1033" />
-        <rect x="18" y="9" width="2" height="2" fill="#1a1033" />
-        <rect x="13" y="9" width="1" height="1" fill="white" />
-        <rect x="19" y="9" width="1" height="1" fill="white" />
-        <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
-        <rect x="14" y="14" width="4" height="1" fill="#c0392b" />
-        <rect x="14" y="16" width="4" height="2" fill="#c68642" />
-        <rect x="9" y="18" width="14" height="10" fill="#4d96ff" />
-        <rect x="5" y="18" width="4" height="8" fill="#4d96ff" />
-        <rect x="23" y="18" width="4" height="8" fill="#4d96ff" />
-        <rect x="5" y="26" width="4" height="3" fill="#c68642" />
-        <rect x="23" y="26" width="4" height="3" fill="#c68642" />
-        <rect x="9" y="28" width="14" height="2" fill="#5d4037" />
-        <rect x="14" y="28" width="4" height="2" fill="#ffd23f" />
-        <rect x="9" y="30" width="6" height="8" fill="#37474f" />
-        <rect x="17" y="30" width="6" height="8" fill="#37474f" />
-        <rect x="15" y="30" width="2" height="6" fill="#1a1033" />
-        <rect x="8" y="37" width="7" height="3" fill="#212121" />
-        <rect x="17" y="37" width="7" height="3" fill="#212121" />
-      </svg>
-    </motion.div>
-  );
-}
 
 export function SplashScreen({ onDone }: Props) {
   const [lettersShown, setLettersShown] = useState(0);
@@ -158,27 +121,29 @@ export function SplashScreen({ onDone }: Props) {
 
           {/* Content */}
           <div className="relative z-10 flex flex-col items-center gap-6 px-8">
-            {/* LIFEQUEST logo letter by letter */}
-            <div
-              className="font-pixel flex gap-0.5"
+            <motion.img
+              src="/brand/lifequest-logo.png"
+              alt="LifeQuest"
+              className="h-28 w-28 rounded-[28px] border border-white/15 bg-white object-cover shadow-2xl"
+              initial={{ opacity: 0, y: -12, scale: 0.82 }}
+              animate={lettersShown > 0 ? { opacity: 1, y: 0, scale: 1 } : {}}
+              transition={{ type: 'spring', stiffness: 240, damping: 18 }}
+            />
+
+            <motion.div
+              className="font-pixel"
               style={{
                 fontSize: 'clamp(14px, 4vw, 24px)',
                 letterSpacing: '3px',
                 color: '#ffd23f',
                 textShadow: '3px 3px 0 #0d0620, 0 0 24px rgba(255,210,63,0.45)',
               }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={lettersShown > 2 ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.35 }}
             >
-              {LOGO_LETTERS.map((letter, i) => (
-                <motion.span
-                  key={i}
-                  initial={{ opacity: 0, y: -12, scale: 0.6 }}
-                  animate={lettersShown > i ? { opacity: 1, y: 0, scale: 1 } : {}}
-                  transition={{ type: 'spring', stiffness: 320, damping: 18 }}
-                >
-                  {letter}
-                </motion.span>
-              ))}
-            </div>
+              LIFEQUEST
+            </motion.div>
 
             {/* Tagline */}
             <AnimatePresence>
@@ -195,7 +160,6 @@ export function SplashScreen({ onDone }: Props) {
               )}
             </AnimatePresence>
 
-            {/* Miguel sprite */}
             <AnimatePresence>
               {showSprite && (
                 <motion.div
@@ -203,7 +167,9 @@ export function SplashScreen({ onDone }: Props) {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 240, damping: 18 }}
                 >
-                  <SplashMiguel />
+                  <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-vt text-xl text-[var(--text-secondary)]">
+                    El RPG de tu vida real
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

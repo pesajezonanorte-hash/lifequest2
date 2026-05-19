@@ -71,7 +71,7 @@ export default function RegisterPage() {
         >
           <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-lg">
-              <p className="text-sm font-semibold text-[var(--text-secondary)]">LifeQuest</p>
+              <img src="/brand/lifequest-logo.png" alt="LifeQuest" className="h-11 w-11 rounded-2xl border border-[var(--border)] bg-white object-cover" />
               <h1 className="mt-2 text-3xl font-bold tracking-[-0.02em] text-[var(--text-primary)]">Crea a tu héroe</h1>
               <p className="mt-2 text-sm text-[var(--text-secondary)]">
                 Configura tu identidad una vez y gestiona tus misiones, hábitos, gym y finanzas en un solo lugar.

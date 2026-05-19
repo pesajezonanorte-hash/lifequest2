@@ -11,7 +11,7 @@ import { AchievementUnlockedToast } from '../achievements/AchievementUnlockedToa
 import { ToastContainer } from '../ui/ToastContainer';
 import { audio } from '../../lib/audio';
 import {
-  LayoutDashboard, Swords, Flame, BarChart3, TrendingUp, Dumbbell,
+  Swords, Flame, BarChart3, TrendingUp, Dumbbell,
   UtensilsCrossed, Moon, Wallet, BookOpen, Heart, NotebookPen,
   ShoppingBag, Globe, Crosshair, Users, Skull, CalendarDays,
   Target, Sun, Sparkles, Trophy, Settings, User,
@@ -241,20 +241,13 @@ export function GameLayout({ children }: Props) {
 
         {/* brand */}
         <div className="relative flex items-center gap-2.5 px-[22px] pt-[22px] pb-4">
-          <div
-            className="flex h-[34px] w-[34px] items-center justify-center text-white"
-            style={{
-              borderRadius: 10,
-              background: 'linear-gradient(160deg, #8b5cf6, #ec4899)',
-              boxShadow: '0 6px 18px rgba(139,92,246,.45)',
-            }}
-          >
-            <Castle size={18} />
-          </div>
+          <img
+            src="/brand/lifequest-logo.png"
+            alt="LifeQuest"
+            className="h-[42px] w-[42px] rounded-[12px] border border-[var(--border)] bg-white object-cover"
+          />
           <div>
-            <div className="text-[17px] font-extrabold tracking-[-0.02em] leading-none">
-              Life<span style={{ color: 'var(--primary)' }}>Quest</span>
-            </div>
+            <div className="text-[17px] font-extrabold tracking-[-0.02em] leading-none">LifeQuest</div>
             <div className="mt-[2px] text-[10.5px] font-semibold uppercase tracking-[0.1em]" style={{ color: 'var(--text-3)' }}>
               v0.3 · alpha
             </div>

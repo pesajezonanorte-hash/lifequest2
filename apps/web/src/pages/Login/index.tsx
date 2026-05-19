@@ -96,7 +96,7 @@ export default function LoginPage() {
         >
           <div className="mb-8 flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold text-[var(--text-secondary)]">LifeQuest</p>
+              <img src="/brand/lifequest-logo.png" alt="LifeQuest" className="h-11 w-11 rounded-2xl border border-[var(--border)] bg-white object-cover" />
               <h2 className="mt-2 text-3xl font-bold tracking-[-0.02em] text-[var(--text-primary)]">Bienvenido de nuevo</h2>
               <p className="mt-2 text-sm text-[var(--text-secondary)]">Inicia sesión en tu partida.</p>
             </div>
