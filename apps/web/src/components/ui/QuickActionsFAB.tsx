@@ -273,7 +273,7 @@ export function QuickActionsFAB() {
       </AnimatePresence>
 
       {/* FAB + Fan */}
-      <div className="fixed bottom-6 right-4 md:bottom-8 md:right-8 z-40">
+      <div className="fixed top-[10rem] bottom-auto sm:top-auto sm:bottom-6 right-4 md:bottom-8 md:right-8 z-40">
         {/* Fan buttons */}
         <AnimatePresence>
           {open && ACTIONS.map((action, i) => {

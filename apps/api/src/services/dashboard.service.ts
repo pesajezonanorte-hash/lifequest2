@@ -1,15 +1,5 @@
 import { prisma } from '../lib/prisma';
 
-const SEVEN_DAY_GUIDE = [
-  { day: 1, title: 'Tu primera misión', zone: 'misiones', route: '/quests', xpBonus: 50 },
-  { day: 2, title: 'Tu primer hábito', zone: 'habitos', route: '/habits', xpBonus: 50 },
-  { day: 3, title: 'Conoce tu Bóveda', zone: 'boveda', route: '/finances', xpBonus: 50 },
-  { day: 4, title: 'El Coliseo te espera', zone: 'coliseo', route: '/gym', xpBonus: 50 },
-  { day: 5, title: 'Habla con el Sabio', zone: 'sabio', route: '/wisdom', xpBonus: 75 },
-  { day: 6, title: 'Escribe en el Diario', zone: 'diario', route: '/journal', xpBonus: 50 },
-  { day: 7, title: 'Revisa tu Life Score', zone: 'estadisticas', route: '/stats', xpBonus: 100, celebration: true },
-] as const;
-
 export async function getDashboard(userId: string) {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -28,6 +18,8 @@ export async function getDashboard(userId: string) {
     latestWeeklySummary,
     recoveryChallenge,
     journalEntryCount,
+    totalQuestCount,
+    totalHabitCount,
   ] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { id: userId },
@@ -112,7 +104,13 @@ export async function getDashboard(userId: string) {
       orderBy: { createdAt: 'desc' },
     }),
     prisma.journalEntry.count({
-      where: { userId, date: { gte: sevenDaysAgo } },
+      where: { userId },
+    }),
+    prisma.quest.count({
+      where: { userId },
+    }),
+    prisma.habit.count({
+      where: { userId },
     }),
   ]);
 
@@ -136,11 +134,6 @@ export async function getDashboard(userId: string) {
     : daysSinceJoin;
 
   const visualHpPercent = getVisualHpPercent(daysAway);
-  const guide = buildSevenDayGuide(user, {
-    questCount: activeQuests.length,
-    habitCount: todayHabits.length,
-    journalEntryCount,
-  });
 
   return {
     user: {
@@ -200,48 +193,10 @@ export async function getDashboard(userId: string) {
           expiresAt: recoveryChallenge.expiresAt.toISOString(),
         }
       : null,
-    sevenDayGuide: guide,
-  };
-}
-
-function buildSevenDayGuide(
-  user: {
-    onboardingCompletedAt: Date | null;
-    sevenDayGuideCompletedDays: unknown;
-    sevenDayGuideCompletedAt: Date | null;
-    sevenDayGuideDismissedAt: Date | null;
-  },
-  progress: {
-    questCount: number;
-    habitCount: number;
-    journalEntryCount: number;
-  }
-) {
-  if (!user.onboardingCompletedAt || user.sevenDayGuideDismissedAt || user.sevenDayGuideCompletedAt) {
-    return null;
-  }
-
-  const completedDays = Array.isArray(user.sevenDayGuideCompletedDays)
-    ? (user.sevenDayGuideCompletedDays as number[])
-    : [];
-
-  const todayIndex = Math.min(
-    7,
-    Math.max(1, Math.floor((Date.now() - user.onboardingCompletedAt.getTime()) / 86400000) + 1)
-  );
-  const current = SEVEN_DAY_GUIDE.find((guideDay) => !completedDays.includes(guideDay.day))
-    ?? SEVEN_DAY_GUIDE[SEVEN_DAY_GUIDE.length - 1];
-
-  return {
-    currentDay: todayIndex,
-    totalDays: 7,
-    completedDays,
-    task: {
-      ...current,
-      suggestedReady:
-        (current.day === 1 && progress.questCount > 0) ||
-        (current.day === 2 && progress.habitCount > 0) ||
-        (current.day === 6 && progress.journalEntryCount > 0),
+    firstSteps: {
+      questCount: totalQuestCount,
+      habitCount: totalHabitCount,
+      hasJournalEntry: journalEntryCount > 0,
     },
   };
 }
@@ -339,10 +294,10 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
       id: habit.id,
       type: 'habit',
       title: habit.title,
-      icon: habit.icon ?? '✅',
+      icon: habit.icon ?? 'âœ…',
       xp: habit.xpReward,
       urgent: habit.currentStreak > 0,
-      detail: habit.currentStreak > 0 ? `Racha: ${habit.currentStreak} días` : undefined,
+      detail: habit.currentStreak > 0 ? `Racha: ${habit.currentStreak} dÃ­as` : undefined,
     });
     if (priorities.length >= 4) break;
   }
@@ -366,7 +321,7 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
       id: quest.id,
       type: 'quest',
       title: quest.title,
-      icon: quest.type === 'DAILY' ? '🗓️' : quest.type === 'MAIN' ? '⚔️' : '📜',
+      icon: quest.type === 'DAILY' ? 'ðŸ—“ï¸' : quest.type === 'MAIN' ? 'âš”ï¸' : 'ðŸ“œ',
       xp: quest.xpReward,
       urgent: daysLeft !== null && daysLeft <= 1,
       detail: daysLeft !== null ? `${daysLeft}d` : quest.type,
@@ -379,7 +334,7 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
       id: event.id,
       type: 'event',
       title: event.title,
-      icon: '📆',
+      icon: 'ðŸ“†',
       xp: 0,
       urgent: event.startDate < todayEnd,
       detail: event.startDate.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
