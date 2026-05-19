@@ -51,3 +51,26 @@ export async function equipItem(req: AuthRequest, res: Response): Promise<void> 
     }
   }
 }
+
+export async function completeGuideDay(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const result = await userService.completeGuideDay(req.userId!, Number(req.body.day));
+    res.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : '';
+    if (message === 'GUIDE_DAY_INVALID') {
+      res.status(400).json({ error: 'Día de guía inválido.' });
+      return;
+    }
+    res.status(500).json({ error: 'Error al completar el día de guía.' });
+  }
+}
+
+export async function dismissGuide(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const result = await userService.dismissGuide(req.userId!);
+    res.json(result);
+  } catch {
+    res.status(500).json({ error: 'Error al ocultar la guía.' });
+  }
+}

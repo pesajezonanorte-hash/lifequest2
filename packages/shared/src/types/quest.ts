@@ -1,4 +1,4 @@
-export type QuestType = 'MAIN' | 'SIDE' | 'DAILY' | 'WEEKLY';
+export type QuestType = 'MAIN' | 'SIDE' | 'DAILY' | 'WEEKLY' | 'META';
 export type QuestStatus = 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'ARCHIVED';
 export type QuestDifficulty = 'EASY' | 'NORMAL' | 'HARD' | 'EPIC';
 export type QuestCategory =

@@ -51,13 +51,42 @@ async function main() {
 
   // ─── Tienda ─────────────────────────────────────────────────────────────────
   const shopItemDefs = [
+    // Cosméticos originales
     { name: 'Sombrero de Aventurero',  description: 'Un sombrero digno de un héroe',          type: 'COSMETIC', cost: 200,  imageKey: 'hat_adventurer', levelRequired: 1 },
     { name: 'Capa del Guerrero',        description: 'Una capa que ondea épicamente',           type: 'COSMETIC', cost: 500,  imageKey: 'cape_warrior',   levelRequired: 5 },
-    { name: 'Multiplicador de XP x2',  description: 'Duplica tu XP por 24 horas',              type: 'POWERUP',  cost: 300,  imageKey: 'xp_booster',     levelRequired: 1 },
-    { name: 'Pase de Perdón',           description: 'No pierdes racha si fallas un día',       type: 'PASS',     cost: 150,  imageKey: 'streak_pass',    levelRequired: 1 },
     { name: 'Mascota: Dragón Pixel',   description: 'Un pequeño dragón te acompaña',            type: 'COSMETIC', cost: 1000, imageKey: 'pet_dragon',     levelRequired: 10 },
     { name: 'Escudo Dorado',            description: 'Un escudo épico que brilla',               type: 'COSMETIC', cost: 750,  imageKey: 'shield_gold',    levelRequired: 5 },
+    // Power-ups
+    { name: 'Multiplicador de XP x2',  description: 'Duplica tu XP por 24 horas',              type: 'POWERUP',  cost: 300,  imageKey: 'xp_booster',     levelRequired: 1 },
+    { name: 'Imán de Gold',            description: '+50% gold por 24 horas',                  type: 'POWERUP',  cost: 250,  imageKey: 'gold_magnet',    levelRequired: 3 },
     { name: 'Poción de Energía',        description: 'Recupera 50 HP al instante',              type: 'POWERUP',  cost: 100,  imageKey: 'potion_energy',  levelRequired: 1 },
+    { name: 'Escudo Anti-Racha',       description: 'Protege tu racha 3 días seguidos',         type: 'POWERUP',  cost: 500,  imageKey: 'streak_shield',  levelRequired: 5 },
+    // Pases
+    { name: 'Pase de Perdón',           description: 'No pierdes racha si fallas un día',       type: 'PASS',     cost: 150,  imageKey: 'streak_pass',    levelRequired: 1 },
+    { name: 'Pase VIP (7 días)',        description: 'Desbloquea funciones premium por 7 días', type: 'PASS',     cost: 800,  imageKey: 'vip_pass',       levelRequired: 1 },
+    // Sombreros (HAT)
+    { name: 'Gorra del Ninja',          description: 'Velocidad y sigilo. Para los héroes discretos.', type: 'HAT', cost: 350, imageKey: 'hat_ninja',  levelRequired: 1 },
+    { name: 'Corona del Campeón',       description: 'Solo para los que llegan al top 10',     type: 'HAT',      cost: 900,  imageKey: 'hat_crown',      levelRequired: 10 },
+    { name: 'Birrete del Sabio',        description: 'La sabiduría tiene su recompensa',        type: 'HAT',      cost: 600,  imageKey: 'hat_scholar',    levelRequired: 7 },
+    { name: 'Sombrero de Mago',         description: 'Con estrellas y todo lo bueno',           type: 'HAT',      cost: 450,  imageKey: 'hat_wizard',     levelRequired: 4 },
+    // Marcos (FRAME)
+    { name: 'Marco Dorado',             description: 'Un marco épico color oro que brilla',     type: 'FRAME',    cost: 500,  imageKey: 'frame_gold',     levelRequired: 1 },
+    { name: 'Marco de Diamante',        description: 'Solo para leyendas',                      type: 'FRAME',    cost: 1500, imageKey: 'frame_diamond',  levelRequired: 20 },
+    { name: 'Marco de Fuego',           description: 'Llamas que rodean tu avatar',             type: 'FRAME',    cost: 700,  imageKey: 'frame_fire',     levelRequired: 8 },
+    { name: 'Marco Cósmico',            description: 'El universo a tu alrededor',              type: 'FRAME',    cost: 1200, imageKey: 'frame_cosmic',   levelRequired: 15 },
+    // Auras (AURA)
+    { name: 'Aura de Fuego',            description: 'Una llama que nunca se apaga',            type: 'AURA',     cost: 600,  imageKey: 'aura_fire',      levelRequired: 5 },
+    { name: 'Aura de Hielo',            description: 'Frío como el acero, duro como el diamante', type: 'AURA',  cost: 600,  imageKey: 'aura_ice',       levelRequired: 5 },
+    { name: 'Aura Dorada',             description: 'El brillo del campeón',                   type: 'AURA',     cost: 1000, imageKey: 'aura_gold',      levelRequired: 10 },
+    { name: 'Aura de Tormenta',         description: 'El poder del rayo',                       type: 'AURA',     cost: 800,  imageKey: 'aura_storm',     levelRequired: 8 },
+    { name: 'Aura Arcoíris',           description: 'Todos los colores, toda la vida',          type: 'AURA',     cost: 1200, imageKey: 'aura_rainbow',   levelRequired: 12 },
+    // Temas (THEME)
+    { name: 'Tema: Aurora Boreal',      description: 'Verde y morado, el tema por defecto',     type: 'THEME',    cost: 0,    imageKey: 'theme_aurora',   levelRequired: 1 },
+    { name: 'Tema: Océano Profundo',    description: 'Azules y cyan, calma del mar',            type: 'THEME',    cost: 400,  imageKey: 'theme_ocean',    levelRequired: 1 },
+    { name: 'Tema: Lava Volcánica',     description: 'Rojos y naranja, puro fuego',             type: 'THEME',    cost: 500,  imageKey: 'theme_lava',     levelRequired: 3 },
+    { name: 'Tema: Bosque Oscuro',      description: 'Verdes oscuros, naturaleza salvaje',      type: 'THEME',    cost: 500,  imageKey: 'theme_forest',   levelRequired: 3 },
+    { name: 'Tema: Ciudad Neón',        description: 'Cyberpunk. Rosa y cyan brillante.',       type: 'THEME',    cost: 700,  imageKey: 'theme_neon',     levelRequired: 6 },
+    { name: 'Tema: Galaxia',            description: 'Morado cósmico, estrellas infinitas',     type: 'THEME',    cost: 800,  imageKey: 'theme_galaxy',   levelRequired: 8 },
   ];
 
   for (const item of shopItemDefs) {

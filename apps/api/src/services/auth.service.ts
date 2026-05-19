@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { prisma } from '../lib/prisma';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../lib/jwt';
 import type { RegisterInput, LoginInput } from '../schemas/auth.schemas';
+import { checkAchievements } from './achievement.service';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -30,6 +31,11 @@ function sanitizeUser(user: {
   birthDate: Date | null;
   currentStreak: number;
   longestStreak: number;
+  gymPlaylistUrl?: string | null;
+  equippedHat?: string | null;
+  equippedAura?: string | null;
+  equippedFrame?: string | null;
+  equippedTheme?: string | null;
   createdAt: Date;
 }) {
   return {
@@ -57,6 +63,11 @@ function sanitizeUser(user: {
     birthDate: user.birthDate?.toISOString() ?? null,
     currentStreak: user.currentStreak,
     longestStreak: user.longestStreak,
+    gymPlaylistUrl: user.gymPlaylistUrl ?? null,
+    equippedHat: user.equippedHat ?? null,
+    equippedAura: user.equippedAura ?? null,
+    equippedFrame: user.equippedFrame ?? null,
+    equippedTheme: user.equippedTheme ?? null,
     createdAt: user.createdAt.toISOString(),
   };
 }
@@ -105,6 +116,9 @@ export async function registerUser(data: RegisterInput) {
     data: { refreshTokenHash, lastLoginAt: new Date() },
   });
 
+  // Trigger first_login achievement silently (don't block registration)
+  checkAchievements(user.id, 'user_registered', { currentStreak: 0 }).catch(() => {});
+
   return { user: sanitizeUser(user), accessToken, refreshToken };
 }
 
@@ -125,6 +139,9 @@ export async function loginUser(data: LoginInput) {
     where: { id: user.id },
     data: { refreshTokenHash, lastLoginAt: new Date() },
   });
+
+  // Check login_30 achievement silently
+  checkAchievements(user.id, 'user_login', { currentStreak: user.currentStreak }).catch(() => {});
 
   return { user: sanitizeUser(user), accessToken, refreshToken };
 }

@@ -14,6 +14,8 @@ router.put('/me/avatar', validate(avatarSchema), userController.updateAvatar);
 router.put('/me/onboarding', validate(onboardingSchema), userController.completeOnboarding);
 router.patch('/me/profile', userController.updateProfile);
 router.post('/me/equip', userController.equipItem);
+router.post('/me/guide/complete', userController.completeGuideDay);
+router.post('/me/guide/dismiss', userController.dismissGuide);
 
 router.post('/me/class', async (req: AuthRequest, res) => {
   try { res.json(await chooseClass(req.userId!, req.body.playerClass)); }

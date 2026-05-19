@@ -35,6 +35,10 @@ import wisdomRoutes       from './wisdom.routes';
 import searchRoutes       from './search.routes';
 import exportRoutes       from './export.routes';
 import feedbackRoutes     from './feedback.routes';
+// El Espejo (Bloque 3)
+import mirrorRoutes       from './mirror.routes';
+// Custom Zones (Bloque 4)
+import customZonesRoutes  from './custom-zones.routes';
 
 const router = Router();
 
@@ -75,6 +79,9 @@ router.use('/wisdom',       wisdomRoutes);
 router.use('/search',       searchRoutes);
 router.use('/export',       exportRoutes);
 router.use('/feedback',     feedbackRoutes);
+
+router.use('/mirror',       mirrorRoutes);
+router.use('/custom-zones', customZonesRoutes);
 
 router.get('/health', (_req, res) => {
   res.json({ status: 'ok', version: '10.0.0', timestamp: new Date().toISOString() });

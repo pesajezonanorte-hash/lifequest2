@@ -141,7 +141,7 @@ export const QuestCard = memo(function QuestCard({ quest, onComplete, onClick }:
         <ShimmerBadge><span className="text-yellow-400">💰{quest.goldReward}</span></ShimmerBadge>
         <DeadlineBadge deadline={quest.deadline} />
         <span className="text-xs text-[var(--text-secondary)]">
-          {quest.type === 'DAILY' ? '☀️' : quest.type === 'WEEKLY' ? '📅' : quest.type === 'MAIN' ? '⚔️' : '🗡️'}
+          {quest.type === 'DAILY' ? '☀️' : quest.type === 'WEEKLY' ? '📅' : quest.type === 'MAIN' ? '⚔️' : quest.type === 'META' ? '🎯' : '🗡️'}
         </span>
       </div>
 

@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { checkAchievements } from './achievement.service';
 import type { TransactionType, TransactionCategory } from '@prisma/client';
 
 export async function listTransactions(userId: string, filters: { from?: string; to?: string; category?: string; type?: string; search?: string }) {
@@ -148,7 +149,7 @@ export async function contributeToGoal(userId: string, id: string, amount: numbe
   const newAmount = Number(goal.currentAmount) + amount;
   const isCompleted = newAmount >= Number(goal.targetAmount);
 
-  return prisma.financialGoal.update({
+  const updated = await prisma.financialGoal.update({
     where: { id },
     data: {
       currentAmount: newAmount,
@@ -156,6 +157,12 @@ export async function contributeToGoal(userId: string, id: string, amount: numbe
       completedAt: isCompleted ? new Date() : undefined,
     },
   });
+
+  if (isCompleted) {
+    checkAchievements(userId, 'finance_goal_completed', {}).catch(() => {});
+  }
+
+  return updated;
 }
 
 export async function deleteFinancialGoal(userId: string, id: string) {

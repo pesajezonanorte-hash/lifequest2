@@ -9,6 +9,7 @@ const QUEST_TYPES = [
   { key: 'SIDE',   icon: '🗡️', label: 'Misión Secundaria', desc: 'Aventuras de mediano plazo.',              multiplier: 4 },
   { key: 'DAILY',  icon: '☀️', label: 'Misión Diaria',     desc: 'Se resetea cada día. Construye hábitos.', multiplier: 1 },
   { key: 'WEEKLY', icon: '📅', label: 'Misión Semanal',    desc: 'Se resetea cada lunes.',                  multiplier: 2.5 },
+  { key: 'META',   icon: '🎯', label: 'Meta',              desc: 'Objetivo de largo plazo. Sin fecha fija.', multiplier: 8 },
 ] as const;
 
 const DIFFICULTIES = [

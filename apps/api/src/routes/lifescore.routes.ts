@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth, AuthRequest } from '../middleware/auth.middleware';
-import { calculateLifeScore, getCorrelations, getMorningBriefing, getYearInReview } from '../services/lifescore.service';
+import { calculateLifeScore, getCorrelations, getMorningBriefing, getYearInReview, calculateDynamicLifeScore } from '../services/lifescore.service';
 import { getGlowUpData } from '../services/glowup.service';
 
 const router = Router();
@@ -26,6 +26,11 @@ router.get('/year-review', async (req, res) => {
     const year = req.query.year ? Number(req.query.year) : undefined;
     res.json(await getYearInReview((req as AuthRequest).userId!, year));
   } catch (err: any) { res.status(500).json({ message: err.message }); }
+});
+
+router.get('/dynamic', async (req, res) => {
+  try { res.json(await calculateDynamicLifeScore((req as AuthRequest).userId!)); }
+  catch (err: any) { res.status(500).json({ message: err.message }); }
 });
 
 router.get('/glow-up', async (req, res) => {

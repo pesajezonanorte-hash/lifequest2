@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma';
 import { awardXpAndGold } from './xp.service';
 import { checkAchievements } from './achievement.service';
+import { createNotification } from './notification.service';
 import type { QuestCategory } from '@prisma/client';
 
 export interface CreateHabitInput {
@@ -157,6 +158,74 @@ export async function logHabit(userId: string, habitId: string, status: HabitLog
     data: { currentStreak, longestStreak },
   });
 
+  let recoveryCompleted: {
+    id: string;
+    bonusXp: number;
+    restoredStreak: number;
+  } | null = null;
+
+  const activeRecovery = await prisma.recoveryChallenge.findFirst({
+    where: {
+      userId,
+      habitId,
+      isCompleted: false,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (activeRecovery) {
+    if (status === 'completed') {
+      const nextCurrentDays = activeRecovery.currentDays + 1;
+      if (nextCurrentDays >= activeRecovery.requiredDays) {
+        const restoredStreak = Math.max(currentStreak, Math.ceil(activeRecovery.lostStreak / 2));
+        await prisma.recoveryChallenge.update({
+          where: { id: activeRecovery.id },
+          data: { currentDays: nextCurrentDays, isCompleted: true },
+        });
+        await prisma.habit.update({
+          where: { id: habitId },
+          data: {
+            currentStreak: restoredStreak,
+            longestStreak: Math.max(longestStreak, restoredStreak),
+          },
+        });
+        currentStreak = restoredStreak;
+        longestStreak = Math.max(longestStreak, restoredStreak);
+
+        const bonusResult = await awardXpAndGold(userId, activeRecovery.bonusXp, 0, 'streak_recovery', {
+          sourceId: activeRecovery.id,
+          description: `Reto de recuperación completado: ${habit.title}`,
+          category: habit.category,
+        });
+
+        recoveryCompleted = {
+          id: activeRecovery.id,
+          bonusXp: bonusResult.xpGained,
+          restoredStreak,
+        };
+
+        createNotification(userId, {
+          type: 'streak',
+          title: '🔥 ¡Racha recuperada!',
+          body: `"${habit.title}" volvió a encenderse. +${bonusResult.xpGained} XP bonus.`,
+          icon: '🔥',
+          link: '/habits',
+        }).catch(() => {});
+      } else {
+        await prisma.recoveryChallenge.update({
+          where: { id: activeRecovery.id },
+          data: { currentDays: nextCurrentDays },
+        });
+      }
+    } else if (status === 'failed') {
+      await prisma.recoveryChallenge.update({
+        where: { id: activeRecovery.id },
+        data: { currentDays: 0 },
+      });
+    }
+  }
+
   let rewards = null;
   let achievementsUnlocked: Awaited<ReturnType<typeof checkAchievements>> = [];
 
@@ -174,6 +243,26 @@ export async function logHabit(userId: string, habitId: string, status: HabitLog
     });
 
     rewards = { xpEarned: result.xpGained, goldEarned: result.goldGained, leveledUp: result.leveledUp, newLevel: result.newLevel };
+
+    // Personalized notification with real data
+    const streakMsg = currentStreak >= 2 ? ` 🔥 Racha: ${currentStreak} días` : '';
+    createNotification(userId, {
+      type: 'habit_completed',
+      title: `${habit.icon ?? '✅'} "${habit.title}" completado`,
+      body: `+${result.xpGained} XP.${streakMsg}`,
+      icon: habit.icon ?? '✅',
+      link: '/habits',
+    }).catch(() => {});
+
+    for (const ach of achievementsUnlocked) {
+      createNotification(userId, {
+        type: 'achievement',
+        title: `${ach.icon} Logro: ${ach.title}`,
+        body: ach.description,
+        icon: ach.icon,
+        link: '/achievements',
+      }).catch(() => {});
+    }
   }
 
   const updatedHabit = await prisma.habit.findUnique({ where: { id: habitId } });
@@ -185,6 +274,7 @@ export async function logHabit(userId: string, habitId: string, status: HabitLog
     longestStreak,
     rewards,
     achievementsUnlocked,
+    recoveryCompleted,
   };
 }
 

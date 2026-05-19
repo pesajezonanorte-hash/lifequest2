@@ -7,14 +7,23 @@ import { AvatarCustomizer } from '../../components/character/AvatarCustomizer';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import { xpProgressPercent } from '../../lib/xp';
+import { getLevelTitle } from '../../lib/gameProgress';
 
 const EQUIPMENT_SLOTS = [
-  { key: 'head', icon: '🎩', label: 'Cabeza' },
-  { key: 'body', icon: '👕', label: 'Cuerpo' },
-  { key: 'accessory', icon: '🛡️', label: 'Accesorio' },
-  { key: 'pet', icon: '🐾', label: 'Mascota' },
-  { key: 'aura', icon: '⭐', label: 'Aura' },
+  { key: 'hat', icon: '🎩', label: 'Sombrero', userField: 'equippedHat' },
+  { key: 'aura', icon: '✨', label: 'Aura', userField: 'equippedAura' },
+  { key: 'frame', icon: '🖼️', label: 'Marco', userField: 'equippedFrame' },
+  { key: 'theme', icon: '🎨', label: 'Tema', userField: 'equippedTheme' },
+  { key: 'pet', icon: '🐾', label: 'Mascota', userField: null },
 ];
+
+const AURA_STYLES: Record<string, { gradient: string; shadow: string }> = {
+  aura_fire:    { gradient: 'radial-gradient(ellipse at center, #ff6b0044 0%, #ff000022 60%, transparent 100%)', shadow: '0 0 32px 12px #ff6b0066' },
+  aura_ice:     { gradient: 'radial-gradient(ellipse at center, #7dd3fc44 0%, #38bdf822 60%, transparent 100%)', shadow: '0 0 32px 12px #7dd3fc66' },
+  aura_gold:    { gradient: 'radial-gradient(ellipse at center, #ffd23f44 0%, #f59e0b22 60%, transparent 100%)', shadow: '0 0 32px 12px #ffd23f88' },
+  aura_storm:   { gradient: 'radial-gradient(ellipse at center, #a78bfa44 0%, #7c3aed22 60%, transparent 100%)', shadow: '0 0 32px 12px #a78bfa66' },
+  aura_rainbow: { gradient: 'conic-gradient(from 0deg, #ff000022, #ff7f0022, #ffff0022, #00ff0022, #0000ff22, #8b00ff22, #ff000022)', shadow: '0 0 32px 12px rgba(255,200,50,0.4)' },
+};
 
 export default function CharacterPage() {
   const user = useAuthStore((s) => s.user);
@@ -44,8 +53,21 @@ export default function CharacterPage() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+            className="relative"
           >
-            <div className="w-32 h-32 rounded-full bg-[var(--bg-panel-light)] flex items-center justify-center">
+            {/* Aura glow effect */}
+            {user.equippedAura && AURA_STYLES[user.equippedAura] && (
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{ background: AURA_STYLES[user.equippedAura].gradient, boxShadow: AURA_STYLES[user.equippedAura].shadow }}
+                animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.06, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            )}
+            <div
+              className="w-32 h-32 rounded-full bg-[var(--bg-panel-light)] flex items-center justify-center relative"
+              style={user.equippedFrame ? { border: '3px solid var(--accent-gold)', boxShadow: '0 0 14px var(--accent-gold)44' } : {}}
+            >
               <MiguelSprite
                 size={120}
                 bodyType={avatarCfg.bodyType}
@@ -64,6 +86,9 @@ export default function CharacterPage() {
           <div className="text-center">
             <p className="font-semibold text-sm text-[var(--text-primary)]">
               {user.displayName}
+            </p>
+            <p className="text-xs mt-1 text-[var(--accent-gold)] font-semibold tracking-wide uppercase">
+              {getLevelTitle(user.level)}
             </p>
             <div className="flex items-center justify-center gap-2 mt-1">
               <div className="bg-[var(--accent-gold)] text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
@@ -154,26 +179,28 @@ export default function CharacterPage() {
           </h2>
 
           <div className="space-y-2">
-            {EQUIPMENT_SLOTS.map((slot) => (
-              <motion.div
-                key={slot.key}
-                whileHover={{ x: 3 }}
-                className="flex items-center gap-3 border border-[var(--border)] rounded-lg bg-[var(--bg-panel-light)] p-2 cursor-pointer hover:border-[var(--accent-gold)] transition-colors group"
-              >
-                <span className="text-xl w-8 text-center">{slot.icon}</span>
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                    {slot.label}
-                  </p>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    — vacío —
-                  </p>
-                </div>
-                <span className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--accent-gold)] transition-colors">
-                  +
-                </span>
-              </motion.div>
-            ))}
+            {EQUIPMENT_SLOTS.map((slot) => {
+              const equippedKey = slot.userField ? (user as unknown as Record<string, unknown>)[slot.userField] as string | null : null;
+              const isEquipped = !!equippedKey;
+              return (
+                <motion.div
+                  key={slot.key}
+                  whileHover={{ x: 3 }}
+                  className={`flex items-center gap-3 border rounded-lg bg-[var(--bg-panel-light)] p-2 cursor-pointer transition-colors group ${isEquipped ? 'border-[var(--accent-gold)]' : 'border-[var(--border)] hover:border-[var(--accent-gold)]'}`}
+                >
+                  <span className="text-xl w-8 text-center">{slot.icon}</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
+                      {slot.label}
+                    </p>
+                    <p className={`text-xs ${isEquipped ? 'text-[var(--accent-gold)]' : 'text-[var(--text-muted)]'}`}>
+                      {isEquipped ? equippedKey!.replace(/_/g, ' ') : '— vacío —'}
+                    </p>
+                  </div>
+                  {isEquipped && <span className="text-xs text-[var(--accent-green)]">✓</span>}
+                </motion.div>
+              );
+            })}
           </div>
 
           <p className="text-xs text-[var(--text-secondary)] text-center mt-4">

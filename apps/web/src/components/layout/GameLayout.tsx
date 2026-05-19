@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
@@ -14,8 +14,9 @@ import {
   Swords, Flame, BarChart3, TrendingUp, Dumbbell,
   UtensilsCrossed, Moon, Wallet, BookOpen, Heart, NotebookPen,
   ShoppingBag, Globe, Crosshair, Users, Skull, CalendarDays,
-  Target, Sun, Sparkles, Trophy, Settings, User,
+  Sparkles, Trophy, Settings, User,
   Volume2, VolumeX, UserPlus, Zap, Search, Castle, ChevronRight,
+  Scroll, MapPin,
 } from 'lucide-react';
 import { FocusMode } from '../ui/FocusMode';
 import { AnimatePresence as AP } from 'framer-motion';
@@ -24,6 +25,8 @@ import { NotificationBell } from '../ui/NotificationPanel';
 import { ScrollToTop } from '../ui/ScrollToTop';
 import { OfflineIndicator } from '../ui/OfflineIndicator';
 import { QuickActionsFAB } from '../ui/QuickActionsFAB';
+import { MusicPlayer } from '../ui/MusicPlayer';
+import { getLevelTitle, ZONE_TOOLTIPS } from '../../lib/gameProgress';
 
 interface NavItem {
   to: string;
@@ -40,27 +43,28 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/quests',      icon: <Swords size={18} />,            label: 'Misiones',    hint: 'Registro',      group: 'main' },
   { to: '/habits',      icon: <Flame size={18} />,             label: 'Hábitos',     hint: 'Rutina',        group: 'main' },
   { to: '/stats',       icon: <TrendingUp size={18} />,        label: 'Estadísticas',hint: 'Life Score',    group: 'main' },
-  { to: '/history',     icon: <BarChart3 size={18} />,         label: 'Historial',   hint: 'Actividad',     group: 'main' },
   // Zonas del reino
-  { to: '/gym',         icon: <Dumbbell size={18} />,          label: 'Coliseo',     hint: 'Gym',           group: 'zones' },
   { to: '/finances',    icon: <Wallet size={18} />,            label: 'Bóveda',      hint: 'Finanzas',      group: 'zones' },
+  { to: '/gym',         icon: <Dumbbell size={18} />,          label: 'Coliseo',     hint: 'Gym',           group: 'zones' },
+  { to: '/glow-up',     icon: <Sparkles size={18} />,          label: 'El Espejo',   hint: 'Glow Up',       group: 'zones' },
   { to: '/food',        icon: <UtensilsCrossed size={18} />,   label: 'Posada',      hint: 'Comida',        group: 'zones' },
   { to: '/sleep',       icon: <Moon size={18} />,              label: 'Torre',       hint: 'Sueño',         group: 'zones' },
   { to: '/learning',    icon: <BookOpen size={18} />,          label: 'Biblioteca',  hint: 'Aprendizaje',   group: 'zones' },
   { to: '/love',        icon: <Heart size={18} />,             label: 'Jardín',      hint: 'Amor',          group: 'zones' },
   { to: '/journal',     icon: <NotebookPen size={18} />,       label: 'Diario',      hint: 'Notas',         group: 'zones' },
   { to: '/shop',        icon: <ShoppingBag size={18} />,       label: 'Mercado',     hint: 'Tienda',        group: 'zones' },
-  { to: '/wisdom',      icon: <Sparkles size={18} />,          label: 'Sabiduría',    hint: 'Sabiduría',     group: 'zones', accent: true },
+  { to: '/wisdom',        icon: <Scroll size={18} />,   label: 'Sabiduría',     hint: 'Sabiduría',     group: 'zones', accent: true },
+  { to: '/custom-zones',  icon: <MapPin size={18} />,   label: 'Mis Zonas',     hint: 'Personalizadas', group: 'zones' },
   // Social
   { to: '/leaderboard', icon: <Globe size={18} />,             label: 'Mundo',       hint: 'Ranking',       group: 'social' },
   { to: '/challenges',  icon: <Crosshair size={18} />,         label: 'Retos',       hint: 'Jefes',         group: 'social' },
   { to: '/guild',       icon: <Users size={18} />,             label: 'Gremio',      hint: 'Amigos',        group: 'social' },
   { to: '/season',      icon: <Skull size={18} />,             label: 'Campaña',     hint: 'Historia',      group: 'social' },
   // Tú
+  { to: '/character',   icon: <User size={18} />,              label: 'Personaje',   hint: 'Perfil',        group: 'me' },
+  { to: '/achievements',icon: <Trophy size={18} />,            label: 'Logros',      hint: 'Achievements',  group: 'me' },
   { to: '/agenda',      icon: <CalendarDays size={18} />,      label: 'Agenda',      hint: 'Calendario',    group: 'me' },
-  { to: '/goals',       icon: <Target size={18} />,            label: 'Metas',       hint: 'Maestras',      group: 'me' },
-  { to: '/rituals',     icon: <Sun size={18} />,               label: 'Rituales',    hint: 'Rutinas',       group: 'me' },
-  { to: '/glow-up',     icon: <Sparkles size={18} />,          label: 'El Espejo',   hint: 'Transformación',group: 'me' },
+  { to: '/settings',    icon: <Settings size={18} />,          label: 'Ajustes',     hint: 'Configuración', group: 'me' },
 ];
 
 const NAV_GROUPS: { id: NavItem['group']; label: string }[] = [
@@ -203,7 +207,18 @@ export function GameLayout({ children }: Props) {
   const { user, logout: storeLogout } = useAuthStore();
   const { toggleAudio, audioEnabled, xpSparkTrigger } = useUIStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showFocus, setShowFocus] = useState(false);
+  const [zoneTooltipVisible, setZoneTooltipVisible] = useState(false);
+
+  useEffect(() => {
+    const tooltip = ZONE_TOOLTIPS[location.pathname];
+    if (!tooltip) return;
+    const key = `lifequest_zone_tip_${location.pathname}`;
+    if (localStorage.getItem(key) === 'seen') return;
+    setZoneTooltipVisible(true);
+    localStorage.setItem(key, 'seen');
+  }, [location.pathname]);
   async function handleLogout() {
     try {
       await authService.logout();
@@ -332,39 +347,6 @@ export function GameLayout({ children }: Props) {
             );
           })}
 
-          {/* secondary */}
-          <div>
-            <div className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--text-3)' }}>
-              Más
-            </div>
-            <div className="flex flex-col gap-0.5">
-              {[
-                { to: '/character', icon: <User size={18} />, label: 'Personaje' },
-                { to: '/achievements', icon: <Trophy size={18} />, label: 'Logros' },
-                { to: '/settings', icon: <Settings size={18} />, label: 'Ajustes' },
-              ].map(({ to, icon, label }) => (
-                <NavLink key={to} to={to} onClick={() => audio.play('blip')}>
-                  {({ isActive }) => (
-                    <div
-                      className="relative flex items-center gap-[11px] px-3 py-[9px] transition-colors"
-                      style={{
-                        borderRadius: 10,
-                        fontSize: 13.5,
-                        fontWeight: isActive ? 700 : 500,
-                        color: isActive ? 'var(--text)' : 'var(--text-2)',
-                        background: isActive
-                          ? 'color-mix(in oklab, var(--primary) 14%, transparent)'
-                          : 'transparent',
-                      }}
-                    >
-                      <span style={{ display: 'flex', color: isActive ? 'var(--primary)' : 'var(--text-3)' }}>{icon}</span>
-                      <span className="flex-1 truncate">{label}</span>
-                    </div>
-                  )}
-                </NavLink>
-              ))}
-            </div>
-          </div>
         </nav>
 
         {/* hero card */}
@@ -415,7 +397,7 @@ export function GameLayout({ children }: Props) {
                       </span>
                     </div>
                     <div className="mt-px text-[11px]" style={{ color: 'var(--text-2)' }}>
-                      Aventurero
+                      {getLevelTitle(user.level)}
                     </div>
                   </div>
                 </div>
@@ -581,6 +563,35 @@ export function GameLayout({ children }: Props) {
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto max-w-7xl px-4 py-5 pb-6 md:px-6 md:py-6">
+            {zoneTooltipVisible && ZONE_TOOLTIPS[location.pathname] && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 rounded-2xl border px-4 py-3"
+                style={{
+                  borderColor: 'rgba(245, 158, 11, 0.35)',
+                  background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(255,255,255,0.02))',
+                }}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--accent-gold)' }}>
+                      {ZONE_TOOLTIPS[location.pathname].title}
+                    </p>
+                    <p className="mt-1 text-sm" style={{ color: 'var(--text-primary)' }}>
+                      {ZONE_TOOLTIPS[location.pathname].body}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setZoneTooltipVisible(false)}
+                    className="text-xs font-semibold"
+                    style={{ color: 'var(--text-secondary)' }}
+                  >
+                    Entendido
+                  </button>
+                </div>
+              </motion.div>
+            )}
             {children}
           </div>
         </main>
@@ -636,6 +647,9 @@ export function GameLayout({ children }: Props) {
 
       {/* FAB de acciones rápidas */}
       <QuickActionsFAB />
+
+      {/* Reproductor de música global */}
+      <MusicPlayer url={user?.gymPlaylistUrl} />
 
       {/* Focus Mode Fab — solo desktop */}
       <motion.button

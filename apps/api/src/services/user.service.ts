@@ -1,4 +1,6 @@
 import { prisma } from '../lib/prisma';
+import { awardXpAndGold } from './xp.service';
+import { createNotification } from './notification.service';
 
 const USER_SELECT = {
   id: true, email: true, username: true, displayName: true,
@@ -9,8 +11,20 @@ const USER_SELECT = {
   language: true, relationshipStatus: true,
   onboardingCompleted: true, birthDate: true,
   currentStreak: true, longestStreak: true, lastActivityDate: true,
+  gymPlaylistUrl: true,
+  equippedHat: true, equippedAura: true, equippedFrame: true, equippedTheme: true,
   createdAt: true,
 } as const;
+
+const SEVEN_DAY_GUIDE = [
+  { day: 1, title: 'Tu primera misión', zone: 'misiones', route: '/quests', xpBonus: 50 },
+  { day: 2, title: 'Tu primer hábito', zone: 'habitos', route: '/habits', xpBonus: 50 },
+  { day: 3, title: 'Conoce tu Bóveda', zone: 'boveda', route: '/finances', xpBonus: 50 },
+  { day: 4, title: 'El Coliseo te espera', zone: 'coliseo', route: '/gym', xpBonus: 50 },
+  { day: 5, title: 'Habla con el Sabio', zone: 'sabio', route: '/wisdom', xpBonus: 75 },
+  { day: 6, title: 'Escribe en el Diario', zone: 'diario', route: '/journal', xpBonus: 50 },
+  { day: 7, title: 'Revisa tu Life Score', zone: 'estadisticas', route: '/stats', xpBonus: 100, celebration: true },
+] as const;
 
 export async function getCharacter(userId: string) {
   const user = await prisma.user.findUniqueOrThrow({
@@ -68,6 +82,7 @@ export async function completeOnboarding(userId: string, data: OnboardingData) {
     where: { id: userId },
     data: {
       onboardingCompleted: true,
+      onboardingCompletedAt: new Date(),
       displayName: data.displayName,
       birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
       timezone: data.timezone,
@@ -211,4 +226,121 @@ export async function equipItem(userId: string, inventoryItemId: string) {
   });
 
   return updated;
+}
+
+export async function completeGuideDay(userId: string, day: number) {
+  const guideDay = SEVEN_DAY_GUIDE.find((entry) => entry.day === day);
+  if (!guideDay) throw new Error('GUIDE_DAY_INVALID');
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { id: userId },
+    select: {
+      sevenDayGuideCompletedDays: true,
+      sevenDayGuideCompletedAt: true,
+    },
+  });
+
+  const completedDays = Array.isArray(user.sevenDayGuideCompletedDays)
+    ? (user.sevenDayGuideCompletedDays as number[])
+    : [];
+
+  if (completedDays.includes(day)) {
+    return { alreadyCompleted: true, day, completedDays, guideCompleted: Boolean(user.sevenDayGuideCompletedAt) };
+  }
+
+  const nextCompletedDays = [...completedDays, day].sort((a, b) => a - b);
+
+  const reward = await awardXpAndGold(
+    userId,
+    guideDay.xpBonus,
+    0,
+    'seven_day_guide',
+    { sourceId: `guide-day-${day}`, description: `Guía de 7 días completada: ${guideDay.title}` }
+  );
+
+  const guideCompleted = nextCompletedDays.length >= SEVEN_DAY_GUIDE.length;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      sevenDayGuideCompletedDays: nextCompletedDays,
+      ...(guideCompleted ? { sevenDayGuideCompletedAt: new Date() } : {}),
+    },
+  });
+
+  createNotification(userId, {
+    type: 'guide',
+    title: `🗺️ Día ${day} completado`,
+    body: `${guideDay.title}: +${guideDay.xpBonus} XP.`,
+    icon: '🗺️',
+    link: guideDay.route,
+  }).catch(() => {});
+
+  let achievementUnlocked = false;
+  if (guideCompleted) {
+    const achievement = await ensureFirstWeekAchievement();
+    const alreadyUnlocked = await prisma.userAchievement.findFirst({
+      where: { userId, achievementId: achievement.id },
+      select: { id: true },
+    });
+
+    if (!alreadyUnlocked) {
+      await prisma.userAchievement.create({
+        data: { userId, achievementId: achievement.id },
+      });
+      achievementUnlocked = true;
+    }
+
+    createNotification(userId, {
+      type: 'achievement',
+      title: '🏆 Logro desbloqueado: Primera Semana',
+      body: 'Completaste la Semana del Héroe.',
+      icon: '🏆',
+      link: '/achievements',
+    }).catch(() => {});
+  }
+
+  return {
+    alreadyCompleted: false,
+    day,
+    completedDays: nextCompletedDays,
+    guideCompleted,
+    celebration: 'celebration' in guideDay ? Boolean(guideDay.celebration) : false,
+    achievementUnlocked,
+    rewards: {
+      xpEarned: reward.xpGained,
+      goldEarned: reward.goldGained,
+      leveledUp: reward.leveledUp,
+      newLevel: reward.leveledUp ? reward.newLevel : undefined,
+      statIncreases: reward.leveledUp ? reward.statIncreases : undefined,
+    },
+  };
+}
+
+export async function dismissGuide(userId: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { sevenDayGuideDismissedAt: new Date() },
+  });
+
+  return { dismissed: true };
+}
+
+async function ensureFirstWeekAchievement() {
+  const existing = await prisma.achievement.findUnique({
+    where: { key: 'first_week' },
+  });
+
+  if (existing) return existing;
+
+  return prisma.achievement.create({
+    data: {
+      key: 'first_week',
+      title: 'Primera Semana',
+      description: 'Completaste la Semana del Héroe.',
+      icon: '🏆',
+      category: 'special',
+      xpReward: 0,
+    },
+  });
 }

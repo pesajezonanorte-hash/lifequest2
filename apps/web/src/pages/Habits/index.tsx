@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
@@ -17,6 +18,8 @@ export default function HabitsPage() {
   const user = useAuthStore((s) => s.user);
   const { addFloatingXP, flashScreen, showAchievementToast, triggerLevelUp } = useUIStore();
   const toast = useToastStore();
+  const [searchParams] = useSearchParams();
+  const showRituals = searchParams.get('filter') === 'ritual';
 
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,10 +127,11 @@ export default function HabitsPage() {
     await load();
   }
 
-  const maxStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak), 0);
-  const topHabit = habits.find((h) => h.longestStreak === maxStreak);
-  const completedToday = habits.filter((h) => h.todayStatus === 'completed').length;
-  const totalHabits = habits.length;
+  const displayedHabits = showRituals ? habits.filter(h => h.isRitual) : habits;
+  const maxStreak = displayedHabits.reduce((max, h) => Math.max(max, h.longestStreak), 0);
+  const topHabit = displayedHabits.find((h) => h.longestStreak === maxStreak);
+  const completedToday = displayedHabits.filter((h) => h.todayStatus === 'completed').length;
+  const totalHabits = displayedHabits.length;
 
   return (
     <div className="space-y-4">
@@ -135,14 +139,16 @@ export default function HabitsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>
-            🔥 TUS HÁBITOS DIARIOS
+            {showRituals ? '⚡ TUS RITUALES' : '🔥 TUS HÁBITOS DIARIOS'}
           </h1>
           <p className="font-vt text-text-secondary text-base">
-            Construye quién quieres ser, un día a la vez, {user?.displayName?.split(' ')[0]}
+            {showRituals
+              ? 'Secuencias de pasos encadenados para tu rutina'
+              : `Construye quién quieres ser, un día a la vez, ${user?.displayName?.split(' ')[0]}`}
           </p>
         </div>
         <PixelButton variant="primary" onClick={() => { setEditingHabit(null); setShowModal(true); }}>
-          + NUEVO HÁBITO
+          {showRituals ? '+ NUEVO RITUAL' : '+ NUEVO HÁBITO'}
         </PixelButton>
       </div>
 
@@ -183,7 +189,7 @@ export default function HabitsPage() {
         </PixelPanel>
       ) : (
         <div className="space-y-2">
-          {habits.map((habit, idx) => (
+          {displayedHabits.map((habit, idx) => (
             <motion.div
               key={habit.id}
               initial={{ opacity: 0, y: 8 }}

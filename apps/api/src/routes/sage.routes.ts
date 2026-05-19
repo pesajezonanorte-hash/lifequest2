@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.middleware';
+import { requireAuth, type AuthRequest } from '../middleware/auth.middleware';
 import { sageLimiter } from '../middleware/rate-limit.middleware';
 import * as sage from '../controllers/sage.controller';
+import { getTodayProactiveNote, markProactiveNoteRead } from '../services/sage-proactive.service';
 
 const router = Router();
 router.use(requireAuth);
@@ -15,5 +16,22 @@ router.post('/plan-workout',     sage.planWorkout);
 router.get('/daily-summary',     sage.dailySummary);
 router.get('/daily-tip',         sage.dailyTip);
 router.get('/rate-info',         sage.rateInfo);
+
+// Proactive note (max 1 per day)
+router.get('/proactive-note', async (req, res) => {
+  try {
+    const userId = (req as AuthRequest).userId!;
+    const note = await getTodayProactiveNote(userId);
+    res.json(note);
+  } catch (err: any) { res.status(500).json({ message: err.message }); }
+});
+
+router.post('/proactive-note/:id/read', async (req, res) => {
+  try {
+    const userId = (req as AuthRequest).userId!;
+    await markProactiveNoteRead(userId, req.params.id);
+    res.json({ success: true });
+  } catch (err: any) { res.status(500).json({ message: err.message }); }
+});
 
 export default router;

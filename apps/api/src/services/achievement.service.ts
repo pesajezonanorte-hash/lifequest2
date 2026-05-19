@@ -8,6 +8,8 @@ export interface AchievementCheckEvent {
   habitStreak?: number;
   leveledUp?: boolean;
   newLevel?: number;
+  currentStreak?: number;
+  userBirthDate?: Date | null;
 }
 
 export interface UnlockedAchievement {
@@ -127,6 +129,59 @@ export async function checkAchievements(
       case 'level_100':
         shouldUnlock = context.leveledUp === true && (context.newLevel ?? 0) >= 100;
         break;
+      case 'first_login':
+        shouldUnlock = event === 'user_registered';
+        break;
+      case 'login_30':
+        shouldUnlock = (event === 'user_login' || event === 'user_registered') && (context.currentStreak ?? 0) >= 30;
+        break;
+      case 'finance_goal':
+        shouldUnlock = event === 'finance_goal_completed';
+        break;
+      case 'speed_run': {
+        if (event === 'quest_completed') {
+          const today = new Date();
+          const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+          const todayCount = await prisma.questCompletion.count({
+            where: { userId, completedAt: { gte: startOfDay, lt: endOfDay } },
+          });
+          shouldUnlock = todayCount >= 5;
+        }
+        break;
+      }
+      case 'birthday': {
+        if (event === 'quest_completed' && context.userBirthDate) {
+          const now = new Date();
+          const bd = context.userBirthDate;
+          shouldUnlock = bd.getMonth() === now.getMonth() && bd.getDate() === now.getDate();
+        }
+        break;
+      }
+      case 'perfect_week': {
+        if (event === 'habit_logged') {
+          const now = new Date();
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          const activeHabits = await prisma.habit.findMany({
+            where: { userId, isActive: true },
+            select: { id: true },
+          });
+          if (activeHabits.length > 0) {
+            const days: boolean[] = [];
+            for (let i = 0; i < 7; i++) {
+              const day = new Date(weekAgo.getTime() + i * 24 * 60 * 60 * 1000);
+              const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+              const dayEnd = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
+              const logsCount = await prisma.habitLog.count({
+                where: { userId, completed: true, date: { gte: dayStart, lt: dayEnd } },
+              });
+              days.push(logsCount >= activeHabits.length);
+            }
+            shouldUnlock = days.every(Boolean);
+          }
+        }
+        break;
+      }
     }
 
     if (shouldUnlock) {

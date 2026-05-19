@@ -24,6 +24,10 @@ export interface User {
   currentStreak: number;
   longestStreak: number;
   gymPlaylistUrl?: string | null;
+  equippedHat?: string | null;
+  equippedAura?: string | null;
+  equippedFrame?: string | null;
+  equippedTheme?: string | null;
   createdAt: string;
 }
 

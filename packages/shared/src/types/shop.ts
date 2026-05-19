@@ -1,4 +1,4 @@
-export type ShopItemType = 'COSMETIC' | 'POWERUP' | 'DECORATION' | 'PASS';
+export type ShopItemType = 'COSMETIC' | 'POWERUP' | 'DECORATION' | 'PASS' | 'HAT' | 'AURA' | 'FRAME' | 'THEME';
 
 export interface ShopItem {
   id: string;

@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma';
 import { awardXpAndGold } from './xp.service';
 import { checkAchievements } from './achievement.service';
+import { createNotification } from './notification.service';
 import type { QuestCategory, QuestDifficulty, QuestStatus, QuestType } from '@prisma/client';
 
 export interface CreateQuestInput {
@@ -39,7 +40,7 @@ export interface QuestFilters {
 }
 
 const XP_BASE: Record<QuestDifficulty, number> = { EASY: 25, NORMAL: 50, HARD: 100, EPIC: 250 };
-const XP_TYPE_MULTIPLIER: Record<QuestType, number> = { DAILY: 1, WEEKLY: 2.5, SIDE: 4, MAIN: 10 };
+const XP_TYPE_MULTIPLIER: Record<QuestType, number> = { DAILY: 1, WEEKLY: 2.5, SIDE: 4, MAIN: 10, META: 8 };
 const DIFFICULTY_ORDER: Record<QuestDifficulty, number> = { EASY: 1, NORMAL: 2, HARD: 3, EPIC: 4 };
 
 export function calculateXpReward(difficulty: QuestDifficulty, type: QuestType): number {
@@ -211,6 +212,9 @@ export async function completeQuest(userId: string, questId: string) {
     category: quest.category,
   });
 
+  // Get user's birthDate for birthday achievement check
+  const userMeta = await prisma.user.findUnique({ where: { id: userId }, select: { birthDate: true } });
+
   // Check achievements after completing quest
   const achievements = await checkAchievements(userId, 'quest_completed', {
     questDifficulty: quest.difficulty,
@@ -218,7 +222,37 @@ export async function completeQuest(userId: string, questId: string) {
     completedHour,
     leveledUp: result.leveledUp,
     newLevel: result.newLevel,
+    userBirthDate: userMeta?.birthDate ?? null,
   });
+
+  // Personalized in-app notifications
+  createNotification(userId, {
+    type: 'quest_completed',
+    title: `⚔️ "${quest.title}" completada`,
+    body: `+${result.xpGained} XP y +${result.goldGained} gold. ${result.leveledUp ? `¡Subiste al nivel ${result.newLevel}! 🎉` : ''}`.trim(),
+    icon: '⚔️',
+    link: '/quests',
+  }).catch(() => {});
+
+  if (result.leveledUp) {
+    createNotification(userId, {
+      type: 'level_up',
+      title: `🌟 ¡Nivel ${result.newLevel} alcanzado!`,
+      body: `Tu perseverancia te ha llevado al nivel ${result.newLevel}. Nuevas aventuras te esperan.`,
+      icon: '🌟',
+      link: '/character',
+    }).catch(() => {});
+  }
+
+  for (const ach of achievements) {
+    createNotification(userId, {
+      type: 'achievement',
+      title: `${ach.icon} Logro desbloqueado: ${ach.title}`,
+      body: ach.description,
+      icon: ach.icon,
+      link: '/achievements',
+    }).catch(() => {});
+  }
 
   const updatedUser = await prisma.user.findUniqueOrThrow({
     where: { id: userId },

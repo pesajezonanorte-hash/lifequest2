@@ -12,6 +12,7 @@ interface Props {
   accessory?: Accessory;
   expression?: Expression;
   animate?: 'idle' | 'celebrate' | 'hurt' | 'none';
+  mood?: number;
 }
 
 export function MiguelSprite({
@@ -25,6 +26,7 @@ export function MiguelSprite({
   accessory = 'none',
   expression = 'normal',
   animate = 'idle',
+  mood = 3,
 }: Props) {
   const idleVariants = {
     animate: {
@@ -56,12 +58,28 @@ export function MiguelSprite({
     none: {},
   };
 
+  const isLowMood = mood <= 2;
+  const isHighMood = mood >= 4;
+  const resolvedExpression: Expression = isLowMood
+    ? 'serious'
+    : isHighMood
+      ? 'smile'
+      : expression;
+  const moodAnimation = isLowMood
+    ? { rotate: -2, y: 3 }
+    : isHighMood
+      ? { y: [0, -2, 0], scale: [1, 1.02, 1] }
+      : {};
+
   return (
     <motion.div
       style={{ width: size, height: size * 1.25, imageRendering: 'pixelated' }}
       variants={variants[animate]}
-      animate="animate"
+      animate={{ ...(variants[animate] as { animate?: Record<string, unknown> }).animate, ...moodAnimation }}
+      initial={false}
+      whileHover={isHighMood ? { scale: 1.03 } : undefined}
       className="inline-block"
+      transition={{ duration: 0.4 }}
     >
       <svg
         width={size}
@@ -70,6 +88,13 @@ export function MiguelSprite({
         xmlns="http://www.w3.org/2000/svg"
         style={{ imageRendering: 'pixelated' }}
       >
+        {isHighMood && (
+          <>
+            <ellipse cx="16" cy="20" rx="14" ry="18" fill="rgba(245, 158, 11, 0.08)" />
+            <ellipse cx="16" cy="20" rx="11" ry="15" fill="rgba(255, 215, 0, 0.08)" />
+          </>
+        )}
+        <g transform={isLowMood ? 'translate(0 2) rotate(-4 16 20)' : isHighMood ? 'translate(0 -1)' : undefined}>
         {/* Cabello - diferentes estilos */}
         {bodyType === 'female' ? (
           <>
@@ -170,25 +195,25 @@ export function MiguelSprite({
         <rect x="13" y="9"  width="1" height="1" fill="white" />
         <rect x="19" y="9"  width="1" height="1" fill="white" />
         {/* Expresión - Boca */}
-        {expression === 'smile' && (
+        {resolvedExpression === 'smile' && (
           <>
             <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
             <rect x="13" y="14" width="2" height="1" fill="#c0392b" />
             <rect x="17" y="14" width="2" height="1" fill="#c0392b" />
           </>
         )}
-        {expression === 'serious' && (
+        {resolvedExpression === 'serious' && (
           <>
             <rect x="13" y="14" width="6" height="1" fill="#8b4513" />
           </>
         )}
-        {expression === 'determined' && (
+        {resolvedExpression === 'determined' && (
           <>
             <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
             <rect x="14" y="14" width="4" height="1" fill="#ff0000" />
           </>
         )}
-        {expression === 'normal' && (
+        {resolvedExpression === 'normal' && (
           <>
             <rect x="13" y="13" width="6" height="1" fill="#8b4513" />
             <rect x="14" y="14" width="4" height="1" fill="#c0392b" />
@@ -284,6 +309,7 @@ export function MiguelSprite({
             <polygon points="13,17 17,17 17,19 13,19" fill="#c0392b" />
           </>
         )}
+        </g>
       </svg>
     </motion.div>
   );

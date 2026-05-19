@@ -18,32 +18,37 @@ const THEMES = [
   { id: 'retro', name: 'Retro SNES', cost: 500, description: '16-bit clásico', emoji: '🕹️', preview: '#16213e' },
 ];
 
-function useDarkMode() {
-  const stored = localStorage.getItem('theme');
-  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const [isDark, setIsDark] = useState(stored === 'dark' || (!stored && systemDark));
+type ThemeMode = 'dark' | 'light' | 'system';
 
-  useEffect(() => {
-    const html = document.documentElement;
-    if (isDark) {
-      html.classList.add('dark');
-      html.classList.remove('light');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      html.classList.add('light');
-      html.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
+function applyTheme(mode: ThemeMode) {
+  const html = document.documentElement;
+  html.classList.remove('dark', 'light');
+  if (mode === 'system') {
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    html.classList.add(systemDark ? 'dark' : 'light');
+  } else {
+    html.classList.add(mode);
+  }
+  localStorage.setItem('theme', mode);
+}
 
-  return { isDark, toggle: () => setIsDark(v => !v) };
+function useThemeMode() {
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'system') return stored;
+    return 'dark';
+  });
+
+  useEffect(() => { applyTheme(mode); }, [mode]);
+
+  return { mode, setMode };
 }
 
 export default function SettingsPage() {
   const { user, updateUser } = useAuthStore();
   const toast = useToast();
   const navigate = useNavigate();
-  const { isDark, toggle: toggleDark } = useDarkMode();
+  const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
   const { audioEnabled, toggleAudio } = useUIStore();
   const [animationsEnabled, setAnimationsEnabled] = useState(() => localStorage.getItem('animations') !== 'false');
 
@@ -227,9 +232,40 @@ export default function SettingsPage() {
             <p className="font-vt text-text-secondary text-sm">Los temas de pago se desbloquean en la tienda</p>
           </div>
 
+          {/* Tema de color */}
+          <div className="py-2 border-b border-border-pixel">
+            <p className="font-pixel text-text-secondary mb-1" style={{ fontSize: '8px' }}>APARIENCIA</p>
+            <div className="flex gap-2 mt-2">
+              {([
+                { value: 'dark',   label: '🌙 Oscuro',    desc: 'Por defecto' },
+                { value: 'light',  label: '☀️ Claro',     desc: '' },
+                { value: 'system', label: '💻 Automático', desc: 'Según el SO' },
+              ] as { value: ThemeMode; label: string; desc: string }[]).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setThemeMode(opt.value)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 6px',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: themeMode === opt.value ? 700 : 500,
+                    border: `1px solid ${themeMode === opt.value ? 'var(--primary)' : 'var(--border)'}`,
+                    background: themeMode === opt.value
+                      ? 'color-mix(in oklab, var(--primary) 14%, transparent)'
+                      : 'var(--bg-panel)',
+                    color: themeMode === opt.value ? 'var(--primary)' : 'var(--text-2)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Toggles */}
           {[
-            { label: 'MODO OSCURO', hint: 'Cambia la apariencia de la app', active: isDark, onToggle: toggleDark },
             { label: 'SONIDOS', hint: 'Efectos de audio en la interfaz', active: audioEnabled, onToggle: toggleAudio },
             { label: 'ANIMACIONES', hint: 'Transiciones y efectos visuales', active: animationsEnabled, onToggle: handleToggleAnimations },
           ].map(({ label, hint, active, onToggle }) => (

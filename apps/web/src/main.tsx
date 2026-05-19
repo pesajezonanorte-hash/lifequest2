@@ -6,12 +6,16 @@ import { PWAInstallBanner } from './components/ui/PWAInstallBanner';
 import './styles/globals.css';
 
 // Apply saved theme preference immediately to avoid flash
-const savedTheme = localStorage.getItem('theme');
-const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+// Default is always 'dark' regardless of system preference
+const savedTheme = localStorage.getItem('theme') ?? 'dark';
+if (savedTheme === 'dark') {
   document.documentElement.classList.add('dark');
-} else {
+} else if (savedTheme === 'light') {
   document.documentElement.classList.add('light');
+} else {
+  // 'system' mode
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.classList.add(systemDark ? 'dark' : 'light');
 }
 
 // Register service worker

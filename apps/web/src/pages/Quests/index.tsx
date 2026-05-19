@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Quest } from '@lifequest/shared';
 import { useAuthStore } from '../../store/authStore';
@@ -15,12 +16,13 @@ import * as questService from '../../services/quest.service';
 import { SageContextButton } from '../../components/sage/SageContextButton';
 
 const TABS = [
-  { key: '',       label: 'Todas',       icon: '📜' },
-  { key: 'MAIN',   label: 'Principales', icon: '⚔️' },
-  { key: 'SIDE',   label: 'Secundarias', icon: '🗡️' },
-  { key: 'DAILY',  label: 'Diarias',     icon: '☀️' },
-  { key: 'WEEKLY', label: 'Semanales',   icon: '📅' },
-  { key: 'COMPLETED', label: 'Completadas', icon: '✅' },
+  { key: '',        label: 'Todas',        icon: '📜' },
+  { key: 'MAIN',    label: 'Principales',  icon: '⚔️' },
+  { key: 'SIDE',    label: 'Secundarias',  icon: '🗡️' },
+  { key: 'DAILY',   label: 'Diarias',      icon: '☀️' },
+  { key: 'WEEKLY',  label: 'Semanales',    icon: '📅' },
+  { key: 'META',    label: 'Metas',        icon: '🎯' },
+  { key: 'COMPLETED', label: 'Completadas',icon: '✅' },
 ] as const;
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -32,10 +34,15 @@ export default function QuestsPage() {
   const user = useAuthStore((s) => s.user);
   const { addFloatingXP, flashScreen, showAchievementToast, triggerLevelUp } = useUIStore();
   const toast = useToastStore();
+  const [searchParams] = useSearchParams();
 
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('');
+  const [activeTab, setActiveTab] = useState(() => {
+    const filter = searchParams.get('filter');
+    if (filter === 'meta') return 'META';
+    return '';
+  });
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [showWizard, setShowWizard] = useState(false);
   const [editingQuest, setEditingQuest] = useState<Quest | null>(null);

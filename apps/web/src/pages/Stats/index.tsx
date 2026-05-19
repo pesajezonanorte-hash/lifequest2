@@ -9,12 +9,12 @@ import {
   getStatsSummary, getXpHistory, getActivityRadar,
   getFinanceTrend, getHabitHeatmap, getSleepScatter,
 } from '../../services/stats.service';
-import { fetchLifeScore } from '../../services/lifescore.service';
-import type { LifeScore } from '../../services/lifescore.service';
+import { fetchLifeScore, fetchDynamicLifeScore } from '../../services/lifescore.service';
+import type { LifeScore, DynamicLifeScoreData } from '../../services/lifescore.service';
 import { getCheckinHistory } from '../../services/checkin.service';
 import type { DailyCheckin } from '../../services/checkin.service';
 import { useAuthStore } from '../../store/authStore';
-import { ProgressRings } from '../../components/ui/ProgressRings';
+import { DynamicLifeScore } from '../../components/ui/DynamicLifeScore';
 
 type Period = 'week' | 'month' | '3months' | 'year';
 const PERIODS: { id: Period; label: string }[] = [
@@ -23,48 +23,6 @@ const PERIODS: { id: Period; label: string }[] = [
   { id: '3months', label: '3 Meses' },
   { id: 'year', label: 'Año' },
 ];
-
-// ─── Life Score Rings (Apple Watch style, concentric, completos) ───────────
-
-function LifeScoreRings({ score }: { score: LifeScore }) {
-  const SIZE = 200;
-  const bd = score.breakdown as Record<string, number>;
-  const questsPct = Math.round(bd.quests ?? bd.missions ?? 0);
-  const habitsPct = Math.round(bd.habits ?? bd.discipline ?? 0);
-  const financePct = Math.round(bd.finance ?? bd.finances ?? 0);
-
-  const legend = [
-    { label: 'Misiones', color: '#ff5e8a', value: questsPct },
-    { label: 'Hábitos',  color: '#48dbfb', value: habitsPct },
-    { label: 'Finanzas', color: '#ffd23f', value: financePct },
-  ];
-
-  return (
-    <div className="flex flex-col items-center">
-      <ProgressRings
-        size={SIZE}
-        stroke={14}
-        gap={4}
-        centerLabel={score.total}
-        centerSubLabel="Life Score"
-        rings={[
-          { progress: questsPct,  color: '#ff5e8a' },
-          { progress: habitsPct,  color: '#48dbfb' },
-          { progress: financePct, color: '#ffd23f' },
-        ]}
-      />
-      <div className="flex gap-4 mt-3 flex-wrap justify-center">
-        {legend.map((l) => (
-          <div key={l.label} className="flex items-center gap-1.5 text-xs">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: l.color }} />
-            <span className="text-[var(--text-muted)]">{l.label}</span>
-            <span className="font-semibold" style={{ color: l.color }}>{l.value}%</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // ─── Habit Heatmap ─────────────────────────────────────────────────────────
 
@@ -290,6 +248,7 @@ export default function StatsPage() {
   const { user } = useAuthStore();
   const [period, setPeriod] = useState<Period>('month');
   const [lifeScore, setLifeScore] = useState<LifeScore | null>(null);
+  const [dynamicScore, setDynamicScore] = useState<DynamicLifeScoreData | null>(null);
   const [xpHistory, setXpHistory] = useState<{ date: string; xp: number }[]>([]);
   const [radarData, setRadarData] = useState<{ subject: string; current: number }[]>([]);
   const [heatmap, setHeatmap] = useState<{ date: string; count: number }[]>([]);
@@ -300,8 +259,9 @@ export default function StatsPage() {
   const load = useCallback(async (p: Period) => {
     setLoading(true);
     try {
-      const [score, xp, radar, hm, chk, sum] = await Promise.allSettled([
+      const [score, dynScore, xp, radar, hm, chk, sum] = await Promise.allSettled([
         fetchLifeScore(),
+        fetchDynamicLifeScore(),
         getXpHistory(p),
         getActivityRadar(),
         getHabitHeatmap(),
@@ -309,6 +269,7 @@ export default function StatsPage() {
         getStatsSummary(p),
       ]);
       if (score.status === 'fulfilled') setLifeScore(score.value);
+      if (dynScore.status === 'fulfilled') setDynamicScore(dynScore.value);
       if (xp.status === 'fulfilled') setXpHistory((xp.value as any).data ?? xp.value ?? []);
       if (radar.status === 'fulfilled') {
         const raw = (radar.value as any);
@@ -344,11 +305,12 @@ export default function StatsPage() {
     return result;
   })();
 
+  const displayScore = dynamicScore?.totalScore ?? lifeScore?.total ?? null;
   const insightCards = [
-    lifeScore && {
+    displayScore !== null && {
       label: 'Life Score',
-      value: `${lifeScore.total}/100`,
-      color: lifeScore.total >= 70 ? 'var(--accent-green)' : 'var(--accent-gold)',
+      value: `${displayScore}/100`,
+      color: displayScore >= 70 ? 'var(--accent-green)' : 'var(--accent-gold)',
       icon: '⭐',
     },
     user && user.longestStreak > 0 && {
@@ -399,36 +361,37 @@ export default function StatsPage() {
       </div>
 
       {/* Life Score Rings Hero */}
-      {lifeScore && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-6 flex flex-col sm:flex-row items-center gap-8"
-          style={{ borderColor: 'var(--accent-gold)44' }}
-        >
-          <LifeScoreRings score={lifeScore} />
-          <div className="flex-1 space-y-3">
-            <h2 className="text-base font-bold text-[var(--text-primary)]">Tu Life Score esta semana</h2>
-            {Object.entries(lifeScore.breakdown).map(([key, val]) => (
-              <div key={key}>
-                <div className="flex justify-between text-xs mb-0.5">
-                  <span className="capitalize text-[var(--text-secondary)]">{key}</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{val}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ background: 'var(--accent-gold)' }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${val}%` }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
-            ))}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-6"
+        style={{ borderColor: 'var(--accent-gold)44' }}
+      >
+        <h2 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
+          <span>⭐</span> Life Score Dinámico
+          {dynamicScore && dynamicScore.trend !== 0 && (
+            <span className={`text-xs ml-auto font-medium ${dynamicScore.trend > 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-pink)]'}`}>
+              {dynamicScore.trend > 0 ? '▲' : '▼'} {Math.abs(dynamicScore.trend)} pts vs semana pasada
+            </span>
+          )}
+        </h2>
+        {dynamicScore ? (
+          <DynamicLifeScore
+            totalScore={dynamicScore.totalScore}
+            zones={dynamicScore.zones}
+            size={220}
+            stroke={13}
+            gap={3}
+          />
+        ) : lifeScore ? (
+          <div className="flex flex-col items-center py-4">
+            <span className="text-5xl font-extrabold" style={{ color: 'var(--text-primary)' }}>{lifeScore.total}</span>
+            <span className="text-xs uppercase tracking-widest mt-1" style={{ color: 'var(--text-muted)' }}>Life Score</span>
           </div>
-        </motion.div>
-      )}
+        ) : (
+          <p className="text-center text-sm py-4" style={{ color: 'var(--text-muted)' }}>Cargando...</p>
+        )}
+      </motion.div>
 
       {/* Insight Cards */}
       {insightCards.length > 0 && (

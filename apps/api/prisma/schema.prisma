@@ -15,6 +15,7 @@ enum QuestType {
   SIDE
   DAILY
   WEEKLY
+  META
 }
 
 enum QuestStatus {
@@ -99,10 +100,14 @@ model User {
   relationshipStatus RelationshipStatus @default(SINGLE)
 
   onboardingCompleted Boolean   @default(false)
+  onboardingCompletedAt DateTime?
   birthDate           DateTime?
   currentStreak       Int       @default(0)
   longestStreak       Int       @default(0)
   lastActivityDate    DateTime?
+  sevenDayGuideCompletedDays Json      @default("[]")
+  sevenDayGuideCompletedAt   DateTime?
+  sevenDayGuideDismissedAt   DateTime?
 
   inviteCode         String?  @unique
   sageCallsToday     Int      @default(0)
@@ -114,6 +119,11 @@ model User {
   classChosenAt  DateTime?
   activeTheme    String   @default("aurora")
   bedtimeGoal    String?
+
+  equippedHat    String?
+  equippedAura   String?
+  equippedFrame  String?
+  equippedTheme  String?
   morningBriefingLastSeen DateTime?
 
   // Fase 9 — Glow Up
@@ -157,6 +167,9 @@ model User {
   guildMessages           GuildMessage[]
   sageMemories            SageMemory[]
   sageInsights            SageInsight[]
+  sageProactiveNotes      SageProactiveNote[]
+  weeklySummaries         WeeklySummary[]
+  recoveryChallenges      RecoveryChallenge[]
   seasonParticipants      SeasonParticipant[]
   agendaEvents            AgendaEvent[]
   bodyWeights             BodyWeight[]
@@ -173,6 +186,13 @@ model User {
   sageScrolls             SageScroll[]
   focusSessions           FocusSession[]
   inAppNotifications      Notification[]
+  customZones             CustomZone[]
+  careRoutines            CareRoutine[]
+  careLogs                CareLog[]
+  clothingItems           ClothingItem[]
+  outfits                 Outfit[]
+  styleWishlists          StyleWishlist[]
+  presenceCheckins        PresenceCheckin[]
 
   @@map("users")
 }
@@ -181,6 +201,9 @@ model Quest {
   id     String @id @default(cuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  customZoneId String?
+  customZone   CustomZone? @relation(fields: [customZoneId], references: [id])
 
   title       String
   description String?
@@ -233,9 +256,14 @@ model Habit {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  customZoneId String?
+  customZone   CustomZone? @relation(fields: [customZoneId], references: [id])
+
   title       String
   description String?
   category    QuestCategory
+
+  isRitual Boolean @default(false)
 
   icon  String @default("⭐")
   color String @default("#ffd23f")
@@ -255,6 +283,7 @@ model Habit {
   updatedAt DateTime @updatedAt
 
   logs HabitLog[]
+  recoveryChallenges RecoveryChallenge[]
 
   @@map("habits")
 }
@@ -736,6 +765,59 @@ model SageInsight {
   @@map("sage_insights")
 }
 
+model SageProactiveNote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  tone      String   @default("neutral") // 'positive' | 'warning' | 'motivational' | 'neutral'
+  icon      String   @default("🧙")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("sage_proactive_notes")
+}
+
+model WeeklySummary {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekStart   DateTime
+  weekEnd     DateTime
+  summary     String   // AI-generated text
+  lifeScore   Int      @default(0)
+  xpTotal     Int      @default(0)
+  goldTotal   Int      @default(0)
+  questsCount Int      @default(0)
+  habitsCount Int      @default(0)
+  topHabit    String?
+  mood        Float?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, weekStart])
+  @@map("weekly_summaries")
+}
+
+model RecoveryChallenge {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitId      String
+  habit        Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  lostStreak   Int
+  requiredDays Int      @default(3)
+  currentDays  Int      @default(0)
+  bonusXp      Int
+  isCompleted  Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId, isCompleted, expiresAt])
+  @@map("recovery_challenges")
+}
+
 // ─── Agenda ───────────────────────────────────────────────────────────────────
 
 model AgendaEvent {
@@ -1081,4 +1163,151 @@ model Notification {
 
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+// ─── Phase 3 Custom Zones ─────────────────────────────────────────────────────
+
+model CustomZone {
+  id        String @id @default(cuid())
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name          String
+  description   String?
+  accentColor   String  @default("#ec4899")
+  icon          String  @default("📍")
+
+  isActive      Boolean @default(true)
+  isMeasurable  Boolean @default(false)
+  measureMetric String? // 'quests_completed' | 'habits_streak' | 'xp_gained' | 'sessions'
+  weeklyXpGoal  Int?
+  order         Int     @default(0)
+
+  sections      Json?   // sections generated by AI
+  actions       Json?   // quick action buttons generated by AI
+  content       Json    @default("[]")  // notas inline
+  quests        Quest[]
+  habits        Habit[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId, isActive])
+  @@map("custom_zones")
+}
+
+// ─── El Espejo (Bloque 3) ─────────────────────────────────────────────────────
+
+model CareRoutine {
+  id            String     @id @default(cuid())
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  timeOfDay     String     // 'morning' | 'night' | 'weekly' | 'custom'
+  steps         CareStep[]
+  logs          CareLog[]
+  currentStreak Int        @default(0)
+  longestStreak Int        @default(0)
+  lastDoneAt    DateTime?
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+
+  @@map("care_routines")
+}
+
+model CareStep {
+  id        String      @id @default(cuid())
+  routineId String
+  routine   CareRoutine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  name      String
+  product   String?
+  order     Int
+
+  @@map("care_steps")
+}
+
+model CareLog {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  routineId String
+  routine   CareRoutine @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  date      DateTime
+  completed Boolean     @default(true)
+  createdAt DateTime    @default(now())
+
+  @@map("care_logs")
+}
+
+model ClothingItem {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  category   String       // 'tops'|'bottoms'|'shoes'|'outerwear'|'accessories'
+  color      String?
+  brand      String?
+  cost       Decimal?     @db.Decimal(15, 2)
+  timesWorn  Int          @default(0)
+  lastWornAt DateTime?
+  isFavorite Boolean      @default(false)
+  outfitItems OutfitItem[]
+  createdAt  DateTime     @default(now())
+
+  @@map("clothing_items")
+}
+
+model Outfit {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String?
+  items      OutfitItem[]
+  occasion   String?
+  rating     Int?
+  lastWornAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  @@map("outfits")
+}
+
+model OutfitItem {
+  id             String       @id @default(cuid())
+  outfitId       String
+  outfit         Outfit       @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  clothingItemId String
+  clothingItem   ClothingItem @relation(fields: [clothingItemId], references: [id])
+
+  @@map("outfit_items")
+}
+
+model StyleWishlist {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  category      String?
+  estimatedCost Decimal? @db.Decimal(15, 2)
+  priority      String   @default("medium")
+  url           String?
+  isPurchased   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@map("style_wishlist")
+}
+
+model PresenceCheckin {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week          DateTime
+  posture       Int
+  voice         Int
+  confidence    Int
+  communication Int
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, week])
+  @@map("presence_checkins")
 }

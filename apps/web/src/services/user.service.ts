@@ -36,3 +36,34 @@ export async function fetchDashboard() {
   const { data } = await api.get('/dashboard');
   return data;
 }
+
+export interface GuideCompletionResult {
+  alreadyCompleted: boolean;
+  day: number;
+  completedDays: number[];
+  guideCompleted: boolean;
+  celebration?: boolean;
+  achievementUnlocked?: boolean;
+  rewards?: {
+    xpEarned: number;
+    goldEarned: number;
+    leveledUp: boolean;
+    newLevel?: number;
+    statIncreases?: {
+      strength?: number;
+      intelligence?: number;
+      charisma?: number;
+      hp?: number;
+      mp?: number;
+    };
+  };
+}
+
+export async function completeGuideDay(day: number): Promise<GuideCompletionResult> {
+  const { data } = await api.post('/users/me/guide/complete', { day });
+  return data;
+}
+
+export async function dismissGuide(): Promise<void> {
+  await api.post('/users/me/guide/dismiss');
+}

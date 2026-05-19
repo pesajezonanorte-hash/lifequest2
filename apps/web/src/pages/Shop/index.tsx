@@ -9,12 +9,21 @@ import * as shopService from '../../services/shop.service';
 
 const TYPE_TABS = [
   { key: '', label: '🛒 Todo' },
-  { key: 'COSMETIC', label: '👗 Cosméticos' },
+  { key: 'HAT', label: '🎩 Sombreros' },
+  { key: 'AURA', label: '✨ Auras' },
+  { key: 'FRAME', label: '🖼️ Marcos' },
+  { key: 'THEME', label: '🎨 Temas' },
   { key: 'POWERUP', label: '⚡ Power-ups' },
   { key: 'PASS', label: '🎭 Pases' },
+  { key: 'COSMETIC', label: '👗 Cosméticos' },
 ] as const;
 
-const TYPE_LABELS: Record<string, string> = { COSMETIC: 'Cosmético', POWERUP: 'Power-up', DECORATION: 'Decoración', PASS: 'Pase especial' };
+const TYPE_LABELS: Record<string, string> = {
+  COSMETIC: 'Cosmético', POWERUP: 'Power-up', DECORATION: 'Decoración',
+  PASS: 'Pase especial', HAT: 'Sombrero', AURA: 'Aura', FRAME: 'Marco', THEME: 'Tema de color',
+};
+
+const EQUIPPABLE_TYPES = new Set(['COSMETIC', 'HAT', 'AURA', 'FRAME', 'THEME']);
 
 function ConfirmPurchaseModal({ item, userGold, onConfirm, onClose }: { item: ShopItem; userGold: number; onConfirm: () => void; onClose: () => void }) {
   const canAfford = userGold >= item.cost;
@@ -88,7 +97,11 @@ export default function ShopPage() {
   }
 
   async function handleEquip(invItem: InventoryItem) {
-    setInventory(prev => prev.map(i => ({ ...i, isEquipped: i.id === invItem.id ? !i.isEquipped : (invItem.shopItem.type === 'COSMETIC' ? false : i.isEquipped) })));
+    const sameType = EQUIPPABLE_TYPES.has(invItem.shopItem.type);
+    setInventory(prev => prev.map(i => ({
+      ...i,
+      isEquipped: i.id === invItem.id ? !i.isEquipped : (sameType && i.shopItem.type === invItem.shopItem.type ? false : i.isEquipped),
+    })));
     try {
       const updated = await shopService.equipItem(invItem.id);
       setInventory(prev => prev.map(i => i.id === updated.id ? updated : i));
@@ -215,7 +228,7 @@ export default function ShopPage() {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {inv.shopItem.type === 'COSMETIC' && (
+                      {EQUIPPABLE_TYPES.has(inv.shopItem.type) && (
                         <PixelButton variant={inv.isEquipped ? 'primary' : 'secondary'} onClick={() => handleEquip(inv)}>
                           {inv.isEquipped ? 'EQUIPADO' : 'EQUIPAR'}
                         </PixelButton>

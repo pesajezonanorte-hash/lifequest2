@@ -21,6 +21,7 @@ export interface Habit {
   resetTime: string;
   reminderTime?: string;
   isActive: boolean;
+  isRitual: boolean;
   createdAt: string;
   updatedAt: string;
   todayStatus?: 'completed' | 'failed' | 'skipped' | null;
@@ -58,6 +59,11 @@ export interface HabitLogResult {
     icon: string;
     xpReward: number;
   }>;
+  recoveryCompleted?: {
+    id: string;
+    bonusXp: number;
+    restoredStreak: number;
+  } | null;
 }
 
 export interface CreateHabitPayload {

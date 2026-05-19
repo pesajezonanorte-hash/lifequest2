@@ -139,6 +139,139 @@ export async function calculateLifeScore(userId: string): Promise<{
   return { total, breakdown };
 }
 
+// ─── Dynamic Life Score (all active zones) ────────────────────────────────────
+
+export interface ZoneScore {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  score: number;
+  hasData: boolean;
+}
+
+export async function calculateDynamicLifeScore(userId: string): Promise<{
+  totalScore: number;
+  zones: ZoneScore[];
+  trend: string;
+}> {
+  const now = new Date();
+  const twoWeeksAgo = new Date(now.getTime() - 14 * 86400000);
+  const lastWeekAgo = new Date(now.getTime() - 7 * 86400000);
+  const prevWeekStart = new Date(now.getTime() - 14 * 86400000);
+  const prevWeekEnd = new Date(now.getTime() - 7 * 86400000);
+
+  const [
+    habits, habitLogs, workouts, sleepLogs, transactions, questCompletions,
+    learningItems, journalEntries, customZones, careRoutines, careLogs,
+  ] = await Promise.all([
+    prisma.habit.findMany({ where: { userId, isActive: true } }),
+    prisma.habitLog.findMany({ where: { userId, date: { gte: twoWeeksAgo }, completed: true } }),
+    prisma.workout.findMany({ where: { userId, date: { gte: twoWeeksAgo } } }),
+    prisma.sleepLog.findMany({ where: { userId, date: { gte: twoWeeksAgo } } }),
+    prisma.transaction.findMany({ where: { userId, date: { gte: twoWeeksAgo } } }),
+    prisma.questCompletion.findMany({ where: { userId, completedAt: { gte: twoWeeksAgo } } }),
+    prisma.learningItem.findMany({ where: { userId, status: { not: 'NOT_STARTED' } } }),
+    prisma.journalEntry.findMany({ where: { userId, date: { gte: twoWeeksAgo } } }),
+    prisma.customZone.findMany({ where: { userId, isActive: true, isMeasurable: true } }),
+    prisma.careRoutine.findMany({ where: { userId, isActive: true } }),
+    prisma.careLog.findMany({ where: { userId, date: { gte: twoWeeksAgo } } }),
+  ]);
+
+  const zones: ZoneScore[] = [];
+
+  // Misiones
+  if (questCompletions.length > 0) {
+    const score = Math.min(100, questCompletions.length * 8);
+    zones.push({ id: 'quests', name: 'Misiones', icon: '⚔️', color: '#8b5cf6', score, hasData: true });
+  }
+
+  // Hábitos
+  if (habits.length > 0 && habitLogs.length > 0) {
+    const possible = habits.length * 14;
+    const score = Math.min(100, Math.round((habitLogs.length / possible) * 100));
+    zones.push({ id: 'habits', name: 'Hábitos', icon: '🔥', color: '#f59e0b', score, hasData: true });
+  }
+
+  // Coliseo (Fitness)
+  if (workouts.length > 0) {
+    const score = Math.min(100, Math.round((workouts.length / 6) * 100));
+    zones.push({ id: 'gym', name: 'Coliseo', icon: '💪', color: '#ef4444', score, hasData: true });
+  }
+
+  // Bóveda (Finanzas)
+  if (transactions.length > 0) {
+    const income = transactions.filter(t => t.type === 'INCOME').reduce((s, t) => s + Number(t.amount), 0);
+    const expense = transactions.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + Number(t.amount), 0);
+    const savings = income > 0 ? Math.max(0, (income - expense) / income) : 0.5;
+    const score = Math.min(100, Math.round(savings * 100));
+    zones.push({ id: 'finances', name: 'Bóveda', icon: '💰', color: '#10b981', score, hasData: true });
+  }
+
+  // Torre (Sueño)
+  if (sleepLogs.length > 0) {
+    const avgDuration = sleepLogs.reduce((s, l) => s + l.duration, 0) / sleepLogs.length;
+    const score = avgDuration >= 7 ? 100 : Math.round((avgDuration / 9) * 100);
+    zones.push({ id: 'sleep', name: 'Torre', icon: '🌙', color: '#6366f1', score, hasData: true });
+  }
+
+  // Biblioteca (Aprendizaje)
+  const activeLearn = learningItems.filter(l => l.status === 'IN_PROGRESS').length;
+  if (activeLearn > 0) {
+    const score = Math.min(100, activeLearn * 35 + 10);
+    zones.push({ id: 'learning', name: 'Biblioteca', icon: '📚', color: '#06b6d4', score, hasData: true });
+  }
+
+  // Diario
+  if (journalEntries.length > 0) {
+    const score = Math.min(100, journalEntries.length * 8);
+    zones.push({ id: 'journal', name: 'Diario', icon: '📓', color: '#ec4899', score, hasData: true });
+  }
+
+  // El Espejo (rutinas de cuidado)
+  if (careRoutines.length > 0 && careLogs.length > 0) {
+    const possible = careRoutines.length * 14;
+    const score = Math.min(100, Math.round((careLogs.length / possible) * 100));
+    zones.push({ id: 'mirror', name: 'El Espejo', icon: '✨', color: '#a78bfa', score, hasData: true });
+  }
+
+  // Custom measurable zones
+  for (const zone of customZones) {
+    if (!zone.weeklyXpGoal) continue;
+    const zoneXp = await prisma.xpEvent.aggregate({
+      where: { userId, createdAt: { gte: twoWeeksAgo } },
+      _sum: { xpAmount: true },
+    });
+    const earned = zoneXp._sum.xpAmount ?? 0;
+    const score = Math.min(100, Math.round((earned / (zone.weeklyXpGoal * 2)) * 100));
+    if (score > 0) {
+      zones.push({ id: zone.id, name: zone.name, icon: zone.icon, color: zone.accentColor, score, hasData: true });
+    }
+  }
+
+  const filtered = zones.filter(z => z.hasData);
+  const totalScore = filtered.length > 0
+    ? Math.round(filtered.reduce((sum, z) => sum + z.score, 0) / filtered.length)
+    : 0;
+
+  // Trend vs previous week
+  const prevQuestCompletions = await prisma.questCompletion.count({
+    where: { userId, completedAt: { gte: prevWeekStart, lt: prevWeekEnd } },
+  });
+  const prevHabitLogs = await prisma.habitLog.count({
+    where: { userId, date: { gte: prevWeekStart, lt: prevWeekEnd }, completed: true },
+  });
+  const prevScore = prevQuestCompletions * 5 + prevHabitLogs * 3;
+  const currentScore = questCompletions.filter(q => new Date(q.completedAt) >= lastWeekAgo).length * 5
+    + habitLogs.filter(h => new Date(h.date) >= lastWeekAgo).length * 3;
+  const diff = currentScore - prevScore;
+  const trend = diff === 0 ? '→ igual que la semana pasada'
+    : diff > 0 ? `+${Math.min(diff, 15)} vs semana pasada`
+    : `${Math.max(diff, -15)} vs semana pasada`;
+
+  return { totalScore, zones: filtered, trend };
+}
+
 // ─── Smart Correlations (SQL-based) ───────────────────────────────────────────
 
 export async function getCorrelations(userId: string): Promise<string[]> {

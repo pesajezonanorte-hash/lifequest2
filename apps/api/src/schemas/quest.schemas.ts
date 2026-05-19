@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const QUEST_TYPES = ['MAIN', 'SIDE', 'DAILY', 'WEEKLY'] as const;
+const QUEST_TYPES = ['MAIN', 'SIDE', 'DAILY', 'WEEKLY', 'META'] as const;
 const DIFFICULTIES = ['EASY', 'NORMAL', 'HARD', 'EPIC'] as const;
 const CATEGORIES = ['HEALTH', 'FITNESS', 'FINANCE', 'LEARNING', 'LOVE', 'SOCIAL', 'PERSONAL', 'CREATIVE'] as const;
 const STATUSES = ['ACTIVE', 'COMPLETED', 'FAILED', 'ARCHIVED'] as const;

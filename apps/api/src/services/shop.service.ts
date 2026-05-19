@@ -46,6 +46,15 @@ export async function listInventory(userId: string) {
   });
 }
 
+const EQUIP_TYPES = new Set(['COSMETIC', 'HAT', 'AURA', 'FRAME', 'THEME']);
+
+const TYPE_TO_USER_FIELD: Record<string, string> = {
+  HAT: 'equippedHat',
+  AURA: 'equippedAura',
+  FRAME: 'equippedFrame',
+  THEME: 'equippedTheme',
+};
+
 export async function equipItem(userId: string, inventoryItemId: string) {
   const item = await prisma.inventoryItem.findFirst({
     where: { id: inventoryItemId, userId },
@@ -53,17 +62,29 @@ export async function equipItem(userId: string, inventoryItemId: string) {
   });
   if (!item) throw new Error('No encontrado');
 
-  if (item.shopItem.type === 'COSMETIC') {
-    // Unequip other cosmetics of same category
-    await prisma.inventoryItem.updateMany({
-      where: { userId, id: { not: inventoryItemId }, shopItem: { type: 'COSMETIC' } },
-      data: { isEquipped: false },
+  const { type, imageKey } = item.shopItem;
+  if (!EQUIP_TYPES.has(type)) throw new Error('Este ítem no se puede equipar');
+
+  const willEquip = !item.isEquipped;
+
+  // Unequip all items of the same type
+  await prisma.inventoryItem.updateMany({
+    where: { userId, id: { not: inventoryItemId }, shopItem: { type } },
+    data: { isEquipped: false },
+  });
+
+  // Update User equipped field for HAT/AURA/FRAME/THEME
+  const userField = TYPE_TO_USER_FIELD[type];
+  if (userField) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { [userField]: willEquip ? (imageKey ?? null) : null },
     });
   }
 
   return prisma.inventoryItem.update({
     where: { id: inventoryItemId },
-    data: { isEquipped: !item.isEquipped },
+    data: { isEquipped: willEquip },
     include: { shopItem: true },
   });
 }

@@ -39,6 +39,7 @@ const GoalsPage        = lazy(() => import('./pages/Goals'));
 const RitualsPage      = lazy(() => import('./pages/Rituals'));
 const GlowUpPage       = lazy(() => import('./pages/GlowUp'));
 const WisdomPage       = lazy(() => import('./pages/Wisdom'));
+const CustomZonesPage  = lazy(() => import('./pages/CustomZones'));
 const NotFoundPage     = lazy(() => import('./pages/NotFound'));
 const AboutPage        = lazy(() => import('./pages/About'));
 const FAQPage          = lazy(() => import('./pages/FAQ'));
@@ -110,8 +111,11 @@ function AnimatedRoutes() {
           <Route path="/season"                   element={<SeasonPage />} />
           <Route path="/agenda"                   element={<AgendaPage />} />
           <Route path="/life"                     element={<LifePage />} />
-          <Route path="/goals"                    element={<GoalsPage />} />
-          <Route path="/rituals"                  element={<RitualsPage />} />
+          <Route path="/custom-zones"              element={<CustomZonesPage />} />
+          <Route path="/goals"    element={<Navigate to="/quests?filter=meta" replace />} />
+          <Route path="/metas"    element={<Navigate to="/quests?filter=meta" replace />} />
+          <Route path="/rituals"  element={<Navigate to="/habits?filter=ritual" replace />} />
+          <Route path="/rituales" element={<Navigate to="/habits?filter=ritual" replace />} />
           <Route path="/glow-up"                  element={<GlowUpPage />} />
           <Route path="/wisdom"                   element={<WisdomPage />} />
           <Route path="/about"                    element={<AboutPage />} />

@@ -1,276 +1,476 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { TrendingUp, Calendar, Zap, Star, Trophy, ArrowUp, Loader2 } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Plus, Trash2, Check, ShoppingBag, Shirt, Star, BarChart3 } from 'lucide-react';
+import { PixelPanel } from '../../components/ui/PixelPanel';
+import { PixelButton } from '../../components/ui/PixelButton';
+import { useToastStore } from '../../hooks/useToast';
 import api from '../../lib/api';
 
-interface GlowUpData {
-  user: {
-    displayName: string;
-    level: number;
-    currentStreak: number;
-    longestStreak: number;
-    createdAt: string;
-    strength: number;
-    intelligence: number;
-    charisma: number;
-  };
-  stats: {
-    totalQuestsCompleted: number;
-    totalHabitsLogged: number;
-    totalXpEarned: number;
-    totalWorkouts: number;
-    totalFocusMinutes: number;
-    startLevel: number;
-  };
-  milestones: {
-    label: string;
-    date: string;
-    icon: string;
-    type: 'level' | 'streak' | 'quest' | 'habit';
-  }[];
-  bodyWeights: { weight: number; date: string }[];
-  projection: string | null;
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface CareRoutine {
+  id: string; name: string; timeOfDay: string;
+  currentStreak: number; longestStreak: number; lastDoneAt?: string;
+  steps: { id: string; name: string; product?: string; order: number }[];
 }
 
-function StatComparison({ label, before, after, unit = '', color }: {
-  label: string; before: string | number; after: string | number; unit?: string; color: string;
-}) {
-  const improved = Number(after) > Number(before);
-  return (
-    <div className="flex flex-col gap-1">
-      <p className="text-xs text-[var(--text-muted)] font-medium">{label}</p>
-      <div className="flex items-center gap-3">
-        <div className="flex-1 p-3 rounded-xl bg-white/5 text-center">
-          <p className="text-lg font-bold text-[var(--text-muted)]">{before}{unit}</p>
-          <p className="text-[10px] text-[var(--text-muted)]">Inicio</p>
-        </div>
-        <div className="flex flex-col items-center">
-          <ArrowUp size={16} style={{ color, opacity: improved ? 1 : 0.3 }} />
-        </div>
-        <div className="flex-1 p-3 rounded-xl text-center" style={{ background: color + '22' }}>
-          <p className="text-lg font-bold" style={{ color }}>{after}{unit}</p>
-          <p className="text-[10px]" style={{ color, opacity: 0.7 }}>Ahora</p>
-        </div>
-      </div>
-    </div>
-  );
+interface ClothingItem {
+  id: string; name: string; category: string; color?: string;
+  brand?: string; cost?: number; timesWorn: number; isFavorite: boolean;
 }
 
-const MILESTONE_ICONS: Record<string, string> = {
-  level: '⭐',
-  streak: '🔥',
-  quest: '⚔️',
-  habit: '💎',
+interface PresenceCheckin {
+  id: string; week: string;
+  posture: number; voice: number; confidence: number; communication: number;
+}
+
+const TABS = [
+  { key: 'care',     label: '🧴 Cuidado Personal' },
+  { key: 'style',    label: '👔 Estilo' },
+  { key: 'presence', label: '💫 Presencia' },
+] as const;
+
+const CATEGORIES = ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories'];
+const CATEGORY_LABELS: Record<string, string> = {
+  tops: 'Camisas/Tops', bottoms: 'Pantalones', shoes: 'Zapatos',
+  outerwear: 'Abrigos', accessories: 'Accesorios',
+};
+const TIME_OF_DAY = ['morning', 'night', 'weekly', 'custom'];
+const TIME_LABELS: Record<string, string> = {
+  morning: '🌅 Mañana', night: '🌙 Noche', weekly: '📅 Semanal', custom: '⚡ Custom',
 };
 
-function Timeline({ milestones }: { milestones: GlowUpData['milestones'] }) {
+// ─── Care Section ────────────────────────────────────────────────────────────
+
+function CareSection() {
+  const toast = useToastStore();
+  const [routines, setRoutines] = useState<CareRoutine[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showNew, setShowNew] = useState(false);
+  const [form, setForm] = useState({ name: '', timeOfDay: 'morning', steps: [''] });
+  const [completing, setCompleting] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get('/mirror/routines');
+      setRoutines(data);
+    } catch { toast.error('Error cargando rutinas'); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function handleComplete(id: string) {
+    setCompleting(id);
+    try {
+      const { data } = await api.post(`/mirror/routines/${id}/complete`);
+      if (data.alreadyDone) { toast.info('¡Ya completaste esta rutina hoy!'); }
+      else { toast.success('¡Rutina completada! +20 XP'); load(); }
+    } catch { toast.error('Error'); }
+    finally { setCompleting(null); }
+  }
+
+  async function handleCreate() {
+    try {
+      await api.post('/mirror/routines', {
+        name: form.name,
+        timeOfDay: form.timeOfDay,
+        steps: form.steps.filter(Boolean).map((s, i) => ({ name: s, order: i })),
+      });
+      setShowNew(false);
+      setForm({ name: '', timeOfDay: 'morning', steps: [''] });
+      load();
+      toast.success('Rutina creada');
+    } catch { toast.error('Error creando rutina'); }
+  }
+
   return (
-    <div className="relative pl-8 space-y-6">
-      <div className="absolute left-3 top-2 bottom-2 w-px bg-gradient-to-b from-[var(--accent-gold)] via-[var(--accent-cyan)] to-transparent" />
-      {milestones.map((m, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, x: -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.1 }}
-          className="relative"
-        >
-          <div
-            className="absolute -left-8 w-6 h-6 rounded-full flex items-center justify-center text-xs"
-            style={{ background: 'var(--bg-panel)', border: '2px solid var(--accent-gold)' }}
-          >
-            {m.icon || MILESTONE_ICONS[m.type] || '📌'}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="font-pixel text-[var(--text-2)] text-[10px]">TUS RUTINAS DE CUIDADO</p>
+        <PixelButton variant="primary" onClick={() => setShowNew(true)}>+ Nueva rutina</PixelButton>
+      </div>
+
+      {showNew && (
+        <PixelPanel className="p-4 space-y-3">
+          <input
+            className="w-full px-3 py-2 rounded-lg text-sm"
+            style={{ background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text)' }}
+            placeholder="Nombre de la rutina"
+            value={form.name}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          />
+          <div className="flex gap-2 flex-wrap">
+            {TIME_OF_DAY.map(t => (
+              <button key={t} onClick={() => setForm(f => ({ ...f, timeOfDay: t }))}
+                style={{
+                  padding: '4px 10px', borderRadius: 6, fontSize: 12,
+                  border: `1px solid ${form.timeOfDay === t ? 'var(--primary)' : 'var(--border)'}`,
+                  background: form.timeOfDay === t ? 'color-mix(in oklab, var(--primary) 14%, transparent)' : 'var(--bg-panel)',
+                  color: form.timeOfDay === t ? 'var(--primary)' : 'var(--text-2)',
+                }}
+              >{TIME_LABELS[t]}</button>
+            ))}
           </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-3">
-            <p className="text-sm font-semibold text-[var(--text-primary)]">{m.label}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              {new Date(m.date).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
+          <p className="text-xs font-semibold" style={{ color: 'var(--text-2)' }}>Pasos:</p>
+          {form.steps.map((s, i) => (
+            <input key={i}
+              className="w-full px-3 py-2 rounded-lg text-sm"
+              style={{ background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text)' }}
+              placeholder={`Paso ${i + 1}...`}
+              value={s}
+              onChange={e => setForm(f => {
+                const steps = [...f.steps]; steps[i] = e.target.value; return { ...f, steps };
+              })}
+            />
+          ))}
+          <button onClick={() => setForm(f => ({ ...f, steps: [...f.steps, ''] }))}
+            className="text-xs" style={{ color: 'var(--primary)' }}>+ Agregar paso</button>
+          <div className="flex gap-2">
+            <PixelButton variant="primary" onClick={handleCreate} disabled={!form.name}>Crear</PixelButton>
+            <PixelButton variant="secondary" onClick={() => setShowNew(false)}>Cancelar</PixelButton>
           </div>
-        </motion.div>
-      ))}
+        </PixelPanel>
+      )}
+
+      {loading ? (
+        <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>Cargando...</p>
+      ) : routines.length === 0 ? (
+        <PixelPanel className="p-8 text-center">
+          <p className="text-3xl mb-2">🧴</p>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Sin rutinas aún. ¡Crea tu primera!</p>
+        </PixelPanel>
+      ) : (
+        <div className="space-y-3">
+          {routines.map(r => (
+            <PixelPanel key={r.id} className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm">{r.name}</span>
+                    <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-soft)', color: 'var(--text-2)' }}>
+                      {TIME_LABELS[r.timeOfDay]}
+                    </span>
+                  </div>
+                  {r.currentStreak > 0 && (
+                    <p className="text-xs mt-1" style={{ color: 'var(--c-gold)' }}>🔥 {r.currentStreak} días de racha</p>
+                  )}
+                  {r.steps.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {r.steps.map((s, i) => (
+                        <p key={s.id} className="text-xs" style={{ color: 'var(--text-2)' }}>
+                          {i + 1}. {s.name}{s.product && ` (${s.product})`}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <PixelButton
+                  variant="primary"
+                  onClick={() => handleComplete(r.id)}
+                  disabled={completing === r.id}
+                >
+                  <Check size={14} />
+                  {completing === r.id ? '...' : 'Hecho'}
+                </PixelButton>
+              </div>
+            </PixelPanel>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-export default function GlowUpPage() {
-  const [data, setData] = useState<GlowUpData | null>(null);
+// ─── Style Section ────────────────────────────────────────────────────────────
+
+function StyleSection() {
+  const toast = useToastStore();
+  const [items, setItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuthStore();
+  const [activeCategory, setActiveCategory] = useState('');
+  const [showNew, setShowNew] = useState(false);
+  const [form, setForm] = useState({ name: '', category: 'tops', color: '', brand: '', cost: '' });
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const { data: d } = await api.get('/life/glow-up');
-        setData(d);
-      } catch {
-        // build from user data
-        if (user) {
-          setData({
-            user: {
-              displayName: user.displayName,
-              level: user.level,
-              currentStreak: user.currentStreak,
-              longestStreak: user.longestStreak,
-              createdAt: user.createdAt ?? new Date().toISOString(),
-              strength: user.strength,
-              intelligence: user.intelligence,
-              charisma: user.charisma,
-            },
-            stats: {
-              totalQuestsCompleted: 0,
-              totalHabitsLogged: 0,
-              totalXpEarned: user.xp,
-              totalWorkouts: 0,
-              totalFocusMinutes: (user as any).focusMinutesTotal ?? 0,
-              startLevel: 1,
-            },
-            milestones: [
-              { label: 'Comenzaste tu aventura', date: user.createdAt ?? new Date().toISOString(), icon: '🏁', type: 'level' },
-            ],
-            bodyWeights: [],
-            projection: null,
-          });
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [user]);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get('/mirror/wardrobe');
+      setItems(data);
+    } catch { toast.error('Error'); }
+    finally { setLoading(false); }
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <Loader2 size={32} className="animate-spin text-[var(--accent-gold)]" />
-      </div>
-    );
+  useEffect(() => { load(); }, [load]);
+
+  const displayed = activeCategory ? items.filter(i => i.category === activeCategory) : items;
+
+  async function handleCreate() {
+    try {
+      await api.post('/mirror/wardrobe', { ...form, cost: form.cost ? Number(form.cost) : undefined });
+      setShowNew(false); load(); toast.success('Prenda añadida');
+    } catch { toast.error('Error'); }
   }
 
-  if (!data) return null;
+  async function handleWorn(id: string) {
+    try { await api.post(`/mirror/wardrobe/${id}/worn`); load(); } catch { toast.error('Error'); }
+  }
 
-  const daysSinceStart = Math.floor(
-    (Date.now() - new Date(data.user.createdAt).getTime()) / 86400000
-  );
+  async function handleDelete(id: string) {
+    try { await api.delete(`/mirror/wardrobe/${id}`); load(); } catch { toast.error('Error'); }
+  }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-          <Zap className="text-[var(--accent-gold)]" size={24} />
-          El Espejo
-        </h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
-          {data.user.displayName} — {daysSinceStart} días de transformación
-        </p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="font-pixel text-[var(--text-2)] text-[10px]">MI ARMARIO</p>
+        <PixelButton variant="primary" onClick={() => setShowNew(true)}>+ Prenda</PixelButton>
       </div>
 
-      {/* Hero stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: 'Nivel', value: data.user.level, icon: <Star size={16} />, color: 'var(--accent-gold)' },
-          { label: 'Racha actual', value: `${data.user.currentStreak}d`, icon: <TrendingUp size={16} />, color: 'var(--accent-cyan)' },
-          { label: 'XP ganado', value: data.stats.totalXpEarned.toLocaleString(), icon: <Zap size={16} />, color: 'var(--accent-green)' },
-          { label: 'Días activo', value: daysSinceStart, icon: <Calendar size={16} />, color: 'var(--accent-pink)' },
-        ].map((s) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-4 text-center"
-            style={{ borderColor: s.color + '44' }}
-          >
-            <div className="flex justify-center mb-2" style={{ color: s.color }}>{s.icon}</div>
-            <p className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">{s.label}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Antes vs Ahora */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-6">
-        <h2 className="text-base font-bold text-[var(--text-primary)] mb-5 flex items-center gap-2">
-          <TrendingUp size={18} className="text-[var(--accent-cyan)]" />
-          Antes vs Ahora
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <StatComparison
-            label="Nivel" before={data.stats.startLevel} after={data.user.level}
-            color="var(--accent-gold)"
-          />
-          <StatComparison
-            label="Racha máxima" before={0} after={data.user.longestStreak}
-            unit="d" color="var(--accent-cyan)"
-          />
-          <StatComparison
-            label="Fuerza" before={1} after={data.user.strength}
-            color="var(--accent-pink)"
-          />
-          <StatComparison
-            label="Inteligencia" before={1} after={data.user.intelligence}
-            color="var(--accent-green)"
-          />
-          {data.stats.totalWorkouts > 0 && (
-            <StatComparison
-              label="Entrenamientos" before={0} after={data.stats.totalWorkouts}
-              color="var(--accent-pink)"
-            />
-          )}
-          {data.stats.totalFocusMinutes > 0 && (
-            <StatComparison
-              label="Min de enfoque" before={0} after={data.stats.totalFocusMinutes}
-              color="var(--accent-cyan)"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Actividad total */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {[
-          { label: 'Misiones completadas', value: data.stats.totalQuestsCompleted, icon: '⚔️' },
-          { label: 'Hábitos registrados', value: data.stats.totalHabitsLogged, icon: '💎' },
-          { label: 'Entrenamientos', value: data.stats.totalWorkouts, icon: '🏋️' },
-        ].map((s) => (
-          <div key={s.label} className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-4 text-center">
-            <div className="text-3xl mb-1">{s.icon}</div>
-            <p className="text-xl font-bold text-[var(--text-primary)]">{s.value.toLocaleString()}</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">{s.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Timeline */}
-      {data.milestones.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-6">
-          <h2 className="text-base font-bold text-[var(--text-primary)] mb-5 flex items-center gap-2">
-            <Calendar size={18} className="text-[var(--accent-gold)]" />
-            El Camino Recorrido
-          </h2>
-          <Timeline milestones={data.milestones} />
-        </div>
-      )}
-
-      {/* Proyección */}
-      {data.projection && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl p-6"
+      <div className="flex gap-2 flex-wrap">
+        <button onClick={() => setActiveCategory('')}
           style={{
-            background: 'linear-gradient(135deg, var(--accent-gold)22, var(--accent-cyan)11)',
-            border: '1px solid var(--accent-gold)44',
-          }}
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Trophy size={20} className="text-[var(--accent-gold)]" />
-            <h2 className="text-base font-bold text-[var(--text-primary)]">Proyección del Sabio</h2>
+            padding: '4px 10px', borderRadius: 6, fontSize: 12,
+            border: `1px solid ${!activeCategory ? 'var(--primary)' : 'var(--border)'}`,
+            background: !activeCategory ? 'color-mix(in oklab, var(--primary) 14%, transparent)' : 'var(--bg-panel)',
+            color: !activeCategory ? 'var(--primary)' : 'var(--text-2)',
+          }}>Todas</button>
+        {CATEGORIES.map(c => (
+          <button key={c} onClick={() => setActiveCategory(c)}
+            style={{
+              padding: '4px 10px', borderRadius: 6, fontSize: 12,
+              border: `1px solid ${activeCategory === c ? 'var(--primary)' : 'var(--border)'}`,
+              background: activeCategory === c ? 'color-mix(in oklab, var(--primary) 14%, transparent)' : 'var(--bg-panel)',
+              color: activeCategory === c ? 'var(--primary)' : 'var(--text-2)',
+            }}>{CATEGORY_LABELS[c]}</button>
+        ))}
+      </div>
+
+      {showNew && (
+        <PixelPanel className="p-4 space-y-2">
+          {[
+            { key: 'name', label: 'Nombre', placeholder: 'Camiseta azul...' },
+            { key: 'brand', label: 'Marca', placeholder: 'Zara, Nike...' },
+            { key: 'color', label: 'Color', placeholder: '#3b82f6' },
+            { key: 'cost', label: 'Precio (COP)', placeholder: '50000' },
+          ].map(f => (
+            <input key={f.key}
+              className="w-full px-3 py-2 rounded-lg text-sm"
+              style={{ background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text)' }}
+              placeholder={f.placeholder}
+              value={(form as any)[f.key]}
+              onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+            />
+          ))}
+          <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+            className="w-full px-3 py-2 rounded-lg text-sm"
+            style={{ background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+            {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
+          </select>
+          <div className="flex gap-2">
+            <PixelButton variant="primary" onClick={handleCreate} disabled={!form.name}>Añadir</PixelButton>
+            <PixelButton variant="secondary" onClick={() => setShowNew(false)}>Cancelar</PixelButton>
           </div>
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{data.projection}</p>
-        </motion.div>
+        </PixelPanel>
       )}
+
+      {loading ? (
+        <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>Cargando...</p>
+      ) : displayed.length === 0 ? (
+        <PixelPanel className="p-8 text-center">
+          <Shirt size={32} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Tu armario está vacío</p>
+        </PixelPanel>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {displayed.map(item => (
+            <PixelPanel key={item.id} className="p-3 space-y-2">
+              <div className="flex items-start justify-between gap-1">
+                <p className="text-sm font-semibold truncate">{item.name}</p>
+                <button onClick={() => handleDelete(item.id)}
+                  className="shrink-0 p-0.5 rounded hover:bg-red-500/10"
+                  style={{ color: 'var(--text-muted)' }}>
+                  <Trash2 size={12} />
+                </button>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--text-2)' }}>{CATEGORY_LABELS[item.category]}</p>
+              {item.brand && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.brand}</p>}
+              <div className="flex items-center justify-between">
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {item.timesWorn}x usado
+                  {item.cost && item.timesWorn > 0
+                    ? ` · $${Math.round(Number(item.cost) / item.timesWorn).toLocaleString('es-CO')}/uso`
+                    : ''}
+                </p>
+                {item.isFavorite && <Star size={12} style={{ color: 'var(--c-gold)' }} />}
+              </div>
+              <button onClick={() => handleWorn(item.id)}
+                className="w-full text-xs py-1 rounded"
+                style={{ background: 'var(--bg-soft)', color: 'var(--primary)', border: '1px solid var(--border)' }}>
+                Usar hoy
+              </button>
+            </PixelPanel>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Presence Section ─────────────────────────────────────────────────────────
+
+const AREAS = [
+  { key: 'posture',       label: 'Postura' },
+  { key: 'voice',         label: 'Voz' },
+  { key: 'confidence',    label: 'Confianza' },
+  { key: 'communication', label: 'Comunicación' },
+] as const;
+
+function PresenceSection() {
+  const toast = useToastStore();
+  const [checkins, setCheckins] = useState<PresenceCheckin[]>([]);
+  const [form, setForm] = useState({ posture: 3, voice: 3, confidence: 3, communication: 3, notes: '' });
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      const { data } = await api.get('/mirror/checkins');
+      setCheckins(data);
+    } catch { toast.error('Error'); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const week = new Date();
+      week.setHours(0, 0, 0, 0);
+      week.setDate(week.getDate() - week.getDay());
+      await api.post('/mirror/checkins', { week: week.toISOString(), ...form });
+      toast.success('Autoevaluación guardada');
+      load();
+    } catch { toast.error('Error guardando'); }
+    finally { setSaving(false); }
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="font-pixel text-[var(--text-2)] text-[10px]">AUTOEVALUACIÓN SEMANAL</p>
+
+      <PixelPanel className="p-4 space-y-4">
+        {AREAS.map(area => (
+          <div key={area.key}>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">{area.label}</span>
+              <span className="text-sm font-bold" style={{ color: 'var(--primary)' }}>{form[area.key]}/5</span>
+            </div>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map(v => (
+                <button key={v} onClick={() => setForm(f => ({ ...f, [area.key]: v }))}
+                  style={{
+                    flex: 1, padding: '6px 0', borderRadius: 6,
+                    background: form[area.key] >= v
+                      ? 'color-mix(in oklab, var(--primary) 80%, transparent)'
+                      : 'var(--bg-soft)',
+                    border: '1px solid var(--border)',
+                    color: form[area.key] >= v ? 'white' : 'var(--text-2)',
+                    fontSize: 12, fontWeight: 600,
+                  }}>{v}</button>
+              ))}
+            </div>
+          </div>
+        ))}
+        <textarea
+          className="w-full px-3 py-2 rounded-lg text-sm resize-none"
+          style={{ background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text)' }}
+          placeholder="Notas de la semana..."
+          rows={2}
+          value={form.notes}
+          onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+        />
+        <PixelButton variant="primary" onClick={handleSave} disabled={saving}>
+          {saving ? 'Guardando...' : 'Guardar evaluación'}
+        </PixelButton>
+      </PixelPanel>
+
+      {checkins.length > 0 && (
+        <div>
+          <p className="font-pixel text-[var(--text-2)] text-[10px] mb-3">EVOLUCIÓN</p>
+          <div className="space-y-2">
+            {checkins.slice(0, 6).map(c => {
+              const avg = Math.round((c.posture + c.voice + c.confidence + c.communication) / 4 * 20);
+              return (
+                <PixelPanel key={c.id} className="p-3 flex items-center gap-3">
+                  <div className="text-xs font-medium w-20 shrink-0" style={{ color: 'var(--text-2)' }}>
+                    {new Date(c.week).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}
+                  </div>
+                  <div className="flex-1 flex gap-2">
+                    {AREAS.map(a => (
+                      <div key={a.key} className="flex-1 text-center">
+                        <div className="text-xs font-bold" style={{ color: 'var(--primary)' }}>{c[a.key]}</div>
+                        <div className="text-[9px]" style={{ color: 'var(--text-muted)' }}>{a.label.slice(0, 3)}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-sm font-bold shrink-0" style={{ color: avg >= 60 ? 'var(--c-green)' : 'var(--c-gold)' }}>
+                    {avg}%
+                  </div>
+                </PixelPanel>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
+export default function GlowUpPage() {
+  const [activeTab, setActiveTab] = useState<'care' | 'style' | 'presence'>('care');
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Sparkles size={22} style={{ color: 'var(--primary)' }} />
+        <div>
+          <h1 className="font-pixel text-[var(--accent-gold)]" style={{ fontSize: '14px' }}>
+            EL ESPEJO
+          </h1>
+          <p className="text-sm" style={{ color: 'var(--text-2)' }}>Glow Up No Físico — Cuídate, vístete y preséntate</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-soft)' }}>
+        {TABS.map(t => (
+          <button key={t.key} onClick={() => setActiveTab(t.key)}
+            style={{
+              flex: 1, padding: '8px 4px', borderRadius: 10, fontSize: 12, fontWeight: activeTab === t.key ? 700 : 500,
+              background: activeTab === t.key ? 'var(--bg-panel)' : 'transparent',
+              color: activeTab === t.key ? 'var(--text)' : 'var(--text-2)',
+              border: activeTab === t.key ? '1px solid var(--border)' : '1px solid transparent',
+              boxShadow: activeTab === t.key ? 'var(--shadow-sm)' : 'none',
+              transition: 'all .15s',
+            }}>{t.label}</button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div key={activeTab}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18 }}
+        >
+          {activeTab === 'care' && <CareSection />}
+          {activeTab === 'style' && <StyleSection />}
+          {activeTab === 'presence' && <PresenceSection />}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

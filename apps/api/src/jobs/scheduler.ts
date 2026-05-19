@@ -1,11 +1,11 @@
 import cron from 'node-cron';
 import { prisma } from '../lib/prisma';
-import { sendPush, isInQuietHours } from '../services/notification.service';
+import { generateText, hasAIProvider } from '../lib/ai';
+import { createNotification, isInQuietHours, sendPush } from '../services/notification.service';
 import { generateDailyScroll } from '../services/scrolls.service';
 import { seedWisdomCards } from '../services/wisdom.service';
 
 export function initScheduler() {
-  // Every 15 minutes: reset dailies for users whose local 4am has passed
   cron.schedule('*/15 * * * *', async () => {
     try {
       await resetDailyQuestsForUsersInTimezone();
@@ -14,7 +14,6 @@ export function initScheduler() {
     }
   });
 
-  // Every Sunday at 4am UTC: reset weekly quests
   cron.schedule('0 4 * * 0', async () => {
     try {
       await resetWeeklyQuests();
@@ -23,7 +22,6 @@ export function initScheduler() {
     }
   });
 
-  // Every hour: fail expired quests
   cron.schedule('0 * * * *', async () => {
     try {
       await failExpiredQuests();
@@ -32,8 +30,7 @@ export function initScheduler() {
     }
   });
 
-  // Every day at 1am UTC: check habit streaks for users who didn't log yesterday
-  cron.schedule('0 1 * * *', async () => {
+  cron.schedule('0 0 * * *', async () => {
     try {
       await penalizeInactiveHabitStreaks();
     } catch (err) {
@@ -41,7 +38,6 @@ export function initScheduler() {
     }
   });
 
-  // Quest deadline alerts: every hour check for quests due in 2 hours
   cron.schedule('0 * * * *', async () => {
     try {
       await sendDeadlineAlerts();
@@ -50,7 +46,6 @@ export function initScheduler() {
     }
   });
 
-  // Daily summary at 9pm UTC (adjust per user timezone in prod)
   cron.schedule('0 21 * * *', async () => {
     try {
       await sendDailySummaries();
@@ -59,7 +54,14 @@ export function initScheduler() {
     }
   });
 
-  // Daily at 7am UTC: generate proactive Sage scrolls for all active users
+  cron.schedule('0 20 * * 0', async () => {
+    try {
+      await generateWeeklySummaries();
+    } catch (err) {
+      console.error('[Scheduler] Error generating weekly summaries:', err);
+    }
+  });
+
   cron.schedule('0 7 * * *', async () => {
     try {
       const users = await prisma.user.findMany({
@@ -67,22 +69,21 @@ export function initScheduler() {
         select: { id: true },
         take: 200,
       });
-      for (const u of users) {
-        await generateDailyScroll(u.id).catch(() => null);
+
+      for (const user of users) {
+        await generateDailyScroll(user.id).catch(() => null);
       }
     } catch (err) {
       console.error('[Scheduler] Error generating daily scrolls:', err);
     }
   });
 
-  // On startup: seed wisdom cards
   seedWisdomCards().catch(() => null);
 
-  console.log('⏰ Scheduler inicializado con 7 cron jobs activos (Fase 9)');
+  console.log('[Scheduler] Inicializado con 8 cron jobs activos (Bloques 13-16)');
 }
 
 async function resetDailyQuestsForUsersInTimezone() {
-  // Find daily recurring quests that haven't been reset today
   const todayStart = new Date();
   todayStart.setHours(4, 0, 0, 0);
 
@@ -98,11 +99,9 @@ async function resetDailyQuestsForUsersInTimezone() {
   if (questsToReset.length === 0) return;
 
   await prisma.quest.updateMany({
-    where: { id: { in: questsToReset.map((q) => q.id) } },
+    where: { id: { in: questsToReset.map((quest) => quest.id) } },
     data: { status: 'ACTIVE', completedAt: null, lastResetAt: new Date() },
   });
-
-  console.log(`[Scheduler] Reset ${questsToReset.length} daily quests`);
 }
 
 async function resetWeeklyQuests() {
@@ -122,11 +121,9 @@ async function resetWeeklyQuests() {
   if (questsToReset.length === 0) return;
 
   await prisma.quest.updateMany({
-    where: { id: { in: questsToReset.map((q) => q.id) } },
+    where: { id: { in: questsToReset.map((quest) => quest.id) } },
     data: { status: 'ACTIVE', completedAt: null, lastResetAt: new Date() },
   });
-
-  console.log(`[Scheduler] Reset ${questsToReset.length} weekly quests`);
 }
 
 async function failExpiredQuests() {
@@ -143,17 +140,13 @@ async function failExpiredQuests() {
   if (expired.length === 0) return;
 
   await prisma.quest.updateMany({
-    where: { id: { in: expired.map((q) => q.id) } },
+    where: { id: { in: expired.map((quest) => quest.id) } },
     data: { status: 'FAILED' },
   });
-
-  console.log(`[Scheduler] Failed ${expired.length} expired quests`);
 }
 
 async function penalizeInactiveHabitStreaks() {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(0, 0, 0, 0);
+  const yesterday = startOfDay(addDays(new Date(), -1));
 
   const activeHabits = await prisma.habit.findMany({
     where: { isActive: true, currentStreak: { gt: 0 } },
@@ -165,12 +158,56 @@ async function penalizeInactiveHabitStreaks() {
     });
 
     if (!log || log.status === 'failed') {
+      await createRecoveryChallengeIfEligible(habit.userId, habit.id, habit.title, habit.currentStreak);
       await prisma.habit.update({
         where: { id: habit.id },
         data: { currentStreak: 0 },
       });
     }
   }
+}
+
+async function createRecoveryChallengeIfEligible(
+  userId: string,
+  habitId: string,
+  habitTitle: string,
+  lostStreak: number
+) {
+  if (lostStreak <= 7) return;
+
+  const now = new Date();
+  const existing = await prisma.recoveryChallenge.findFirst({
+    where: {
+      userId,
+      habitId,
+      isCompleted: false,
+      expiresAt: { gt: now },
+    },
+    select: { id: true },
+  });
+
+  if (existing) return;
+
+  const bonusXp = Math.floor(lostStreak * 1.5);
+
+  await prisma.recoveryChallenge.create({
+    data: {
+      userId,
+      habitId,
+      lostStreak,
+      requiredDays: 3,
+      bonusXp,
+      expiresAt: addDays(now, 7),
+    },
+  });
+
+  createNotification(userId, {
+    type: 'streak',
+    title: '🔥 Reto de recuperación disponible',
+    body: `"${habitTitle}" puede volver a encenderse: 3 días seguidos por +${bonusXp} XP.`,
+    icon: '🔥',
+    link: '/habits',
+  }).catch(() => {});
 }
 
 async function sendDeadlineAlerts() {
@@ -195,7 +232,7 @@ async function sendDeadlineAlerts() {
 
     await sendPush(quest.userId, {
       title: '⚠️ Misión por vencer',
-      body: `"${quest.title}" vence en 2 horas. ¡Tú puedes!`,
+      body: `"${quest.title}" vence en 2 horas. Tú puedes.`,
       tag: `deadline-${quest.id}`,
       data: { questId: quest.id },
     });
@@ -210,8 +247,7 @@ async function sendDailySummaries() {
     include: { notificationPreferences: true, pushSubscriptions: true },
   });
 
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const todayStart = startOfDay(new Date());
 
   for (const user of users) {
     const prefs = user.notificationPreferences;
@@ -220,15 +256,207 @@ async function sendDailySummaries() {
 
     const [completions, xpEvents] = await Promise.all([
       prisma.questCompletion.count({ where: { userId: user.id, completedAt: { gte: todayStart } } }),
-      prisma.xpEvent.aggregate({ where: { userId: user.id, createdAt: { gte: todayStart } }, _sum: { xpAmount: true } }),
+      prisma.xpEvent.aggregate({
+        where: { userId: user.id, createdAt: { gte: todayStart } },
+        _sum: { xpAmount: true },
+      }),
     ]);
-
-    const xpToday = xpEvents._sum.xpAmount ?? 0;
 
     await sendPush(user.id, {
       title: '📜 Tu día en LifeQuest',
-      body: `Completaste ${completions} misiones y ganaste ${xpToday} XP hoy. ¡Sigue así, héroe!`,
+      body: `Completaste ${completions} misiones y ganaste ${xpEvents._sum.xpAmount ?? 0} XP hoy.`,
       tag: 'daily-summary',
     });
   }
+}
+
+async function generateWeeklySummaries() {
+  const users = await prisma.user.findMany({
+    where: { onboardingCompleted: true },
+    select: { id: true },
+    take: 500,
+  });
+
+  for (const user of users) {
+    await generateWeeklySummaryForUser(user.id).catch((err) => {
+      console.error(`[Scheduler] Weekly summary failed for ${user.id}:`, err);
+    });
+  }
+}
+
+async function generateWeeklySummaryForUser(userId: string) {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const weekEnd = startOfDay(now);
+  const weekStart = addDays(weekEnd, -(dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  const nextWeekStart = addDays(weekStart, 7);
+
+  const existing = await prisma.weeklySummary.findFirst({
+    where: { userId, weekStart },
+    select: { id: true },
+  });
+  if (existing) return;
+
+  const previousSummary = await prisma.weeklySummary.findFirst({
+    where: { userId },
+    orderBy: { weekStart: 'desc' },
+    select: { lifeScore: true },
+  });
+
+  const [
+    user,
+    questsCompleted,
+    questsCreated,
+    topHabit,
+    workoutsCount,
+    transactionAgg,
+    xpAgg,
+    goldAgg,
+    moodAgg,
+    habitsCompleted,
+  ] = await Promise.all([
+    prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { displayName: true, lifeScore: true },
+    }),
+    prisma.questCompletion.count({
+      where: { userId, completedAt: { gte: weekStart, lt: nextWeekStart } },
+    }),
+    prisma.quest.count({
+      where: { userId, createdAt: { gte: weekStart, lt: nextWeekStart } },
+    }),
+    prisma.habit.findFirst({
+      where: { userId, isActive: true },
+      orderBy: [{ longestStreak: 'desc' }, { currentStreak: 'desc' }],
+      select: { title: true, longestStreak: true, currentStreak: true },
+    }),
+    prisma.workout.count({
+      where: { userId, date: { gte: weekStart, lt: nextWeekStart } },
+    }),
+    prisma.transaction.aggregate({
+      where: { userId },
+      _sum: { amount: true },
+    }),
+    prisma.xpEvent.aggregate({
+      where: { userId, createdAt: { gte: weekStart, lt: nextWeekStart } },
+      _sum: { xpAmount: true },
+    }),
+    prisma.xpEvent.aggregate({
+      where: { userId, createdAt: { gte: weekStart, lt: nextWeekStart } },
+      _sum: { goldAmount: true },
+    }),
+    prisma.dailyCheckin.aggregate({
+      where: { userId, date: { gte: weekStart, lt: nextWeekStart } },
+      _avg: { mood: true },
+    }),
+    prisma.habitLog.count({
+      where: { userId, completed: true, date: { gte: weekStart, lt: nextWeekStart } },
+    }),
+  ]);
+
+  const weekData = {
+    displayName: user.displayName,
+    lifeScore: user.lifeScore,
+    prevScore: previousSummary?.lifeScore ?? user.lifeScore,
+    questsCompleted,
+    questsCreated,
+    bestStreak: Math.max(topHabit?.longestStreak ?? 0, topHabit?.currentStreak ?? 0),
+    bestHabitName: topHabit?.title ?? 'tu disciplina',
+    gymSessions: workoutsCount,
+    balance: Number(transactionAgg._sum.amount ?? 0),
+  };
+
+  const summary = await buildWeeklySummary(weekData);
+
+  await prisma.weeklySummary.create({
+    data: {
+      userId,
+      weekStart,
+      weekEnd: addDays(nextWeekStart, -1),
+      summary,
+      lifeScore: weekData.lifeScore,
+      xpTotal: xpAgg._sum.xpAmount ?? 0,
+      goldTotal: goldAgg._sum.goldAmount ?? 0,
+      questsCount: questsCompleted,
+      habitsCount: habitsCompleted,
+      topHabit: topHabit?.title ?? null,
+      mood: moodAgg._avg.mood ?? null,
+    },
+  });
+
+  createNotification(userId, {
+    type: 'sage',
+    title: '📊 Tu resumen semanal está listo',
+    body: `Life Score ${weekData.lifeScore}/100. El Sabio tiene algo que decirte.`,
+    icon: '📊',
+    link: '/stats',
+  }).catch(() => {});
+
+  await sendPush(userId, {
+    title: '📊 Tu resumen semanal está listo',
+    body: `Life Score ${weekData.lifeScore}/100. El Sabio tiene algo que decirte.`,
+    tag: `weekly-summary-${weekStart.toISOString()}`,
+  });
+}
+
+async function buildWeeklySummary(weekData: {
+  displayName: string;
+  lifeScore: number;
+  prevScore: number;
+  questsCompleted: number;
+  questsCreated: number;
+  bestStreak: number;
+  bestHabitName: string;
+  gymSessions: number;
+  balance: number;
+}) {
+  if (!hasAIProvider()) {
+    return [
+      `${weekData.displayName}, tu semana cerró con Life Score ${weekData.lifeScore}/100 frente a ${weekData.prevScore}/100 la semana pasada. Completaste ${weekData.questsCompleted} de ${weekData.questsCreated} misiones creadas y tu mejor racha fue de ${weekData.bestStreak} días en "${weekData.bestHabitName}".`,
+      `${weekData.gymSessions > 0 ? `Entrenaste ${weekData.gymSessions} veces` : 'El Coliseo quedó en pausa'} y tu frente financiero se sostiene en ${formatCOP(weekData.balance)}. Hubo avance, pero todavía puedes volver más consistente lo que ya empezó a funcionar.`,
+      `La próxima semana protege una sola ancla: repite "${weekData.bestHabitName}" al inicio del día y deja que ese impulso arrastre el resto.`,
+    ].join('\n\n');
+  }
+
+  const prompt = `
+Eres el Sabio del Castillo. Escribe el resumen semanal de ${weekData.displayName} en español.
+Específico con sus datos reales. Épico pero directo. Máximo 3 párrafos.
+
+DATOS: Life Score ${weekData.lifeScore}/100 (vs ${weekData.prevScore} semana pasada).
+Quests: ${weekData.questsCompleted}/${weekData.questsCreated}.
+Mejor racha: ${weekData.bestStreak} días en "${weekData.bestHabitName}".
+Gym: ${weekData.gymSessions} sesiones. Finanzas: ${formatCOP(weekData.balance)}.
+
+Párrafo 1: lo que logró.
+Párrafo 2: qué puede mejorar.
+Párrafo 3: UNA sugerencia concreta para la próxima semana.
+  `.trim();
+
+  return generateText(
+    [
+      { role: 'system', content: 'Responde solo en español. Sé específico con datos reales, épico pero directo.' },
+      { role: 'user', content: prompt },
+    ],
+    { temperature: 0.7, maxTokens: 320 }
+  );
+}
+
+function startOfDay(date: Date) {
+  const value = new Date(date);
+  value.setHours(0, 0, 0, 0);
+  return value;
+}
+
+function addDays(date: Date, days: number) {
+  const value = new Date(date);
+  value.setDate(value.getDate() + days);
+  return value;
+}
+
+function formatCOP(amount: number) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
