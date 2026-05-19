@@ -187,7 +187,7 @@ export default function OnboardingPage() {
 
       <div className="relative z-10 p-4 flex flex-col items-center gap-3">
         <h1 className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>
-          ðŸ° LIFEQUEST
+          🏰 LIFEQUEST
         </h1>
         <OnboardingProgress currentStep={step - 2} totalSteps={TOTAL_STEPS} />
         <p className="font-vt text-text-secondary text-lg">

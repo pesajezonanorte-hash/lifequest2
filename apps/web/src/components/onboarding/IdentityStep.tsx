@@ -29,10 +29,10 @@ export function IdentityStep({ initialName = '', initialGender = 'male', lockGen
     >
       <div className="text-center">
         <h2 className="font-pixel text-accent-gold mb-1" style={{ fontSize: '11px' }}>
-          Â¿QUIÃ‰N ERES?
+          ¿QUIÉN ERES?
         </h2>
         <p className="font-vt text-text-secondary text-xl">
-          CuÃ©ntame sobre el hÃ©roe que estÃ¡ comenzando.
+          Cuéntame sobre el héroe que está comenzando.
         </p>
       </div>
 
@@ -40,7 +40,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', lockGen
         {!lockGender && (
           <div>
             <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
-              Â¿ERES HÃ‰ROE O HEROÃNA?
+              ¿ERES HÉROE O HEROÍNA?
             </label>
             <div className="flex gap-3">
               {(['male', 'female'] as const).map((g) => (
@@ -53,7 +53,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', lockGen
                       : 'border-border-pixel text-text-secondary hover:border-accent-gold'
                   }`}
                 >
-                  {g === 'male' ? 'âš”ï¸ HÃ©roe' : 'ðŸ—¡ï¸ HeroÃ­na'}
+                  {g === 'male' ? '⚔️ Héroe' : '🗡️ Heroína'}
                 </button>
               ))}
             </div>
@@ -62,12 +62,12 @@ export function IdentityStep({ initialName = '', initialGender = 'male', lockGen
 
         <div>
           <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
-            Â¿CÃ“MO TE LLAMARÃN EN EL REINO?
+            ¿CÓMO TE LLAMARÁN EN EL REINO?
           </label>
           <PixelInput
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Tu nombre de hÃ©roe..."
+            placeholder="Tu nombre de héroe..."
             maxLength={60}
           />
         </div>
@@ -83,7 +83,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', lockGen
             className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-xl px-3 py-2 focus:outline-none focus:border-accent-gold"
           />
           <p className="font-vt text-text-secondary text-sm mt-1">
-            Para celebrar tu aniversario en LifeQuest ðŸŽ‚
+            Para celebrar tu aniversario en LifeQuest 🎂
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', lockGen
 
       <div className="flex gap-3">
         <PixelButton variant="ghost" onClick={onBack} className="flex-1">
-          â† ATRÃS
+          ← ATRÁS
         </PixelButton>
         <PixelButton
           variant="primary"
@@ -107,7 +107,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', lockGen
           disabled={!canContinue}
           className="flex-1"
         >
-          SIGUIENTE â†’
+          SIGUIENTE →
         </PixelButton>
       </div>
     </motion.div>
