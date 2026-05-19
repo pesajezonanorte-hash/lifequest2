@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
+import * as authService from '../../services/auth.service';
 import { completeOnboarding } from '../../services/user.service';
 import { OnboardingProgress } from '../../components/onboarding/OnboardingProgress';
 import { WelcomeStep } from '../../components/onboarding/WelcomeStep';
@@ -44,7 +45,7 @@ function save(state: Partial<OnboardingState>) {
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { user, updateUser } = useAuthStore();
+  const { user, updateUser, logout } = useAuthStore();
   const saved = user?.displayName && !user?.onboardingCompleted ? {} : loadSaved();
   const savedOrRegisteredGender = saved.gender ?? user?.avatarConfig?.bodyType;
 
@@ -121,6 +122,18 @@ export default function OnboardingPage() {
     navigate('/', { replace: true });
   };
 
+  const handleSwitchAccount = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Ignore logout errors and still clear local auth state.
+    }
+
+    localStorage.removeItem(STORAGE_KEY);
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   if (celebrating) {
     return (
       <div className="min-h-screen bg-bg-deep flex items-center justify-center px-4 overflow-hidden">
@@ -158,6 +171,8 @@ export default function OnboardingPage() {
               initialName={displayName}
               initialGender={gender}
               lockGender={Boolean(savedOrRegisteredGender)}
+              secondaryActionLabel="Registrarse o iniciar sesion con otra cuenta"
+              onSecondaryAction={handleSwitchAccount}
               onNext={handleIdentity}
               onBack={() => {}}
             />
