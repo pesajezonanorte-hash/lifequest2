@@ -7,11 +7,12 @@ import { PixelPanel } from '../ui/PixelPanel';
 interface Props {
   initialName?: string;
   initialGender?: 'male' | 'female';
+  lockGender?: boolean;
   onNext: (data: { displayName: string; birthDate: string; timezone: string; gender: 'male' | 'female' }) => void;
   onBack: () => void;
 }
 
-export function IdentityStep({ initialName = '', initialGender = 'male', onNext, onBack }: Props) {
+export function IdentityStep({ initialName = '', initialGender = 'male', lockGender = false, onNext, onBack }: Props) {
   const [name, setName] = useState(initialName);
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState<'male' | 'female'>(initialGender);
@@ -28,43 +29,45 @@ export function IdentityStep({ initialName = '', initialGender = 'male', onNext,
     >
       <div className="text-center">
         <h2 className="font-pixel text-accent-gold mb-1" style={{ fontSize: '11px' }}>
-          ¿QUIÉN ERES?
+          Â¿QUIÃ‰N ERES?
         </h2>
         <p className="font-vt text-text-secondary text-xl">
-          Cuéntame sobre el héroe que está comenzando.
+          CuÃ©ntame sobre el hÃ©roe que estÃ¡ comenzando.
         </p>
       </div>
 
       <PixelPanel className="p-5 space-y-5">
-        <div>
-          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
-            ¿ERES HÉROE O HEROÍNA?
-          </label>
-          <div className="flex gap-3">
-            {(['male', 'female'] as const).map((g) => (
-              <button
-                key={g}
-                onClick={() => setGender(g)}
-                className={`flex-1 py-3 border-2 font-vt text-lg transition-colors ${
-                  gender === g
-                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
-                }`}
-              >
-                {g === 'male' ? '⚔️ Héroe' : '🗡️ Heroína'}
-              </button>
-            ))}
+        {!lockGender && (
+          <div>
+            <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+              Â¿ERES HÃ‰ROE O HEROÃNA?
+            </label>
+            <div className="flex gap-3">
+              {(['male', 'female'] as const).map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setGender(g)}
+                  className={`flex-1 py-3 border-2 font-vt text-lg transition-colors ${
+                    gender === g
+                      ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
+                      : 'border-border-pixel text-text-secondary hover:border-accent-gold'
+                  }`}
+                >
+                  {g === 'male' ? 'âš”ï¸ HÃ©roe' : 'ðŸ—¡ï¸ HeroÃ­na'}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div>
           <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
-            ¿CÓMO TE LLAMARÁN EN EL REINO?
+            Â¿CÃ“MO TE LLAMARÃN EN EL REINO?
           </label>
           <PixelInput
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Tu nombre de héroe..."
+            placeholder="Tu nombre de hÃ©roe..."
             maxLength={60}
           />
         </div>
@@ -80,7 +83,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', onNext,
             className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-xl px-3 py-2 focus:outline-none focus:border-accent-gold"
           />
           <p className="font-vt text-text-secondary text-sm mt-1">
-            Para celebrar tu aniversario en LifeQuest 🎂
+            Para celebrar tu aniversario en LifeQuest ðŸŽ‚
           </p>
         </div>
 
@@ -96,7 +99,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', onNext,
 
       <div className="flex gap-3">
         <PixelButton variant="ghost" onClick={onBack} className="flex-1">
-          ← ATRÁS
+          â† ATRÃS
         </PixelButton>
         <PixelButton
           variant="primary"
@@ -104,7 +107,7 @@ export function IdentityStep({ initialName = '', initialGender = 'male', onNext,
           disabled={!canContinue}
           className="flex-1"
         >
-          SIGUIENTE →
+          SIGUIENTE â†’
         </PixelButton>
       </div>
     </motion.div>

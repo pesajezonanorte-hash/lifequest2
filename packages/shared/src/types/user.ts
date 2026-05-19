@@ -64,4 +64,5 @@ export interface RegisterPayload {
   username: string;
   password: string;
   displayName?: string;
+  gender?: 'male' | 'female';
 }

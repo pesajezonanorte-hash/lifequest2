@@ -1,19 +1,20 @@
 import { z } from 'zod';
 
 export const registerSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().email('Email invÃ¡lido'),
   username: z
     .string()
-    .min(3, 'Mínimo 3 caracteres')
-    .max(20, 'Máximo 20 caracteres')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, números y guion bajo'),
-  password: z.string().min(8, 'Mínimo 8 caracteres'),
-  displayName: z.string().min(2, 'Mínimo 2 caracteres').max(50).optional(),
+    .min(3, 'MÃ­nimo 3 caracteres')
+    .max(20, 'MÃ¡ximo 20 caracteres')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Solo letras, nÃºmeros y guion bajo'),
+  password: z.string().min(8, 'MÃ­nimo 8 caracteres'),
+  displayName: z.string().min(2, 'MÃ­nimo 2 caracteres').max(50).optional(),
+  gender: z.enum(['male', 'female']).optional(),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'Contraseña requerida'),
+  email: z.string().email('Email invÃ¡lido'),
+  password: z.string().min(1, 'ContraseÃ±a requerida'),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

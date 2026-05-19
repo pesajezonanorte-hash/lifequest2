@@ -49,6 +49,7 @@ export default function RegisterPage() {
         username: data.username,
         password: data.password,
         displayName: data.displayName,
+        gender,
       });
       setAuth(user, accessToken);
       navigate('/');

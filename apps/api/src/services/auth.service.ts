@@ -72,6 +72,18 @@ export async function registerUser(data: RegisterInput) {
   }
 
   const passwordHash = await bcrypt.hash(data.password, BCRYPT_ROUNDS);
+  const bodyType = data.gender ?? 'male';
+  const avatarConfig = {
+    bodyType,
+    hairStyle: bodyType === 'female' ? 'long' : 'short',
+    hairColor: '#4a3728',
+    skinColor: '#c68642',
+    shirtColor: '#4d96ff',
+    pants: '#37474f',
+    accessory: 'none',
+    expression: 'normal',
+    pet: null,
+  };
 
   const user = await prisma.user.create({
     data: {
@@ -79,6 +91,7 @@ export async function registerUser(data: RegisterInput) {
       username: data.username,
       passwordHash,
       displayName: data.displayName ?? data.username,
+      avatarConfig,
     },
   });
 

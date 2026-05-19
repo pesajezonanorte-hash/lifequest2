@@ -45,14 +45,14 @@ function save(state: Partial<OnboardingState>) {
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuthStore();
-  // Reset progress if onboarding was never completed (prevents stale state)
   const saved = user?.displayName && !user?.onboardingCompleted ? {} : loadSaved();
+  const savedOrRegisteredGender = saved.gender ?? user?.avatarConfig?.bodyType;
 
   const [step, setStep] = useState(saved.step ?? 0);
   const [displayName, setDisplayName] = useState(saved.displayName ?? user?.displayName ?? '');
   const [birthDate, setBirthDate] = useState(saved.birthDate ?? '');
   const [timezone, setTimezone] = useState(saved.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
-  const [gender, setGender] = useState<'male' | 'female'>(saved.gender ?? 'male');
+  const [gender, setGender] = useState<'male' | 'female'>(savedOrRegisteredGender ?? 'male');
   const [avatarConfig, setAvatarConfig] = useState<Partial<AvatarConfig>>(saved.avatarConfig ?? user?.avatarConfig ?? {});
   const [goalCategories, setGoalCategories] = useState<string[]>(saved.goalCategories ?? []);
   const [mainQuestTitle, setMainQuestTitle] = useState(saved.mainQuestTitle ?? '');
@@ -61,7 +61,6 @@ export default function OnboardingPage() {
   const [celebrating, setCelebrating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Persist progress
   useEffect(() => {
     save({ step, displayName, birthDate, timezone, gender, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline });
   }, [step, displayName, birthDate, timezone, gender, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline]);
@@ -106,13 +105,11 @@ export default function OnboardingPage() {
         mainQuestCategory: data.category,
         mainQuestDeadline: data.deadline,
       });
-      // Ensure onboarding is marked as completed
       if (updatedUser) {
         updateUser({ ...updatedUser, onboardingCompleted: true });
       }
     } catch (error) {
       console.error('[Onboarding] Error:', error);
-      // Still mark as completed to prevent infinite loop
       updateUser({ onboardingCompleted: true });
     } finally {
       setSubmitting(false);
@@ -160,6 +157,7 @@ export default function OnboardingPage() {
             <IdentityStep
               initialName={displayName}
               initialGender={gender}
+              lockGender={Boolean(savedOrRegisteredGender)}
               onNext={handleIdentity}
               onBack={() => {}}
             />
@@ -175,7 +173,6 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-bg-deep flex flex-col">
-      {/* Stars background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {Array.from({ length: 40 }, (_, i) => (
           <motion.div
@@ -188,10 +185,9 @@ export default function OnboardingPage() {
         ))}
       </div>
 
-      {/* Header */}
       <div className="relative z-10 p-4 flex flex-col items-center gap-3">
         <h1 className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>
-          🏰 LIFEQUEST
+          ðŸ° LIFEQUEST
         </h1>
         <OnboardingProgress currentStep={step - 2} totalSteps={TOTAL_STEPS} />
         <p className="font-vt text-text-secondary text-lg">
@@ -199,7 +195,6 @@ export default function OnboardingPage() {
         </p>
       </div>
 
-      {/* Content */}
       <div className="relative z-10 flex-1 flex items-start justify-center px-4 pb-6">
         <div className="max-w-sm w-full">
           <AnimatePresence mode="wait">
