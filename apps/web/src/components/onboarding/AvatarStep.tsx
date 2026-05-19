@@ -15,6 +15,34 @@ const HAIR_STYLES_FEMALE: HairStyle[] = ['long', 'short', 'recogido', 'trenzas',
 const ACCESSORIES: Accessory[] = ['none', 'glasses', 'cap', 'headband', 'earrings', 'scarf'];
 const EXPRESSIONS: Expression[] = ['normal', 'smile', 'serious', 'determined'];
 
+const HAIR_STYLE_LABELS: Record<HairStyle, string> = {
+  short: 'Corto',
+  medium: 'Medio',
+  long: 'Largo',
+  shaved: 'Rapado',
+  copete: 'Copete',
+  afro: 'Afro',
+  recogido: 'Recogido',
+  trenzas: 'Trenzas',
+  ondulado: 'Ondulado',
+};
+
+const ACCESSORY_LABELS: Record<Accessory, string> = {
+  none: 'Sin accesorio',
+  glasses: 'Gafas',
+  cap: 'Gorra',
+  headband: 'Diadema',
+  earrings: 'Aretes',
+  scarf: 'Bufanda',
+};
+
+const EXPRESSION_LABELS: Record<Expression, string> = {
+  normal: 'Normal',
+  smile: 'Sonriente',
+  serious: 'Serio',
+  determined: 'Decidido',
+};
+
 interface Props {
   gender: 'male' | 'female';
   initialConfig: Partial<AvatarConfig>;
@@ -36,10 +64,17 @@ export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
   });
 
   const update = (key: keyof AvatarConfig) => (value: string) => {
-    setConfig((c) => ({ ...c, [key]: value }));
+    setConfig((current) => ({ ...current, [key]: value }));
   };
 
   const hairStyles = gender === 'female' ? HAIR_STYLES_FEMALE : HAIR_STYLES_MALE;
+
+  const optionButtonClass = (selected: boolean) =>
+    `rounded-xl border px-3 py-2 text-sm font-medium transition-all ${
+      selected
+        ? 'border-accent-gold bg-accent-gold/15 text-accent-gold shadow-[0_0_0_1px_rgba(255,210,63,0.35)]'
+        : 'border-border-pixel bg-white/0 text-text-secondary hover:border-accent-gold hover:bg-white/5 hover:text-text-primary'
+    }`;
 
   return (
     <motion.div
@@ -49,22 +84,23 @@ export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
       exit={{ opacity: 0, x: -40 }}
     >
       <div className="text-center">
-        <h2 className="font-pixel text-accent-gold mb-1" style={{ fontSize: '11px' }}>
+        <h2 className="mb-1 font-pixel text-accent-gold" style={{ fontSize: '11px' }}>
           PERSONALIZA TU AVATAR
         </h2>
-        <p className="font-vt text-text-secondary text-xl">
-          Elige los colores de tu héroe. Se actualiza en tiempo real.
+        <p className="font-vt text-xl text-text-secondary">
+          Dale estilo a tu {gender === 'female' ? 'heroína' : 'héroe'}. Cada cambio se ve al instante.
         </p>
       </div>
 
-      {/* Sprite grande */}
       <div className="flex justify-center">
         <motion.div
           key={JSON.stringify(config)}
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.15 }}
+          className="relative"
         >
+          <div className="absolute inset-0 rounded-full bg-accent-gold/10 blur-2xl" />
           <MiguelSprite
             size={120}
             bodyType={config.bodyType}
@@ -80,23 +116,35 @@ export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
         </motion.div>
       </div>
 
-      <PixelPanel className="p-4 space-y-4">
+      <div className="flex flex-wrap justify-center gap-2">
+        <span className="rounded-full border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 text-xs font-semibold text-accent-gold">
+          Cabello: {HAIR_STYLE_LABELS[config.hairStyle]}
+        </span>
+        <span className="rounded-full border border-border-pixel bg-bg-panel px-3 py-1 text-xs font-semibold text-text-secondary">
+          Accesorio: {ACCESSORY_LABELS[config.accessory]}
+        </span>
+        <span className="rounded-full border border-border-pixel bg-bg-panel px-3 py-1 text-xs font-semibold text-text-secondary">
+          Expresión: {EXPRESSION_LABELS[config.expression]}
+        </span>
+      </div>
+
+      <PixelPanel className="space-y-5 p-4">
         <div>
-          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+          <label className="mb-2 block font-pixel text-text-secondary" style={{ fontSize: '8px' }}>
             ESTILO DE CABELLO
           </label>
-          <div className="grid grid-cols-3 gap-1">
+          <p className="mb-3 text-sm text-text-secondary">
+            Elige la silueta que mejor representa tu avatar.
+          </p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {hairStyles.map((style) => (
               <button
                 key={style}
+                type="button"
                 onClick={() => update('hairStyle')(style)}
-                className={`py-1 px-1 text-xs font-vt border-2 transition-colors ${
-                  config.hairStyle === style
-                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
-                }`}
+                className={optionButtonClass(config.hairStyle === style)}
               >
-                {style}
+                {HAIR_STYLE_LABELS[style]}
               </button>
             ))}
           </div>
@@ -108,42 +156,42 @@ export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
         <ColorPicker label="COLOR DE PANTALÓN" value={config.pants} colors={PANTS_COLORS} onChange={update('pants')} />
 
         <div>
-          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+          <label className="mb-2 block font-pixel text-text-secondary" style={{ fontSize: '8px' }}>
             ACCESORIOS
           </label>
-          <div className="grid grid-cols-3 gap-1">
-            {ACCESSORIES.map((acc) => (
+          <p className="mb-3 text-sm text-text-secondary">
+            Añade un detalle que haga más único a tu personaje.
+          </p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {ACCESSORIES.map((accessory) => (
               <button
-                key={acc}
-                onClick={() => update('accessory')(acc)}
-                className={`py-1 px-1 text-xs font-vt border-2 transition-colors ${
-                  config.accessory === acc
-                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
-                }`}
+                key={accessory}
+                type="button"
+                onClick={() => update('accessory')(accessory)}
+                className={optionButtonClass(config.accessory === accessory)}
               >
-                {acc}
+                {ACCESSORY_LABELS[accessory]}
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="font-pixel text-text-secondary block mb-2" style={{ fontSize: '8px' }}>
+          <label className="mb-2 block font-pixel text-text-secondary" style={{ fontSize: '8px' }}>
             EXPRESIÓN
           </label>
-          <div className="grid grid-cols-2 gap-1">
-            {EXPRESSIONS.map((expr) => (
+          <p className="mb-3 text-sm text-text-secondary">
+            Define la actitud con la que tu avatar entra al reino.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {EXPRESSIONS.map((expression) => (
               <button
-                key={expr}
-                onClick={() => update('expression')(expr)}
-                className={`py-1 px-1 text-xs font-vt border-2 transition-colors ${
-                  config.expression === expr
-                    ? 'border-accent-gold bg-accent-gold/10 text-accent-gold'
-                    : 'border-border-pixel text-text-secondary hover:border-accent-gold'
-                }`}
+                key={expression}
+                type="button"
+                onClick={() => update('expression')(expression)}
+                className={optionButtonClass(config.expression === expression)}
               >
-                {expr}
+                {EXPRESSION_LABELS[expression]}
               </button>
             ))}
           </div>
@@ -151,8 +199,12 @@ export function AvatarStep({ gender, initialConfig, onNext, onBack }: Props) {
       </PixelPanel>
 
       <div className="flex gap-3">
-        <PixelButton variant="ghost" onClick={onBack} className="flex-1">← ATRÁS</PixelButton>
-        <PixelButton variant="primary" onClick={() => onNext(config)} className="flex-1">SIGUIENTE →</PixelButton>
+        <PixelButton variant="ghost" onClick={onBack} className="flex-1">
+          ← ATRÁS
+        </PixelButton>
+        <PixelButton variant="primary" onClick={() => onNext(config)} className="flex-1">
+          SIGUIENTE →
+        </PixelButton>
       </div>
     </motion.div>
   );

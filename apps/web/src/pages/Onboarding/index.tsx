@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
@@ -63,18 +63,33 @@ export default function OnboardingPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    save({ step, displayName, birthDate, timezone, gender, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline });
+    save({
+      step,
+      displayName,
+      birthDate,
+      timezone,
+      gender,
+      avatarConfig,
+      goalCategories,
+      mainQuestTitle,
+      mainQuestCategory,
+      mainQuestDeadline,
+    });
   }, [step, displayName, birthDate, timezone, gender, avatarConfig, goalCategories, mainQuestTitle, mainQuestCategory, mainQuestDeadline]);
 
-  const goNext = () => setStep((s) => s + 1);
-  const goBack = () => setStep((s) => Math.max(0, s - 1));
+  const goNext = () => setStep((current) => current + 1);
+  const goBack = () => setStep((current) => Math.max(0, current - 1));
 
   const handleIdentity = (data: { displayName: string; birthDate: string; timezone: string; gender: 'male' | 'female' }) => {
     setDisplayName(data.displayName);
     setBirthDate(data.birthDate);
     setTimezone(data.timezone);
     setGender(data.gender);
-    setAvatarConfig((current) => ({ ...current, bodyType: data.gender }));
+    setAvatarConfig((current) => ({
+      ...current,
+      bodyType: data.gender,
+      hairStyle: current.hairStyle ?? (data.gender === 'female' ? 'long' : 'short'),
+    }));
     goNext();
   };
 
@@ -106,6 +121,7 @@ export default function OnboardingPage() {
         mainQuestCategory: data.category,
         mainQuestDeadline: data.deadline,
       });
+
       if (updatedUser) {
         updateUser({ ...updatedUser, onboardingCompleted: true });
       }
@@ -134,10 +150,22 @@ export default function OnboardingPage() {
     navigate('/login', { replace: true });
   };
 
+  const handleBackToRegister = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Ignore logout errors and still send the user back to the register form.
+    }
+
+    localStorage.removeItem(STORAGE_KEY);
+    logout();
+    navigate('/register', { replace: true });
+  };
+
   if (celebrating) {
     return (
-      <div className="min-h-screen bg-bg-deep flex items-center justify-center px-4 overflow-hidden">
-        <div className="max-w-sm w-full">
+      <div className="min-h-screen bg-bg-deep flex items-center justify-center overflow-hidden px-4">
+        <div className="w-full max-w-sm">
           {submitting ? (
             <div className="text-center">
               <motion.p
@@ -166,15 +194,16 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen bg-bg-deep flex flex-col">
         <div className="flex-1 flex items-center justify-center px-4">
-          <div className="max-w-sm w-full">
+          <div className="w-full max-w-sm">
             <IdentityStep
               initialName={displayName}
+              initialBirthDate={birthDate}
               initialGender={gender}
               lockGender={Boolean(savedOrRegisteredGender)}
               secondaryActionLabel="Registrarse o iniciar sesion con otra cuenta"
               onSecondaryAction={handleSwitchAccount}
               onNext={handleIdentity}
-              onBack={() => {}}
+              onBack={handleBackToRegister}
             />
           </div>
         </div>
@@ -183,35 +212,40 @@ export default function OnboardingPage() {
   }
 
   if (step === 1) {
-    return <WelcomeStep gender={gender} onNext={goNext} />;
+    return <WelcomeStep gender={gender} avatarConfig={avatarConfig} onNext={goNext} />;
   }
 
   return (
     <div className="min-h-screen bg-bg-deep flex flex-col">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 40 }, (_, i) => (
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        {Array.from({ length: 40 }, (_, index) => (
           <motion.div
-            key={i}
+            key={index}
             className="absolute rounded-full bg-white"
-            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, width: 1 + Math.random() * 2, height: 1 + Math.random() * 2 }}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              width: 1 + Math.random() * 2,
+              height: 1 + Math.random() * 2,
+            }}
             animate={{ opacity: [0.1, 0.6, 0.1] }}
             transition={{ duration: 2 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 3 }}
           />
         ))}
       </div>
 
-      <div className="relative z-10 p-4 flex flex-col items-center gap-3">
+      <div className="relative z-10 flex flex-col items-center gap-3 p-4">
         <h1 className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>
-          🏰 LIFEQUEST
+          LIFEQUEST
         </h1>
         <OnboardingProgress currentStep={step - 2} totalSteps={TOTAL_STEPS} />
-        <p className="font-vt text-text-secondary text-lg">
+        <p className="font-vt text-lg text-text-secondary">
           Paso {step - 1} de {TOTAL_STEPS}
         </p>
       </div>
 
-      <div className="relative z-10 flex-1 flex items-start justify-center px-4 pb-6">
-        <div className="max-w-sm w-full">
+      <div className="relative z-10 flex flex-1 items-start justify-center px-4 pb-6">
+        <div className="w-full max-w-sm">
           <AnimatePresence mode="wait">
             <motion.div key={step}>
               {step === 2 && (
