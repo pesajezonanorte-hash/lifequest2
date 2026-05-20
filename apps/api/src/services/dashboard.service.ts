@@ -294,10 +294,10 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
       id: habit.id,
       type: 'habit',
       title: habit.title,
-      icon: habit.icon ?? 'âœ…',
+      icon: habit.icon ?? '✅',
       xp: habit.xpReward,
       urgent: habit.currentStreak > 0,
-      detail: habit.currentStreak > 0 ? `Racha: ${habit.currentStreak} dÃ­as` : undefined,
+      detail: habit.currentStreak > 0 ? `Racha: ${habit.currentStreak} días` : undefined,
     });
     if (priorities.length >= 4) break;
   }
@@ -321,7 +321,7 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
       id: quest.id,
       type: 'quest',
       title: quest.title,
-      icon: quest.type === 'DAILY' ? 'ðŸ—“ï¸' : quest.type === 'MAIN' ? 'âš”ï¸' : 'ðŸ“œ',
+      icon: quest.type === 'DAILY' ? '📅' : quest.type === 'MAIN' ? '⚔️' : '📜',
       xp: quest.xpReward,
       urgent: daysLeft !== null && daysLeft <= 1,
       detail: daysLeft !== null ? `${daysLeft}d` : quest.type,
@@ -334,7 +334,7 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
       id: event.id,
       type: 'event',
       title: event.title,
-      icon: 'ðŸ“†',
+      icon: '📆',
       xp: 0,
       urgent: event.startDate < todayEnd,
       detail: event.startDate.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
