@@ -15,11 +15,11 @@ const FAN_RADIUS = 76;
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
 
 const ACTIONS: { icon: React.ReactNode; label: string; color: string; modal: ModalType }[] = [
-  { icon: <Swords size={15} />,    label: 'Nueva Quest',    color: '#ffd23f', modal: 'quest' },
-  { icon: <Wallet size={15} />,    label: 'Gasto rápido',   color: '#4ade80', modal: 'expense' },
-  { icon: <Flame size={15} />,     label: 'Marcar hábito',  color: '#f87171', modal: 'habit' },
-  { icon: <NotebookPen size={15}/>, label: 'Nota rápida',   color: '#22d3ee', modal: 'note' },
-  { icon: <Zap size={15} />,       label: 'Check-in',       color: '#a78bfa', modal: 'checkin' },
+  { icon: <Swords size={15} />, label: 'Nueva Quest', color: '#ffd23f', modal: 'quest' },
+  { icon: <Wallet size={15} />, label: 'Gasto rápido', color: '#4ade80', modal: 'expense' },
+  { icon: <Flame size={15} />, label: 'Marcar hábito', color: '#f87171', modal: 'habit' },
+  { icon: <NotebookPen size={15} />, label: 'Nota rápida', color: '#22d3ee', modal: 'note' },
+  { icon: <Zap size={15} />, label: 'Check-in', color: '#a78bfa', modal: 'checkin' },
 ];
 
 // ── Quest Modal ──────────────────────────────────────────────────────────────
@@ -263,17 +263,17 @@ export function QuickActionsFAB() {
         {activeModal && (
           <div className="fixed inset-0 z-50 flex items-end justify-end p-4 pb-24"
             onClick={() => setActiveModal(null)}>
-            {activeModal === 'quest'   && <QuestModal   onClose={() => setActiveModal(null)} onDone={onDone} />}
+            {activeModal === 'quest' && <QuestModal onClose={() => setActiveModal(null)} onDone={onDone} />}
             {activeModal === 'expense' && <ExpenseModal onClose={() => setActiveModal(null)} onDone={onDone} />}
-            {activeModal === 'habit'   && <HabitModal   onClose={() => setActiveModal(null)} onDone={onDone} />}
-            {activeModal === 'note'    && <NoteModal    onClose={() => setActiveModal(null)} onDone={onDone} />}
+            {activeModal === 'habit' && <HabitModal onClose={() => setActiveModal(null)} onDone={onDone} />}
+            {activeModal === 'note' && <NoteModal onClose={() => setActiveModal(null)} onDone={onDone} />}
             {activeModal === 'checkin' && <CheckinModal onClose={() => setActiveModal(null)} onDone={onDone} />}
           </div>
         )}
       </AnimatePresence>
 
       {/* FAB + Fan */}
-      <div className="fixed top-[10rem] bottom-auto sm:top-auto sm:bottom-6 right-4 md:bottom-8 md:right-8 z-40">
+      <div className="fixed bottom-6 right-4 md:bottom-8 md:right-8 z-40">
         {/* Fan buttons */}
         <AnimatePresence>
           {open && ACTIONS.map((action, i) => {

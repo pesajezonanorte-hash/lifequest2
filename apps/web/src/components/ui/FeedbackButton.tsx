@@ -39,7 +39,7 @@ export function FeedbackButton() {
         onClick={() => setOpen(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed top-[5.5rem] bottom-auto sm:top-auto sm:bottom-4 left-4 z-40 flex items-center gap-2 rounded-full border-2 border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] shadow-lg hover:border-[var(--accent-gold)] hover:text-[var(--text-primary)]"
+        className="fixed bottom-4 left-4 z-40 flex items-center gap-2 rounded-full border-2 border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] shadow-lg hover:border-[var(--accent-gold)] hover:text-[var(--text-primary)]"
         title="Enviar feedback"
       >
         <MessageSquare size={14} className="text-[var(--accent-gold)]" />

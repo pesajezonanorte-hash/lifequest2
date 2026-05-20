@@ -23,7 +23,7 @@ export function SageWidget() {
     <>
       <motion.button
         onClick={handleOpen}
-        className="fixed top-[5.5rem] bottom-auto sm:top-auto sm:bottom-6 right-4 sm:right-6 z-40 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] text-[var(--text-primary)] shadow-lg transition-shadow hover:border-[var(--accent-gold)]"
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] text-[var(--text-primary)] shadow-lg transition-shadow hover:border-[var(--accent-gold)]"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="El Sabio — Asistente IA"
