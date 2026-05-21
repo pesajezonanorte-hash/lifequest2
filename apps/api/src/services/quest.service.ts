@@ -195,7 +195,6 @@ export async function completeQuest(userId: string, questId: string) {
   if (!quest) throw new Error('QUEST_NOT_FOUND');
 
   const now = new Date();
-  const completedHour = now.getHours();
 
   await prisma.quest.update({
     where: { id: questId },
@@ -212,8 +211,20 @@ export async function completeQuest(userId: string, questId: string) {
     category: quest.category,
   });
 
-  // Get user's birthDate for birthday achievement check
-  const userMeta = await prisma.user.findUnique({ where: { id: userId }, select: { birthDate: true } });
+  // Get user metadata for achievement checks
+  const userMeta = await prisma.user.findUnique({ where: { id: userId }, select: { birthDate: true, timezone: true } });
+
+  // Calculate local hour using user's timezone (falls back to UTC)
+  let completedHour = now.getUTCHours();
+  if (userMeta?.timezone) {
+    try {
+      const localHour = parseInt(
+        new Intl.DateTimeFormat('en-US', { hour: 'numeric', hour12: false, timeZone: userMeta.timezone }).format(now),
+        10
+      );
+      if (!isNaN(localHour)) completedHour = localHour % 24;
+    } catch { /* invalid timezone string — keep UTC */ }
+  }
 
   // Check achievements after completing quest
   const achievements = await checkAchievements(userId, 'quest_completed', {

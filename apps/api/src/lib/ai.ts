@@ -14,6 +14,11 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
+// Groq — OpenAI-compatible, very generous free tier (14,400 req/day)
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash-lite';
 const GEMINI_API_URL =
@@ -22,30 +27,40 @@ const GEMINI_API_URL =
 const GEMINI_MAX_RETRIES = 3;
 
 export function hasAIProvider(): boolean {
-  return Boolean(OPENAI_API_KEY || GEMINI_API_KEY);
+  return Boolean(GROQ_API_KEY || OPENAI_API_KEY || GEMINI_API_KEY);
 }
 
 export async function generateText(messages: ChatMessage[], options: ChatOptions = {}): Promise<string> {
+  if (GROQ_API_KEY) {
+    return generateWithOpenAICompat(messages, options, GROQ_API_URL, GROQ_API_KEY, GROQ_MODEL);
+  }
+
   if (OPENAI_API_KEY) {
-    return generateWithOpenAI(messages, options);
+    return generateWithOpenAICompat(messages, options, OPENAI_API_URL, OPENAI_API_KEY, OPENAI_MODEL);
   }
 
   if (GEMINI_API_KEY) {
     return generateWithGemini(messages, options);
   }
 
-  throw new Error('No hay proveedor de IA configurado. Define OPENAI_API_KEY o GEMINI_API_KEY.');
+  throw new Error('No hay proveedor de IA configurado. Define GROQ_API_KEY, OPENAI_API_KEY o GEMINI_API_KEY.');
 }
 
-async function generateWithOpenAI(messages: ChatMessage[], options: ChatOptions): Promise<string> {
-  const response = await fetch(OPENAI_API_URL, {
+async function generateWithOpenAICompat(
+  messages: ChatMessage[],
+  options: ChatOptions,
+  apiUrl: string,
+  apiKey: string,
+  model: string
+): Promise<string> {
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
+      model,
       messages,
       temperature: options.temperature ?? 0.8,
       max_tokens: options.maxTokens ?? 300,
@@ -55,12 +70,12 @@ async function generateWithOpenAI(messages: ChatMessage[], options: ChatOptions)
   const data = await response.json();
   if (!response.ok) {
     const message = data?.error?.message ?? `HTTP ${response.status}`;
-    throw new Error(`OpenAI ${response.status}: ${message}`);
+    throw new Error(`AI ${response.status}: ${message}`);
   }
 
   const text = data?.choices?.[0]?.message?.content;
   if (!text) {
-    throw new Error('OpenAI no devolvió texto en choices[0].message.content');
+    throw new Error('El proveedor de IA no devolvió texto');
   }
 
   return text;

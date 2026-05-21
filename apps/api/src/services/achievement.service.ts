@@ -64,7 +64,8 @@ export async function checkAchievements(
         shouldUnlock = event === 'quest_completed' && context.questDifficulty === 'EPIC';
         break;
       case 'early_bird':
-        shouldUnlock = event === 'quest_completed' && (context.completedHour ?? 12) < 7;
+        shouldUnlock = event === 'quest_completed' &&
+          (context.completedHour ?? 12) >= 3 && (context.completedHour ?? 12) < 7;
         break;
       case 'night_owl':
         shouldUnlock = event === 'quest_completed' && (context.completedHour ?? 12) >= 23;
