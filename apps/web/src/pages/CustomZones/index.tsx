@@ -1,12 +1,28 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Sparkles, Loader2, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Sparkles, Loader2, Trash2, ChevronDown, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import { useToastStore } from '../../hooks/useToast';
 import api from '../../lib/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ZoneQuest {
+  id: string;
+  title: string;
+  status: string;
+  xpReward: number;
+  difficulty: string;
+}
+
+interface ZoneHabit {
+  id: string;
+  title: string;
+  currentStreak: number;
+  icon: string;
+  xpReward: number;
+}
 
 interface CustomZone {
   id: string;
@@ -20,8 +36,8 @@ interface CustomZone {
   sections?: { type: string; title: string; description: string }[];
   actions?: { label: string; type: string }[];
   content: unknown[];
-  quests: { id: string; title: string; status: string }[];
-  habits: { id: string; title: string; currentStreak: number }[];
+  quests: ZoneQuest[];
+  habits: ZoneHabit[];
 }
 
 interface AISuggestion {
@@ -40,6 +56,352 @@ const COLOR_PALETTE = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
   '#f59e0b', '#10b981', '#06b6d4', '#3b82f6',
 ];
+
+const DIFFICULTY_LABELS: Record<string, string> = { EASY: 'Fácil', NORMAL: 'Normal', HARD: 'Difícil' };
+const DIFFICULTY_COLORS: Record<string, string> = { EASY: '#10b981', NORMAL: '#f59e0b', HARD: '#ef4444' };
+
+// Detect if an action type creates a habit or quest
+function actionCreatesHabit(type: string) {
+  return type === 'new_habit' || type.includes('habit') || type.includes('habito') || type.includes('habito') || type.includes('rutina');
+}
+
+function actionCategory(type: string): string {
+  if (type.includes('lesson') || type.includes('leccion') || type.includes('lección') || type.includes('study') || type.includes('estudio')) return 'LEARNING';
+  return 'PERSONAL';
+}
+
+// ─── Inline Action Form ───────────────────────────────────────────────────────
+
+function ActionForm({
+  action,
+  zone,
+  onDone,
+  onClose,
+}: {
+  action: { label: string; type: string };
+  zone: CustomZone;
+  onDone: () => void;
+  onClose: () => void;
+}) {
+  const toast = useToastStore();
+  const [title, setTitle] = useState('');
+  const [difficulty, setDifficulty] = useState<'EASY' | 'NORMAL' | 'HARD'>('NORMAL');
+  const [saving, setSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isHabit = actionCreatesHabit(action.type);
+
+  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 80); }, []);
+
+  async function handleSave() {
+    if (!title.trim()) return;
+    setSaving(true);
+    try {
+      if (isHabit) {
+        await api.post(`/custom-zones/${zone.id}/habits`, { title: title.trim() });
+        toast.success('¡Hábito creado en la zona!');
+      } else {
+        await api.post(`/custom-zones/${zone.id}/quests`, {
+          title: title.trim(),
+          type: 'SIDE',
+          difficulty,
+          category: actionCategory(action.type),
+        });
+        toast.success('¡Misión creada en la zona!');
+      }
+      setTitle('');
+      onDone();
+    } catch {
+      toast.error('Error al crear. Intenta de nuevo.');
+      setSaving(false);
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.18 }}
+      className="overflow-hidden"
+    >
+      <div
+        className="mt-2 rounded-xl p-3 space-y-2"
+        style={{ background: `${zone.accentColor}10`, border: `1px solid ${zone.accentColor}30` }}
+      >
+        <p className="text-xs font-semibold" style={{ color: zone.accentColor }}>
+          {isHabit ? '🔥 Nuevo hábito' : `✦ ${action.label}`}
+        </p>
+        <input
+          ref={inputRef}
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') onClose(); }}
+          placeholder={isHabit ? 'Nombre del hábito...' : 'Nombre de la misión...'}
+          className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+          style={{
+            background: 'var(--bg-panel)',
+            border: `1px solid ${zone.accentColor}40`,
+            color: 'var(--text)',
+          }}
+        />
+        {!isHabit && (
+          <div className="flex gap-1.5">
+            {(['EASY', 'NORMAL', 'HARD'] as const).map(d => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className="flex-1 py-1 rounded-lg text-xs font-semibold transition-all"
+                style={{
+                  background: difficulty === d ? `${DIFFICULTY_COLORS[d]}22` : 'var(--bg-soft)',
+                  border: `1px solid ${difficulty === d ? DIFFICULTY_COLORS[d] : 'var(--border)'}`,
+                  color: difficulty === d ? DIFFICULTY_COLORS[d] : 'var(--text-muted)',
+                }}
+              >
+                {DIFFICULTY_LABELS[d]}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <button
+            onClick={handleSave}
+            disabled={!title.trim() || saving}
+            className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-40"
+            style={{ background: zone.accentColor, color: '#fff' }}
+          >
+            {saving ? '...' : 'Crear'}
+          </button>
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+            style={{ background: 'var(--bg-soft)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Zone Card ────────────────────────────────────────────────────────────────
+
+function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete: () => void }) {
+  const [zone, setZone] = useState(initialZone);
+  const [expanded, setExpanded] = useState(true);
+  const [activeAction, setActiveAction] = useState<{ label: string; type: string } | null>(null);
+  const [completingQuest, setCompletingQuest] = useState<string | null>(null);
+  const toast = useToastStore();
+
+  // Keep zone in sync if parent updates
+  useEffect(() => { setZone(initialZone); }, [initialZone]);
+
+  async function refreshZone() {
+    try {
+      const { data } = await api.get<CustomZone>(`/custom-zones/${zone.id}`);
+      setZone(data);
+    } catch { /* silent */ }
+  }
+
+  async function handleDelete() {
+    if (!confirm(`¿Eliminar la zona "${zone.name}"?`)) return;
+    try {
+      await api.delete(`/custom-zones/${zone.id}`);
+      toast.success('Zona eliminada');
+      onDelete();
+    } catch { toast.error('Error eliminando zona'); }
+  }
+
+  async function handleCompleteQuest(questId: string) {
+    setCompletingQuest(questId);
+    try {
+      await api.post(`/quests/${questId}/complete`);
+      toast.success('¡Misión completada! ⚔️');
+      await refreshZone();
+    } catch { toast.error('Error completando misión'); }
+    finally { setCompletingQuest(null); }
+  }
+
+  function toggleAction(a: { label: string; type: string }) {
+    setActiveAction(prev => (prev?.type === a.type && prev?.label === a.label) ? null : a);
+  }
+
+  const hasContent = zone.quests.length > 0 || zone.habits.length > 0;
+
+  return (
+    <PixelPanel className="overflow-hidden">
+      {/* Top accent bar */}
+      <div className="h-1 w-full" style={{ background: zone.accentColor }} />
+
+      <div className="p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <button
+            className="flex items-center gap-3 flex-1 text-left"
+            onClick={() => setExpanded(v => !v)}
+          >
+            <span style={{ fontSize: 22 }}>{zone.icon}</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-sm truncate">{zone.name}</p>
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                  style={{ background: `${zone.accentColor}20`, color: zone.accentColor }}
+                >
+                  {zone.quests.length}M · {zone.habits.length}H
+                </span>
+              </div>
+              {zone.description && (
+                <p className="text-xs truncate" style={{ color: 'var(--text-2)' }}>{zone.description}</p>
+              )}
+            </div>
+            {expanded
+              ? <ChevronDown size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+              : <ChevronRight size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            }
+          </button>
+          <button
+            onClick={handleDelete}
+            className="ml-2 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+            title="Eliminar zona"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-3 space-y-3">
+
+                {/* Quick action buttons */}
+                {zone.actions && zone.actions.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {zone.actions.map((a, i) => (
+                      <button
+                        key={i}
+                        onClick={() => toggleAction(a)}
+                        className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all"
+                        style={{
+                          background: activeAction?.label === a.label
+                            ? zone.accentColor
+                            : `${zone.accentColor}20`,
+                          color: activeAction?.label === a.label ? '#fff' : zone.accentColor,
+                          border: `1px solid ${zone.accentColor}50`,
+                        }}
+                      >
+                        {activeAction?.label === a.label ? '✕ Cancelar' : `+ ${a.label}`}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Inline creation form */}
+                <AnimatePresence>
+                  {activeAction && (
+                    <ActionForm
+                      key={activeAction.type + activeAction.label}
+                      action={activeAction}
+                      zone={zone}
+                      onDone={async () => { setActiveAction(null); await refreshZone(); }}
+                      onClose={() => setActiveAction(null)}
+                    />
+                  )}
+                </AnimatePresence>
+
+                {/* Quests list */}
+                {zone.quests.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                      ⚔️ Misiones ({zone.quests.length})
+                    </p>
+                    <div className="space-y-1">
+                      {zone.quests.map(q => (
+                        <div
+                          key={q.id}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg group"
+                          style={{ background: 'var(--bg-soft)' }}
+                        >
+                          <button
+                            onClick={() => handleCompleteQuest(q.id)}
+                            disabled={completingQuest === q.id}
+                            className="flex-shrink-0 transition-all"
+                            title="Completar misión"
+                          >
+                            {completingQuest === q.id
+                              ? <Loader2 size={15} className="animate-spin" style={{ color: zone.accentColor }} />
+                              : <Circle size={15} style={{ color: zone.accentColor }} className="hover:opacity-70" />
+                            }
+                          </button>
+                          <span className="text-sm flex-1 truncate" style={{ color: 'var(--text)' }}>{q.title}</span>
+                          <span
+                            className="text-[10px] font-medium flex-shrink-0"
+                            style={{ color: DIFFICULTY_COLORS[q.difficulty] ?? 'var(--text-muted)' }}
+                          >
+                            {DIFFICULTY_LABELS[q.difficulty] ?? q.difficulty}
+                          </span>
+                          <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--accent-cyan)' }}>
+                            +{q.xpReward}xp
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Habits list */}
+                {zone.habits.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                      🔥 Hábitos ({zone.habits.length})
+                    </p>
+                    <div className="space-y-1">
+                      {zone.habits.map(h => (
+                        <div
+                          key={h.id}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
+                          style={{ background: 'var(--bg-soft)' }}
+                        >
+                          <span className="flex-shrink-0">{h.icon}</span>
+                          <span className="text-sm flex-1 truncate" style={{ color: 'var(--text)' }}>{h.title}</span>
+                          {h.currentStreak > 0 && (
+                            <span
+                              className="text-[10px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded"
+                              style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--accent-gold)' }}
+                            >
+                              🔥 {h.currentStreak}d
+                            </span>
+                          )}
+                          <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--accent-cyan)' }}>
+                            +{h.xpReward}xp
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty state */}
+                {!hasContent && !activeAction && (
+                  <p className="text-xs py-1" style={{ color: 'var(--text-muted)' }}>
+                    Usa los botones de arriba para añadir misiones o hábitos a esta zona.
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </PixelPanel>
+  );
+}
 
 // ─── Wizard ───────────────────────────────────────────────────────────────────
 
@@ -107,6 +469,7 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
             placeholder="Ej: Quiero organizar mis clases de inglés, tener mis notas de vocabulario, repasar el material..."
             value={description}
             onChange={e => setDescription(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) handleAsk(); }}
           />
           <div className="flex gap-2">
             <PixelButton variant="primary" onClick={handleAsk} disabled={loading || !description.trim()}>
@@ -119,7 +482,6 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
 
       {step === 2 && suggestion && (
         <>
-          {/* Preview */}
           <div className="rounded-xl p-4 space-y-3"
             style={{ background: `${editedColor}18`, border: `1px solid ${editedColor}40` }}>
             <div className="flex items-center gap-3">
@@ -135,9 +497,17 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
                 <span style={{ color: 'var(--text-2)' }}> — {s.description}</span>
               </div>
             ))}
+            {suggestion.actions?.length > 0 && (
+              <div className="flex gap-2 flex-wrap pt-1">
+                {suggestion.actions.map((a, i) => (
+                  <span key={i} className="text-xs px-2 py-1 rounded-lg" style={{ background: `${editedColor}25`, color: editedColor }}>
+                    + {a.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Icon selector */}
           <div>
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-2)' }}>Ícono</p>
             <input
@@ -148,7 +518,6 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
             />
           </div>
 
-          {/* Color palette */}
           <div>
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-2)' }}>Color de la zona</p>
             <div className="flex gap-2 flex-wrap">
@@ -163,7 +532,6 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
             </div>
           </div>
 
-          {/* Measurable toggle */}
           <div className="flex items-center justify-between py-2 rounded-lg px-3"
             style={{ background: 'var(--bg-soft)' }}>
             <div>
@@ -193,103 +561,6 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
   );
 }
 
-// ─── Zone Card ────────────────────────────────────────────────────────────────
-
-function ZoneCard({ zone, onDelete }: { zone: CustomZone; onDelete: () => void }) {
-  const [expanded, setExpanded] = useState(false);
-  const toast = useToastStore();
-
-  async function handleDelete() {
-    try {
-      await api.delete(`/custom-zones/${zone.id}`);
-      toast.success('Zona eliminada');
-      onDelete();
-    } catch { toast.error('Error'); }
-  }
-
-  return (
-    <PixelPanel className="overflow-hidden">
-      <div
-        className="h-1 w-full"
-        style={{ background: zone.accentColor }}
-      />
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <button className="flex items-center gap-3 flex-1 text-left" onClick={() => setExpanded(v => !v)}>
-            <span style={{ fontSize: 22 }}>{zone.icon}</span>
-            <div className="min-w-0 flex-1">
-              <p className="font-bold text-sm truncate">{zone.name}</p>
-              {zone.description && (
-                <p className="text-xs truncate" style={{ color: 'var(--text-2)' }}>{zone.description}</p>
-              )}
-            </div>
-            {expanded ? <ChevronDown size={16} style={{ color: 'var(--text-muted)' }} /> : <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />}
-          </button>
-          <button onClick={handleDelete} className="ml-2 p-1 rounded hover:bg-red-500/10" style={{ color: 'var(--text-muted)' }}>
-            <Trash2 size={14} />
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {expanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="pt-3 space-y-3">
-                {/* Quick actions */}
-                {zone.actions && zone.actions.length > 0 && (
-                  <div className="flex gap-2 flex-wrap">
-                    {zone.actions.map((a, i) => (
-                      <button key={i}
-                        className="text-xs px-3 py-1.5 rounded-lg font-medium"
-                        style={{ background: `${zone.accentColor}20`, color: zone.accentColor, border: `1px solid ${zone.accentColor}40` }}>
-                        + {a.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Quests */}
-                {zone.quests.length > 0 && (
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Misiones</p>
-                    {zone.quests.map(q => (
-                      <p key={q.id} className="text-sm py-0.5">○ {q.title}</p>
-                    ))}
-                  </div>
-                )}
-
-                {/* Habits */}
-                {zone.habits.length > 0 && (
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Hábitos</p>
-                    {zone.habits.map(h => (
-                      <div key={h.id} className="flex items-center justify-between text-sm py-0.5">
-                        <span>🔥 {h.title}</span>
-                        {h.currentStreak > 0 && <span style={{ color: 'var(--c-gold)' }}>{h.currentStreak}d</span>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {zone.quests.length === 0 && zone.habits.length === 0 && (
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Esta zona aún no tiene contenido. Crea misiones o hábitos y asígnalos a esta zona.
-                  </p>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </PixelPanel>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function CustomZonesPage() {
@@ -301,11 +572,11 @@ export default function CustomZonesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await api.get('/custom-zones');
+      const { data } = await api.get<CustomZone[]>('/custom-zones');
       setZones(data);
     } catch { toast.error('Error cargando zonas'); }
     finally { setLoading(false); }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { load(); }, [load]);
 

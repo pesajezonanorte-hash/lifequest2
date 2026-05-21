@@ -99,6 +99,69 @@ router.post('/reorder', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Create quest inside a zone
+router.post('/:id/quests', async (req, res, next) => {
+  try {
+    const userId = (req as AuthRequest).userId!;
+    const zone = await prisma.customZone.findFirst({ where: { id: req.params.id, userId, isActive: true } });
+    if (!zone) return res.status(404).json({ error: 'Zone not found' });
+
+    const { title, description, type = 'SIDE', difficulty = 'NORMAL', category = 'PERSONAL' } = req.body;
+    if (!title?.trim()) return res.status(400).json({ error: 'title required' });
+
+    const XP_BASE: Record<string, number> = { EASY: 25, NORMAL: 50, HARD: 100, EPIC: 250 };
+    const XP_TYPE: Record<string, number> = { DAILY: 1, WEEKLY: 2.5, SIDE: 4, MAIN: 10, META: 8 };
+    const xpReward = Math.floor((XP_BASE[difficulty] ?? 50) * (XP_TYPE[type] ?? 4));
+    const goldReward = Math.floor(xpReward * 0.2);
+
+    const quest = await prisma.quest.create({
+      data: {
+        userId,
+        customZoneId: zone.id,
+        title: title.trim(),
+        description: description ?? null,
+        type,
+        difficulty,
+        category,
+        xpReward,
+        goldReward,
+        subObjectives: [],
+        isRecurring: type === 'DAILY' || type === 'WEEKLY',
+      },
+    });
+    res.status(201).json(quest);
+  } catch (err) { next(err); }
+});
+
+// Create habit inside a zone
+router.post('/:id/habits', async (req, res, next) => {
+  try {
+    const userId = (req as AuthRequest).userId!;
+    const zone = await prisma.customZone.findFirst({ where: { id: req.params.id, userId, isActive: true } });
+    if (!zone) return res.status(404).json({ error: 'Zone not found' });
+
+    const { title, description, icon, xpReward = 20, goldReward = 5 } = req.body;
+    if (!title?.trim()) return res.status(400).json({ error: 'title required' });
+
+    const habit = await prisma.habit.create({
+      data: {
+        userId,
+        customZoneId: zone.id,
+        title: title.trim(),
+        description: description ?? null,
+        category: 'PERSONAL',
+        icon: icon ?? zone.icon ?? '⭐',
+        color: zone.accentColor,
+        xpReward,
+        goldReward,
+        frequency: { type: 'daily', days: [] },
+        resetTime: '04:00',
+      },
+    });
+    res.status(201).json(habit);
+  } catch (err) { next(err); }
+});
+
 // AI zone suggestion wizard (step 1)
 router.post('/suggest', async (req, res, next) => {
   try {
