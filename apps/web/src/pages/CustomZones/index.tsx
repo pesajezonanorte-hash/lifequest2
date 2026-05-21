@@ -281,27 +281,37 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
             >
               <div className="pt-3 space-y-3">
 
-                {/* Quick action buttons */}
-                {zone.actions && zone.actions.length > 0 && (
-                  <div className="flex gap-2 flex-wrap">
-                    {zone.actions.map((a, i) => (
-                      <button
-                        key={i}
-                        onClick={() => toggleAction(a)}
-                        className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all"
-                        style={{
-                          background: activeAction?.label === a.label
-                            ? zone.accentColor
-                            : `${zone.accentColor}20`,
-                          color: activeAction?.label === a.label ? '#fff' : zone.accentColor,
-                          border: `1px solid ${zone.accentColor}50`,
-                        }}
-                      >
-                        {activeAction?.label === a.label ? '✕ Cancelar' : `+ ${a.label}`}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {/* Quick action buttons — always show base buttons + any custom ones */}
+                {(() => {
+                  const defaultActions: { label: string; type: string }[] = [
+                    { label: 'Nueva misión', type: 'new_quest' },
+                    { label: 'Nuevo hábito', type: 'new_habit' },
+                  ];
+                  const customActions = (zone.actions ?? []).filter(
+                    a => a.type !== 'new_quest' && a.type !== 'new_habit'
+                  );
+                  const allActions = [...defaultActions, ...customActions];
+                  return (
+                    <div className="flex gap-2 flex-wrap">
+                      {allActions.map((a, i) => (
+                        <button
+                          key={i}
+                          onClick={() => toggleAction(a)}
+                          className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all"
+                          style={{
+                            background: activeAction?.label === a.label
+                              ? zone.accentColor
+                              : `${zone.accentColor}20`,
+                            color: activeAction?.label === a.label ? '#fff' : zone.accentColor,
+                            border: `1px solid ${zone.accentColor}50`,
+                          }}
+                        >
+                          {activeAction?.label === a.label ? '✕ Cancelar' : `+ ${a.label}`}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
 
                 {/* Inline creation form */}
                 <AnimatePresence>
