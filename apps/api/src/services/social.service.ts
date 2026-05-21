@@ -132,9 +132,9 @@ export async function getLeaderboard(
   if (category === 'xp') {
     const users = await prisma.user.findMany({
       where: whereClause,
-      orderBy: { xp: 'desc' },
+      orderBy: [{ level: 'desc' }, { xp: 'desc' }],
       take: 50,
-      select: { id: true, username: true, displayName: true, level: true, xp: true, avatarConfig: true },
+      select: { id: true, username: true, displayName: true, level: true, xp: true, xpToNextLevel: true, avatarConfig: true, equippedAura: true, equippedFrame: true, equippedHat: true },
     });
     return users.map((u, i) => ({ rank: i + 1, ...u, value: u.xp }));
   }
@@ -144,7 +144,7 @@ export async function getLeaderboard(
       where: whereClause,
       orderBy: { currentStreak: 'desc' },
       take: 50,
-      select: { id: true, username: true, displayName: true, level: true, currentStreak: true, avatarConfig: true },
+      select: { id: true, username: true, displayName: true, level: true, currentStreak: true, avatarConfig: true, equippedAura: true, equippedFrame: true, equippedHat: true },
     });
     return users.map((u, i) => ({ rank: i + 1, ...u, value: u.currentStreak }));
   }
@@ -161,7 +161,7 @@ export async function getLeaderboard(
     const userIds = result.map((r) => r.userId);
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
-      select: { id: true, username: true, displayName: true, level: true, avatarConfig: true },
+      select: { id: true, username: true, displayName: true, level: true, avatarConfig: true, equippedAura: true, equippedFrame: true, equippedHat: true },
     });
 
     const userMap = new Map(users.map((u) => [u.id, u]));
@@ -203,7 +203,7 @@ export async function getLeaderboard(
     const userIds = ranked.map((r) => r.userId);
     const users = await prisma.user.findMany({
       where: { id: { in: userIds } },
-      select: { id: true, username: true, displayName: true, level: true, avatarConfig: true },
+      select: { id: true, username: true, displayName: true, level: true, avatarConfig: true, equippedAura: true, equippedFrame: true, equippedHat: true },
     });
 
     const userMap = new Map(users.map((u) => [u.id, u]));
@@ -344,7 +344,7 @@ export async function getMyGuild(userId: string) {
         include: {
           members: {
             include: {
-              user: { select: { id: true, username: true, displayName: true, level: true, currentStreak: true, xp: true, avatarConfig: true } },
+              user: { select: { id: true, username: true, displayName: true, level: true, currentStreak: true, xp: true, avatarConfig: true, equippedAura: true, equippedFrame: true, equippedHat: true } },
             },
             orderBy: { joinedAt: 'asc' },
           },
@@ -362,7 +362,7 @@ export async function getGuildMessages(userId: string, guildId: string, limit = 
 
   const messages = await prisma.guildMessage.findMany({
     where: { guildId },
-    include: { user: { select: { id: true, username: true, displayName: true, avatarConfig: true } } },
+    include: { user: { select: { id: true, username: true, displayName: true, avatarConfig: true, equippedAura: true, equippedFrame: true, equippedHat: true } } },
     orderBy: { createdAt: 'asc' },
     take: limit,
   });
@@ -381,7 +381,7 @@ export async function sendGuildMessage(userId: string, guildId: string, content:
 
   return prisma.guildMessage.create({
     data: { guildId, userId, content: content.trim() },
-    include: { user: { select: { id: true, username: true, displayName: true, avatarConfig: true } } },
+    include: { user: { select: { id: true, username: true, displayName: true, avatarConfig: true, equippedAura: true, equippedFrame: true, equippedHat: true } } },
   });
 }
 

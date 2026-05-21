@@ -193,6 +193,7 @@ model User {
   outfits                 Outfit[]
   styleWishlists          StyleWishlist[]
   presenceCheckins        PresenceCheckin[]
+  feedbackEntries         Feedback[]
 
   @@map("users")
 }
@@ -1310,4 +1311,17 @@ model PresenceCheckin {
 
   @@unique([userId, week])
   @@map("presence_checkins")
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     String?
+  kind      String   @default("other")
+  message   String
+  url       String?
+  createdAt DateTime @default(now())
+
+  @@map("feedback")
 }

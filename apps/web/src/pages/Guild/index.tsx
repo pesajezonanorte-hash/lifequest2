@@ -5,13 +5,36 @@ import {
   getMyGuild, createGuild, joinGuild, getGuildMessages, postGuildMessage, leaveGuild,
 } from '../../services/social.service';
 import { useAuthStore } from '../../store/authStore';
+import { AvatarDisplay } from '../../components/character/AvatarDisplay';
+
+interface GuildMemberUser {
+  id: string;
+  username: string;
+  displayName: string;
+  level: number;
+  currentStreak: number;
+  xp: number;
+  avatarConfig?: unknown;
+  equippedAura?: string | null;
+  equippedFrame?: string | null;
+  equippedHat?: string | null;
+}
+
+interface GuildMessageUser {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarConfig?: unknown;
+  equippedAura?: string | null;
+  equippedFrame?: string | null;
+}
 
 interface GuildMessage {
   id: string;
   content: string;
   createdAt: string;
   userId: string;
-  user: { id: string; username: string; displayName: string };
+  user: GuildMessageUser;
 }
 
 interface Guild {
@@ -27,7 +50,7 @@ interface Guild {
     id: string;
     userId: string;
     role: string;
-    user: { id: string; username: string; displayName: string; level: number; currentStreak: number; xp: number };
+    user: GuildMemberUser;
   }>;
 }
 
@@ -255,15 +278,19 @@ export default function GuildPage() {
           <div className="space-y-2">
             {guild.members.map((m) => (
               <div key={m.id} className="flex items-center gap-2">
-                <div className="w-7 h-7 border-2 border-border-pixel bg-bg-deep flex items-center justify-center font-pixel text-xs">
-                  {m.user.displayName.charAt(0)}
-                </div>
+                <AvatarDisplay
+                  avatarConfig={m.user.avatarConfig}
+                  equippedAura={m.user.equippedAura}
+                  equippedFrame={m.user.equippedFrame}
+                  size={32}
+                  animate="idle"
+                />
                 <div className="flex-1 min-w-0">
                   <div className={`font-pixel truncate ${m.userId === user?.id ? 'text-accent-gold' : 'text-text-primary'}`} style={{ fontSize: '8px' }}>
                     {m.user.displayName}
                     {m.role === 'LEADER' && ' 👑'}
                   </div>
-                  <div className="font-vt text-text-dim" style={{ fontSize: '10px' }}>Nv.{m.user.level}</div>
+                  <div className="font-vt text-text-dim" style={{ fontSize: '10px' }}>Nv.{m.user.level} · 🔥{m.user.currentStreak}</div>
                 </div>
               </div>
             ))}
@@ -279,30 +306,41 @@ export default function GuildPage() {
             {messages.length === 0 ? (
               <div className="text-center py-4 font-vt text-text-dim text-sm">¡Sé el primero en hablar!</div>
             ) : (
-              messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-2 ${msg.userId === user?.id ? 'flex-row-reverse' : ''}`}
-                >
-                  <div className={`max-w-[75%] ${msg.userId === user?.id ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
-                    <span className="font-pixel text-text-dim" style={{ fontSize: '8px' }}>
-                      {msg.userId !== user?.id && msg.user.displayName}
-                    </span>
-                    <div className={`px-3 py-2 border-2 font-vt text-sm ${
-                      msg.userId === user?.id
-                        ? 'bg-blue-900 border-blue-600 text-blue-100'
-                        : 'bg-bg-deep border-border-pixel text-text-primary'
-                    }`}>
-                      {msg.content}
+              messages.map((msg) => {
+                const isMe = msg.userId === user?.id;
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex gap-2 items-end ${isMe ? 'flex-row-reverse' : ''}`}
+                  >
+                    <AvatarDisplay
+                      avatarConfig={msg.user.avatarConfig}
+                      equippedAura={msg.user.equippedAura}
+                      equippedFrame={msg.user.equippedFrame}
+                      size={28}
+                      animate="none"
+                      className="flex-shrink-0 mb-4"
+                    />
+                    <div className={`max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-0.5`}>
+                      <span className="font-pixel text-text-dim" style={{ fontSize: '8px' }}>
+                        {!isMe && msg.user.displayName}
+                      </span>
+                      <div className={`px-3 py-2 border-2 font-vt text-sm ${
+                        isMe
+                          ? 'bg-blue-900 border-blue-600 text-blue-100'
+                          : 'bg-bg-deep border-border-pixel text-text-primary'
+                      }`}>
+                        {msg.content}
+                      </div>
+                      <span className="font-vt text-text-dim" style={{ fontSize: '10px' }}>
+                        {new Date(msg.createdAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                    <span className="font-vt text-text-dim" style={{ fontSize: '10px' }}>
-                      {new Date(msg.createdAt).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </motion.div>
-              ))
+                  </motion.div>
+                );
+              })
             )}
             <div ref={bottomRef} />
           </div>

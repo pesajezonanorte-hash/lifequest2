@@ -84,7 +84,8 @@ export async function generateProactiveNote(userId: string) {
   let tone = 'motivational';
   let icon = '🧙';
 
-  if (streak && streak.currentStreak === 0) {
+  const isNewUser = user.longestStreak === 0 && habits.length === 0;
+  if (!isNewUser && streak && streak.currentStreak === 0 && user.longestStreak > 0) {
     tone = 'warning';
     icon = '⚠️';
   } else if (user.currentStreak >= 7) {
@@ -99,10 +100,12 @@ export async function generateProactiveNote(userId: string) {
   let message: string;
 
   if (hasAIProvider()) {
+    const newUserNote = isNewUser ? 'IMPORTANTE: Este héroe es NUEVO, acaba de unirse. Dales la bienvenida con entusiasmo, NO menciones rachas perdidas ni puntos críticos.' : '';
     const prompt = `Eres El Sabio, el mentor de LifeQuest — una app RPG de vida real.
 
 Datos del héroe ${user.displayName} (Nivel ${user.level}):
 - Racha actual: ${user.currentStreak} días
+- Racha más larga: ${user.longestStreak} días
 - Hábitos activos: ${habits.length}
 - Mejor hábito (racha): ${topHabit ? `${topHabit.title} — ${topHabit.currentStreak} días` : 'ninguno'}
 - Misiones esta semana: ${recentQuests}
@@ -110,6 +113,7 @@ Datos del héroe ${user.displayName} (Nivel ${user.level}):
 - Estado emocional último check-in: ${lastMood ? `${lastMood}/5` : 'sin datos'}
 - Energía último check-in: ${lastEnergy ? `${lastEnergy}/10` : 'sin datos'}
 - Hábitos completados hoy: ${todayLogs}
+${newUserNote}
 
 Escribe UNA sola nota proactiva en español. Máximo 2 frases. Específica a los datos. Tono: ${tone}.
 Menciona datos reales (nombre del hábito, racha, etc). NO uses saludos genéricos.
@@ -144,11 +148,14 @@ Responde SOLO el mensaje, sin comillas, sin explicaciones.`;
 }
 
 function buildFallbackMessage(
-  user: { displayName: string; currentStreak: number },
+  user: { displayName: string; currentStreak: number; longestStreak: number },
   topHabit: { title: string; currentStreak: number } | undefined,
   recentQuests: number,
   tone: string
 ): string {
+  if (user.longestStreak === 0 && user.currentStreak === 0) {
+    return `¡Bienvenido a LifeQuest, ${user.displayName}! Tu aventura comienza hoy. Crea tu primer hábito y empieza a ganar XP.`;
+  }
   if (tone === 'warning' && user.currentStreak === 0) {
     return `${user.displayName}, tu racha se ha roto. Hoy es el mejor momento para empezar una nueva.`;
   }

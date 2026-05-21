@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { requireAuth, type AuthRequest } from '../middleware/auth.middleware';
-import { sageLimiter } from '../middleware/rate-limit.middleware';
+import { sageLimiter, sageDailyLimiter } from '../middleware/rate-limit.middleware';
 import * as sage from '../controllers/sage.controller';
 import { getTodayProactiveNote, markProactiveNoteRead } from '../services/sage-proactive.service';
 
 const router = Router();
 router.use(requireAuth);
 router.use(sageLimiter);
+router.use(sageDailyLimiter);
 
 router.post('/chat',             sage.chat);
 router.post('/suggest-quests',   sage.suggestQuests);

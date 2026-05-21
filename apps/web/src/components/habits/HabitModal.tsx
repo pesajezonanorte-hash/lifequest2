@@ -95,9 +95,12 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
                 <button
                   key={icon}
                   onClick={() => setForm((f) => ({ ...f, icon }))}
-                  className={`w-8 h-8 text-lg flex items-center justify-center border rounded-lg transition-colors ${form.icon === icon ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'}`}
+                  className={`relative w-8 h-8 text-lg flex items-center justify-center border rounded-lg transition-colors ${form.icon === icon ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'}`}
                 >
                   {icon}
+                  {form.icon === icon && (
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[var(--accent-gold)] rounded-full flex items-center justify-center text-[8px] font-bold text-black leading-none">✓</span>
+                  )}
                 </button>
               ))}
             </div>

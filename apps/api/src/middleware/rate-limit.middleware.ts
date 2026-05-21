@@ -69,11 +69,18 @@ export const registerLimiter = buildLimiter({
   message: 'Demasiados registros desde esta IP. Intenta más tarde.',
 });
 
-// Sage limiter — also protected by Gemini daily quota; this is the request-rate cap
+// Sage limiter — per-minute burst guard
 export const sageLimiter = buildLimiter({
   windowMs: 60_000,
+  max: 10,
+  message: 'Demasiadas consultas al Sabio por minuto. Espera un momento.',
+});
+
+// Sage daily limiter — prevents one user from exhausting all AI tokens
+export const sageDailyLimiter = buildLimiter({
+  windowMs: 24 * 60 * 60_000,
   max: 20,
-  message: 'Demasiadas consultas al Sabio por minuto.',
+  message: 'Has alcanzado el límite diario de consultas al Sabio (20/día). Vuelve mañana.',
 });
 
 export { buildLimiter };

@@ -15,7 +15,7 @@ const OPENAI_API_URL = process.env.OPENAI_API_URL || 'https://api.openai.com/v1/
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash-lite';
 const GEMINI_API_URL =
   process.env.GEMINI_API_URL ||
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
@@ -48,7 +48,7 @@ async function generateWithOpenAI(messages: ChatMessage[], options: ChatOptions)
       model: OPENAI_MODEL,
       messages,
       temperature: options.temperature ?? 0.8,
-      max_tokens: options.maxTokens ?? 600,
+      max_tokens: options.maxTokens ?? 300,
     }),
   });
 
@@ -79,7 +79,7 @@ async function generateWithGemini(messages: ChatMessage[], options: ChatOptions)
     contents,
     generationConfig: {
       temperature: options.temperature ?? 0.8,
-      maxOutputTokens: options.maxTokens ?? 600,
+      maxOutputTokens: options.maxTokens ?? 300,
     },
   };
 

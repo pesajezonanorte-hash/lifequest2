@@ -1,22 +1,9 @@
 import { Router } from 'express';
-import { promises as fs } from 'fs';
-import path from 'path';
 import { requireAuth, type AuthRequest } from '../middleware/auth.middleware';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
 router.use(requireAuth);
-
-const FEEDBACK_DIR = path.join(process.cwd(), '.feedback');
-const FEEDBACK_FILE = path.join(FEEDBACK_DIR, 'entries.jsonl');
-
-interface FeedbackEntry {
-  userId: string;
-  email?: string;
-  kind: 'bug' | 'idea' | 'other';
-  message: string;
-  url?: string;
-  createdAt: string;
-}
 
 router.post('/', async (req, res) => {
   try {
@@ -25,20 +12,18 @@ router.post('/', async (req, res) => {
       res.status(400).json({ error: 'Mensaje requerido (mínimo 3 caracteres).' });
       return;
     }
-    const sanitized = message.trim().slice(0, 2000);
-    const k: FeedbackEntry['kind'] = kind === 'bug' || kind === 'idea' ? kind : 'other';
 
-    const entry: FeedbackEntry = {
-      userId: (req as AuthRequest).userId!,
-      email: (req as AuthRequest).userEmail,
-      kind: k,
-      message: sanitized,
-      url: typeof url === 'string' ? url.slice(0, 500) : undefined,
-      createdAt: new Date().toISOString(),
-    };
+    const k = kind === 'bug' || kind === 'idea' ? kind : 'other';
 
-    await fs.mkdir(FEEDBACK_DIR, { recursive: true });
-    await fs.appendFile(FEEDBACK_FILE, JSON.stringify(entry) + '\n', 'utf8');
+    await prisma.feedback.create({
+      data: {
+        userId: (req as AuthRequest).userId!,
+        email: (req as AuthRequest).userEmail,
+        kind: k,
+        message: message.trim().slice(0, 2000),
+        url: typeof url === 'string' ? url.slice(0, 500) : undefined,
+      },
+    });
 
     res.json({ ok: true });
   } catch (e) {

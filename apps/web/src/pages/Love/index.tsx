@@ -155,19 +155,19 @@ function AddDateModal({ relationshipId, onClose, onSave }: { relationshipId: str
   );
 }
 
-function SetupModal({ onClose, onSave }: { onClose: () => void; onSave: (r: Relationship) => void }) {
-  const [name, setName] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+function SetupModal({ onClose, onSave, existing }: { onClose: () => void; onSave: (r: Relationship) => void; existing?: Relationship | null }) {
+  const existingStartDate = (existing?.notes as string | undefined)?.match(/startDate:(\d{4}-\d{2}-\d{2})/)?.[1] ?? new Date().toISOString().split('T')[0];
+  const [name, setName] = useState(existing?.name ?? '');
+  const [startDate, setStartDate] = useState(existingStartDate);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
 
   async function save() {
-    if (!name.trim()) return;
     setSaving(true);
     try {
-      const r = await loveService.createRelationship({ name, type: 'romantic', isPartner: true, notes: startDate ? `startDate:${startDate}` : undefined });
+      const r = await loveService.createRelationship({ name: name.trim(), type: 'romantic', isPartner: true, notes: startDate ? `startDate:${startDate}` : undefined });
       onSave(r);
-      toast.success('¡Relación configurada! 💝');
+      toast.success(name.trim() ? '¡Relación configurada! 💝' : 'Nombre eliminado');
     } catch { toast.error('Error al configurar'); }
     finally { setSaving(false); }
   }
@@ -176,14 +176,17 @@ function SetupModal({ onClose, onSave }: { onClose: () => void; onSave: (r: Rela
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <motion.div initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="bg-bg-panel border-2 border-border-pixel w-full max-w-sm space-y-4 p-5" onClick={e => e.stopPropagation()}>
         <p className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>CONFIGURAR JARDÍN</p>
-        <input autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="Nombre de tu pareja" className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-xl px-3 py-2 focus:border-accent-gold outline-none" />
+        <div>
+          <p className="font-pixel text-text-secondary mb-1" style={{ fontSize: '7px' }}>NOMBRE DE TU PAREJA (opcional)</p>
+          <input autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="Dejar vacío para ocultar nombre" className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-xl px-3 py-2 focus:border-accent-gold outline-none" />
+        </div>
         <div>
           <p className="font-pixel text-text-secondary mb-1" style={{ fontSize: '7px' }}>FECHA DE INICIO</p>
           <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-3 py-2 focus:border-accent-gold outline-none" />
         </div>
         <div className="flex gap-2">
           <PixelButton variant="ghost" onClick={onClose} className="flex-1">Cancelar</PixelButton>
-          <PixelButton variant="primary" onClick={save} disabled={!name.trim() || saving} className="flex-1">Guardar</PixelButton>
+          <PixelButton variant="primary" onClick={save} disabled={saving} className="flex-1">Guardar</PixelButton>
         </div>
       </motion.div>
     </motion.div>
@@ -276,9 +279,17 @@ export default function LovePage() {
       {tab === 'jardín' && rel && (
         <>
           {/* Partner card */}
-          <PixelPanel className="p-5 text-center space-y-3">
+          <PixelPanel className="p-5 text-center space-y-3 relative">
+            <button
+              onClick={() => setShowSetup(true)}
+              className="absolute top-3 right-3 font-pixel text-text-secondary hover:text-accent-gold transition-colors"
+              style={{ fontSize: '9px' }}
+              title="Editar jardín"
+            >
+              ✏️
+            </button>
             <p className="text-5xl">💑</p>
-            <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>{rel.name}</p>
+            {rel.name && <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>{rel.name}</p>}
             {startDate && <p className="font-vt text-text-secondary text-lg">{timeTogetherText(startDate + 'T00:00:00')}</p>}
           </PixelPanel>
 
@@ -351,7 +362,7 @@ export default function LovePage() {
       )}
 
       <AnimatePresence>
-        {showSetup && <SetupModal onClose={() => setShowSetup(false)} onSave={handleRelationshipSaved} />}
+        {showSetup && <SetupModal onClose={() => setShowSetup(false)} onSave={handleRelationshipSaved} existing={dashboard?.relationship} />}
         {showAddDate && rel && <AddDateModal relationshipId={rel.id} onClose={() => setShowAddDate(false)} onSave={r => { setDashboard(prev => ({ ...prev!, relationship: r })); setShowAddDate(false); load(); }} />}
       </AnimatePresence>
     </div>

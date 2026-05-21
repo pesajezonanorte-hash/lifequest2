@@ -6,10 +6,16 @@ import { PixelPanel } from '../ui/PixelPanel';
 import { ColorPicker } from './ColorPicker';
 import type { AvatarConfig, HairStyle, Accessory, Expression } from '@lifequest/shared';
 
-const HAIR_COLORS = ['#2c1810', '#4a3728', '#8b4513', '#d4a017', '#c8a2c8', '#708090', '#1a1a1a', '#ff6b6b'];
-const SKIN_COLORS = ['#fde8d0', '#f5c89f', '#c68642', '#a0522d', '#7b3f2c', '#4a2010'];
-const SHIRT_COLORS = ['#4d96ff', '#ff6b9d', '#4ecdc4', '#6bcf7f', '#ffd23f', '#ff6347', '#9b59b6', '#2c3e50', '#e74c3c', '#1abc9c'];
-const PANTS_COLORS = ['#37474f', '#1a237e', '#4e342e', '#1b5e20', '#880e4f', '#263238'];
+const HAIR_COLORS = ['#2c1810', '#4a3728', '#8b4513', '#d4a017', '#c8a2c8', '#708090', '#1a1a1a', '#ff6b6b', '#e8c090', '#ffffff', '#3d5a80', '#c0392b'];
+const SKIN_COLORS = [
+  '#fdf0e8','#fde8d0','#fcd9c0','#f8d5b0',
+  '#f5c89f','#f0b98e','#e8a876','#d4956a',
+  '#c68642','#b87340','#a86035','#a0522d',
+  '#8b4513','#7b3f2c','#6b3422','#5c2e1a',
+  '#4a2010','#3d1a0c','#2d1009','#1c0806',
+];
+const SHIRT_COLORS = ['#4d96ff', '#ff6b9d', '#4ecdc4', '#6bcf7f', '#ffd23f', '#ff6347', '#9b59b6', '#2c3e50', '#e74c3c', '#1abc9c', '#f97316', '#64748b', '#ffffff', '#000000'];
+const PANTS_COLORS = ['#37474f', '#1a237e', '#4e342e', '#1b5e20', '#880e4f', '#263238', '#000000', '#5d4037', '#b71c1c', '#1565c0'];
 const HAIR_STYLES_MALE: HairStyle[] = ['short', 'medium', 'long', 'shaved', 'copete', 'afro'];
 const HAIR_STYLES_FEMALE: HairStyle[] = ['long', 'short', 'recogido', 'trenzas', 'ondulado', 'afro'];
 const ACCESSORIES: Accessory[] = ['none', 'glasses', 'cap', 'headband', 'earrings', 'scarf'];
