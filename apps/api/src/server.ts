@@ -43,13 +43,14 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// Database connection check (schema must be pushed locally via: prisma db push)
-app.post('/api/v1/db/migrate', async (_req, res) => {
+// Database connection check and schema sync
+app.get('/api/v1/db/push', async (_req, res) => {
   try {
-    await prisma.$connect();
-    res.json({ status: 'database connected', note: 'schema must be applied locally via: npm run db:push' });
+    const { execSync } = await import('child_process');
+    const output = execSync('npx prisma db push --accept-data-loss', { encoding: 'utf-8' });
+    res.json({ status: 'success', output });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Database connection failed';
+    const msg = err instanceof Error ? err.message : 'DB push failed';
     res.status(500).json({ error: msg });
   }
 });

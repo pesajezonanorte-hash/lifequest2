@@ -9,13 +9,14 @@ export async function register(req: Request, res: Response): Promise<void> {
     res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
     res.status(201).json({ user, accessToken });
   } catch (err) {
+    console.error('[REGISTER_ERROR]', err);
     const msg = err instanceof Error ? err.message : 'ERROR';
     if (msg === 'EMAIL_TAKEN') {
       res.status(409).json({ error: 'Este email ya está en uso, héroe.' });
     } else if (msg === 'USERNAME_TAKEN') {
       res.status(409).json({ error: 'Este nombre de usuario ya existe.' });
     } else {
-      res.status(500).json({ error: 'Error al crear la cuenta.' });
+      res.status(500).json({ error: 'Error al crear la cuenta.', message: msg });
     }
   }
 }
