@@ -56,7 +56,7 @@ export async function logout(req: AuthRequest, res: Response): Promise<void> {
   if (req.userId) {
     await authService.logoutUser(req.userId);
   }
-  res.clearCookie('refreshToken', { path: '/api/v1/auth' });
+  res.clearCookie('refreshToken', { path: '/api/v1' });
   res.json({ message: 'Hasta pronto, héroe.' });
 }
 

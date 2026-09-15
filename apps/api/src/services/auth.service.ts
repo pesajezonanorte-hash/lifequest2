@@ -73,12 +73,13 @@ function sanitizeUser(user: {
 }
 
 export async function registerUser(data: RegisterInput) {
+  const normalizedEmail = data.email.trim().toLowerCase();
   const existing = await prisma.user.findFirst({
-    where: { OR: [{ email: data.email }, { username: data.username }] },
+    where: { OR: [{ email: normalizedEmail }, { username: data.username.trim() }] },
   });
 
   if (existing) {
-    if (existing.email === data.email) throw new Error('EMAIL_TAKEN');
+    if (existing.email === normalizedEmail) throw new Error('EMAIL_TAKEN');
     throw new Error('USERNAME_TAKEN');
   }
 
@@ -98,10 +99,10 @@ export async function registerUser(data: RegisterInput) {
 
   const user = await prisma.user.create({
     data: {
-      email: data.email,
-      username: data.username,
+      email: normalizedEmail,
+      username: data.username.trim(),
       passwordHash,
-      displayName: data.displayName ?? data.username,
+      displayName: data.displayName ?? data.username.trim(),
       avatarConfig,
     },
   });
@@ -123,7 +124,8 @@ export async function registerUser(data: RegisterInput) {
 }
 
 export async function loginUser(data: LoginInput) {
-  const user = await prisma.user.findUnique({ where: { email: data.email } });
+  const normalizedEmail = data.email.trim().toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
   if (!user) throw new Error('INVALID_CREDENTIALS');
 

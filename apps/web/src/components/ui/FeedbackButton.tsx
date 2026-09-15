@@ -1,9 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X } from 'lucide-react';
 import api from '../../lib/api';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 
 type Kind = 'bug' | 'idea' | 'other';
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+  return isMobile;
+}
 
 export function FeedbackButton() {
   const [open, setOpen] = useState(false);
@@ -12,6 +23,16 @@ export function FeedbackButton() {
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  const kbHeight = useKeyboardHeight();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [message]);
 
   async function submit() {
     if (message.trim().length < 3) {
@@ -33,17 +54,50 @@ export function FeedbackButton() {
     }
   }
 
+  const btnStyle: React.CSSProperties = isMobile
+    ? {
+        position: 'fixed',
+        top: 70,
+        right: 60,
+        width: 36,
+        height: 36,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '50%',
+        border: '2px solid var(--border)',
+        background: 'var(--bg-panel)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+      }
+    : {
+        position: 'fixed',
+        bottom: 16,
+        left: 16,
+        zIndex: 40,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        borderRadius: '9999px',
+        border: '2px solid var(--border)',
+        background: 'var(--bg-panel)',
+        padding: '8px 12px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+      };
+
   return (
     <>
       <motion.button
         onClick={() => setOpen(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-4 left-4 z-40 flex items-center gap-2 rounded-full border-2 border-[var(--border)] bg-[var(--bg-panel)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] shadow-lg hover:border-[var(--accent-gold)] hover:text-[var(--text-primary)]"
+        style={btnStyle}
         title="Enviar feedback"
       >
-        <MessageSquare size={14} className="text-[var(--accent-gold)]" />
-        <span className="hidden sm:inline">Feedback</span>
+        <MessageSquare size={isMobile ? 16 : 14} className="text-[var(--accent-gold)]" />
+        {!isMobile && (
+          <span className="hidden sm:inline text-xs font-medium text-[var(--text-secondary)]">Feedback</span>
+        )}
       </motion.button>
 
       <AnimatePresence>
@@ -56,7 +110,11 @@ export function FeedbackButton() {
             <motion.div
               initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-md rounded-2xl border-2 border-[var(--border)] bg-[var(--bg-panel)] p-5 space-y-3"
+              className="w-full max-w-md rounded-2xl border-2 border-[var(--border)] bg-[var(--bg-panel)] p-5 space-y-3 overflow-y-auto"
+              style={{
+                maxHeight: kbHeight > 0 ? `calc(100vh - ${kbHeight}px - 20px)` : '90vh',
+                transition: 'max-height 0.2s ease',
+              }}
             >
               <div className="flex items-center justify-between">
                 <h2 className="font-pixel text-[var(--accent-gold)]" style={{ fontSize: '11px' }}>💬 ENVIAR FEEDBACK</h2>
@@ -80,12 +138,14 @@ export function FeedbackButton() {
                   </div>
 
                   <textarea
+                    ref={textareaRef}
                     value={message}
                     onChange={e => setMessage(e.target.value)}
-                    rows={5}
+                    rows={3}
                     placeholder="Cuéntanos qué pasó, qué te gustaría, o cualquier comentario…"
-                    className="w-full bg-[var(--bg-deep)] border-2 border-[var(--border)] text-[var(--text-primary)] font-vt text-base px-3 py-2 rounded focus:border-[var(--accent-gold)] outline-none resize-none"
+                    className="w-full bg-[var(--bg-deep)] border-2 border-[var(--border)] text-[var(--text-primary)] font-vt text-base px-3 py-2 rounded focus:border-[var(--accent-gold)] outline-none resize-none overflow-hidden"
                     maxLength={2000}
+                    style={{ minHeight: 72 }}
                   />
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[var(--text-muted)]">{message.length}/2000</span>

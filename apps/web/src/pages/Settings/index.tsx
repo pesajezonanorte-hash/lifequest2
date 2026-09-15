@@ -7,6 +7,7 @@ import { useToast } from '../../hooks/useToast';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import * as userService from '../../services/user.service';
+import { requestPermissionAndSubscribe, sendTestNotification } from '../../services/notification.service';
 import api from '../../lib/api';
 
 const THEMES = [
@@ -69,6 +70,45 @@ export default function SettingsPage() {
   const [themeLoading, setThemeLoading] = useState<string | null>(null);
   const [exporting, setExporting] = useState<string | null>(null);
   const activeTheme = (user as any)?.activeTheme ?? 'aurora';
+  const [previewingTheme, setPreviewingTheme] = useState<string | null>(null);
+
+  function handleThemePreview(themeId: string) {
+    if (previewingTheme === themeId) {
+      document.documentElement.setAttribute('data-theme', activeTheme);
+      setPreviewingTheme(null);
+    } else {
+      document.documentElement.setAttribute('data-theme', themeId);
+      setPreviewingTheme(themeId);
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      document.documentElement.setAttribute('data-theme', activeTheme);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [notifStatus, setNotifStatus] = useState<string | null>(null);
+  const [testingNotif, setTestingNotif] = useState(false);
+
+  const notifPermission = 'Notification' in window ? Notification.permission : 'denied';
+
+  async function handleEnableNotifications() {
+    setNotifStatus(null);
+    const ok = await requestPermissionAndSubscribe();
+    setNotifStatus(ok ? '✓ Notificaciones activadas' : '✗ Permiso denegado');
+  }
+
+  async function handleTestNotification() {
+    setTestingNotif(true);
+    try {
+      await sendTestNotification();
+      toast.success('Notificación de prueba enviada 🔔');
+    } catch {
+      toast.error('Error al enviar notificación de prueba');
+    } finally {
+      setTestingNotif(false);
+    }
+  }
 
   async function handleExportJSON() {
     setExporting('json');
@@ -221,7 +261,16 @@ export default function SettingsPage() {
                   </div>
                   <p className="font-vt text-text-secondary text-xs">{theme.description}</p>
                   {theme.cost > 0 && activeTheme !== theme.id && (
-                    <p className="font-pixel text-accent-gold mt-1" style={{ fontSize: '7px' }}>{theme.cost}G</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="font-pixel text-accent-gold" style={{ fontSize: '7px' }}>{theme.cost}G</p>
+                      <button
+                        onClick={e => { e.stopPropagation(); handleThemePreview(theme.id); }}
+                        className={`font-pixel border rounded px-1.5 py-0.5 transition-colors ${previewingTheme === theme.id ? 'border-accent-green text-accent-green' : 'border-border-pixel text-text-muted hover:text-text-secondary'}`}
+                        style={{ fontSize: '6px' }}
+                      >
+                        {previewingTheme === theme.id ? '↩' : '👁'}
+                      </button>
+                    </div>
                   )}
                   {activeTheme === theme.id && (
                     <p className="font-pixel text-accent-green mt-1" style={{ fontSize: '7px' }}>✓ ACTIVO</p>
@@ -288,6 +337,29 @@ export default function SettingsPage() {
               </motion.button>
             </div>
           ))}
+
+          {/* Notifications */}
+          <div className="py-2 border-b border-border-pixel space-y-2">
+            <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>🔔 NOTIFICACIONES</p>
+            <p className="font-vt text-text-secondary text-sm">Recibe alertas de rachas, misiones y logros.</p>
+            <div className="flex flex-wrap gap-2">
+              {notifPermission !== 'granted' && (
+                <PixelButton variant="secondary" onClick={handleEnableNotifications}>
+                  Activar notificaciones
+                </PixelButton>
+              )}
+              {notifPermission === 'granted' && (
+                <PixelButton variant="secondary" onClick={handleTestNotification} disabled={testingNotif}>
+                  {testingNotif ? 'Enviando...' : '📲 Enviar notificación de prueba'}
+                </PixelButton>
+              )}
+            </div>
+            {notifStatus && (
+              <p className={`font-vt text-sm ${notifStatus.startsWith('✓') ? 'text-accent-green' : 'text-accent-red'}`}>
+                {notifStatus}
+              </p>
+            )}
+          </div>
 
           <div className="space-y-1">
             <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>STATS DEL HÉROE</p>

@@ -9,6 +9,8 @@ import { SplashScreen } from './components/animations/SplashScreen';
 import { SageWidget } from './components/sage/SageWidget';
 import { FeedbackButton } from './components/ui/FeedbackButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { NotificationPermissionModal, useNotificationModalState } from './components/ui/NotificationPermissionModal';
+import { useKeyboardAdjust } from './hooks/useKeyboardAdjust';
 
 const LoginPage        = lazy(() => import('./pages/Login'));
 const RegisterPage     = lazy(() => import('./pages/Register'));
@@ -75,6 +77,10 @@ function PageLoader() {
   );
 }
 
+function SafePage({ children }: { children: React.ReactNode }) {
+  return <ErrorBoundary>{children}</ErrorBoundary>;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
   return (
@@ -88,39 +94,39 @@ function AnimatedRoutes() {
         style={{ width: '100%' }}
       >
         <Routes location={location}>
-          <Route path="/"             element={<DashboardPage />} />
-          <Route path="/character"    element={<CharacterPage />} />
-          <Route path="/quests"       element={<QuestsPage />} />
-          <Route path="/quests/new"   element={<QuestsPage />} />
-          <Route path="/habits"       element={<HabitsPage />} />
-          <Route path="/achievements" element={<AchievementsPage />} />
-          <Route path="/history"      element={<HistoryPage />} />
-          <Route path="/gym"          element={<GymPage />} />
-          <Route path="/finances"     element={<FinancesPage />} />
-          <Route path="/sleep"        element={<SleepPage />} />
-          <Route path="/food"         element={<FoodPage />} />
-          <Route path="/learning"     element={<LearningPage />} />
-          <Route path="/journal"      element={<JournalPage />} />
-          <Route path="/love"         element={<LovePage />} />
-          <Route path="/shop"         element={<ShopPage />} />
-          <Route path="/settings"     element={<SettingsPage />} />
-          <Route path="/leaderboard"  element={<LeaderboardPage />} />
-          <Route path="/challenges"   element={<ChallengesPage />} />
-          <Route path="/guild"        element={<GuildPage />} />
-          <Route path="/stats"                    element={<StatsPage />} />
-          <Route path="/season"                   element={<SeasonPage />} />
-          <Route path="/agenda"                   element={<AgendaPage />} />
-          <Route path="/life"                     element={<LifePage />} />
-          <Route path="/custom-zones"              element={<CustomZonesPage />} />
+          <Route path="/"             element={<SafePage><DashboardPage /></SafePage>} />
+          <Route path="/character"    element={<SafePage><CharacterPage /></SafePage>} />
+          <Route path="/quests"       element={<SafePage><QuestsPage /></SafePage>} />
+          <Route path="/quests/new"   element={<SafePage><QuestsPage /></SafePage>} />
+          <Route path="/habits"       element={<SafePage><HabitsPage /></SafePage>} />
+          <Route path="/achievements" element={<SafePage><AchievementsPage /></SafePage>} />
+          <Route path="/history"      element={<SafePage><HistoryPage /></SafePage>} />
+          <Route path="/gym"          element={<SafePage><GymPage /></SafePage>} />
+          <Route path="/finances"     element={<SafePage><FinancesPage /></SafePage>} />
+          <Route path="/sleep"        element={<SafePage><SleepPage /></SafePage>} />
+          <Route path="/food"         element={<SafePage><FoodPage /></SafePage>} />
+          <Route path="/learning"     element={<SafePage><LearningPage /></SafePage>} />
+          <Route path="/journal"      element={<SafePage><JournalPage /></SafePage>} />
+          <Route path="/love"         element={<SafePage><LovePage /></SafePage>} />
+          <Route path="/shop"         element={<SafePage><ShopPage /></SafePage>} />
+          <Route path="/settings"     element={<SafePage><SettingsPage /></SafePage>} />
+          <Route path="/leaderboard"  element={<SafePage><LeaderboardPage /></SafePage>} />
+          <Route path="/challenges"   element={<SafePage><ChallengesPage /></SafePage>} />
+          <Route path="/guild"        element={<SafePage><GuildPage /></SafePage>} />
+          <Route path="/stats"        element={<SafePage><StatsPage /></SafePage>} />
+          <Route path="/season"       element={<SafePage><SeasonPage /></SafePage>} />
+          <Route path="/agenda"       element={<SafePage><AgendaPage /></SafePage>} />
+          <Route path="/life"         element={<SafePage><LifePage /></SafePage>} />
+          <Route path="/custom-zones" element={<SafePage><CustomZonesPage /></SafePage>} />
           <Route path="/goals"    element={<Navigate to="/quests?filter=meta" replace />} />
           <Route path="/metas"    element={<Navigate to="/quests?filter=meta" replace />} />
           <Route path="/rituals"  element={<Navigate to="/habits?filter=ritual" replace />} />
           <Route path="/rituales" element={<Navigate to="/habits?filter=ritual" replace />} />
-          <Route path="/glow-up"                  element={<GlowUpPage />} />
-          <Route path="/wisdom"                   element={<WisdomPage />} />
-          <Route path="/about"                    element={<AboutPage />} />
-          <Route path="/faq"                      element={<FAQPage />} />
-          <Route path="*"             element={<NotFoundPage />} />
+          <Route path="/glow-up"  element={<SafePage><GlowUpPage /></SafePage>} />
+          <Route path="/wisdom"   element={<SafePage><WisdomPage /></SafePage>} />
+          <Route path="/about"    element={<SafePage><AboutPage /></SafePage>} />
+          <Route path="/faq"      element={<SafePage><FAQPage /></SafePage>} />
+          <Route path="*"         element={<SafePage><NotFoundPage /></SafePage>} />
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -155,8 +161,10 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   useBootstrapAuth();
+  useKeyboardAdjust();
   const { initAudio } = useUIStore();
-  const { user, isLoading } = useAuthStore();
+  const { user, isLoading, isAuthenticated } = useAuthStore();
+  const { show: showNotifModal, setShow: setShowNotifModal } = useNotificationModalState();
 
   useEffect(() => {
     const theme = (user as any)?.activeTheme ?? 'aurora';
@@ -201,6 +209,10 @@ export default function App() {
   return (
     <ErrorBoundary>
       {showSplash && <SplashScreen onDone={() => setSplashDone(true)} />}
+
+      {isAuthenticated && showNotifModal && (
+        <NotificationPermissionModal onClose={() => setShowNotifModal(false)} />
+      )}
 
       {!showSplash && (
         <Suspense fallback={<PageLoader />}>

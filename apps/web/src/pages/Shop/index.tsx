@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { useToast } from '../../hooks/useToast';
@@ -6,6 +6,25 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import type { ShopItem, InventoryItem } from '@lifequest/shared';
 import * as shopService from '../../services/shop.service';
+
+const THEME_PREVIEW_COLORS: Record<string, { bg: string; card: string; accent: string }> = {
+  aurora:  { bg: '#1a0d2e', card: '#251545', accent: '#d4a017' },
+  cyber:   { bg: '#001a33', card: '#002244', accent: '#00e5ff' },
+  forest:  { bg: '#122214', card: '#1a331e', accent: '#4ecdc4' },
+  ocean:   { bg: '#041e33', card: '#062d4a', accent: '#4d96ff' },
+  sunset:  { bg: '#2d1300', card: '#3d1c00', accent: '#f97316' },
+  retro:   { bg: '#16213e', card: '#0f3460', accent: '#e94560' },
+};
+
+const THEME_NAME_TO_ID: Record<string, string> = {
+  'Aurora': 'aurora',
+  'Cyber': 'cyber',
+  'Forest': 'forest',
+  'Ocean': 'ocean',
+  'Sunset': 'sunset',
+  'Retro SNES': 'retro',
+  'Retro': 'retro',
+};
 
 const TYPE_TABS = [
   { key: '', label: '🛒 Todo' },
@@ -66,6 +85,25 @@ export default function ShopPage() {
   const [shopTab, setShopTab] = useState<'shop' | 'inventory'>('shop');
   const [confirmItem, setConfirmItem] = useState<ShopItem | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [previewTheme, setPreviewTheme] = useState<string | null>(null);
+  const originalThemeRef = useRef<string>(document.documentElement.getAttribute('data-theme') ?? 'aurora');
+
+  function applyThemePreview(themeId: string | null) {
+    if (themeId) {
+      document.documentElement.setAttribute('data-theme', themeId);
+      setPreviewTheme(themeId);
+    } else {
+      document.documentElement.setAttribute('data-theme', originalThemeRef.current);
+      setPreviewTheme(null);
+    }
+  }
+
+  useEffect(() => {
+    originalThemeRef.current = document.documentElement.getAttribute('data-theme') ?? 'aurora';
+    return () => {
+      document.documentElement.setAttribute('data-theme', originalThemeRef.current);
+    };
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -167,8 +205,21 @@ export default function ShopPage() {
                     <motion.div key={item.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.04 }}>
                       <PixelPanel className={`p-4 space-y-3 ${isLocked ? 'opacity-50' : 'hover:border-accent-gold/50'} transition-all`}>
                         <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-vt text-text-primary text-xl">{item.name}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              {item.type === 'THEME' && (() => {
+                                const tid = THEME_NAME_TO_ID[item.name] ?? item.name.toLowerCase();
+                                const colors = THEME_PREVIEW_COLORS[tid];
+                                return colors ? (
+                                  <div className="flex gap-0.5 rounded overflow-hidden border border-[var(--border)]" title={item.name}>
+                                    <div style={{ width: 10, height: 16, background: colors.bg }} />
+                                    <div style={{ width: 10, height: 16, background: colors.card }} />
+                                    <div style={{ width: 10, height: 16, background: colors.accent }} />
+                                  </div>
+                                ) : null;
+                              })()}
+                              <p className="font-vt text-text-primary text-xl">{item.name}</p>
+                            </div>
                             <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>{TYPE_LABELS[item.type]}</p>
                           </div>
                           {isLocked ? (
@@ -181,19 +232,35 @@ export default function ShopPage() {
                           ) : null}
                         </div>
                         {item.description && <p className="font-vt text-text-secondary text-base">{item.description}</p>}
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
                           <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>🪙 {item.cost}</p>
-                          {!isLocked && !isOwned && (
-                            <motion.button
-                              whileTap={{ scale: 0.92 }}
-                              disabled={isBuying}
-                              onClick={() => setConfirmItem(item)}
-                              className="font-pixel border-2 border-accent-gold text-accent-gold px-3 py-1.5 hover:bg-accent-gold hover:text-bg-deep transition-colors disabled:opacity-50"
-                              style={{ fontSize: '8px' }}
-                            >
-                              {isBuying ? '...' : 'COMPRAR'}
-                            </motion.button>
-                          )}
+                          <div className="flex gap-1">
+                            {item.type === 'THEME' && !isLocked && (() => {
+                              const tid = THEME_NAME_TO_ID[item.name] ?? item.name.toLowerCase();
+                              const isPreviewing = previewTheme === tid;
+                              return (
+                                <motion.button
+                                  whileTap={{ scale: 0.92 }}
+                                  onClick={() => applyThemePreview(isPreviewing ? null : tid)}
+                                  className={`font-pixel border-2 px-2 py-1.5 transition-colors ${isPreviewing ? 'border-accent-green text-accent-green' : 'border-border-pixel text-text-secondary hover:border-text-secondary'}`}
+                                  style={{ fontSize: '7px' }}
+                                >
+                                  {isPreviewing ? '↩ Restaurar' : '👁 Preview'}
+                                </motion.button>
+                              );
+                            })()}
+                            {!isLocked && !isOwned && (
+                              <motion.button
+                                whileTap={{ scale: 0.92 }}
+                                disabled={isBuying}
+                                onClick={() => setConfirmItem(item)}
+                                className="font-pixel border-2 border-accent-gold text-accent-gold px-3 py-1.5 hover:bg-accent-gold hover:text-bg-deep transition-colors disabled:opacity-50"
+                                style={{ fontSize: '8px' }}
+                              >
+                                {isBuying ? '...' : 'COMPRAR'}
+                              </motion.button>
+                            )}
+                          </div>
                         </div>
                       </PixelPanel>
                     </motion.div>

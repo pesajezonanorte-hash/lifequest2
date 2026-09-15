@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { SagePanel } from './SagePanel';
@@ -6,8 +6,19 @@ import { useUIStore } from '../../store/uiStore';
 
 const SEEN_KEY = 'sage-daily-seen';
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+  return isMobile;
+}
+
 export function SageWidget() {
   const { sageOpen, openSage, closeSage } = useUIStore();
+  const isMobile = useIsMobile();
 
   const hasNew = (() => {
     const today = new Date().toDateString();
@@ -19,16 +30,48 @@ export function SageWidget() {
     localStorage.setItem(SEEN_KEY, new Date().toDateString());
   };
 
+  const btnStyle: React.CSSProperties = isMobile
+    ? {
+        position: 'fixed',
+        top: 70,
+        right: 12,
+        width: 36,
+        height: 36,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '50%',
+        border: '1px solid var(--border)',
+        background: 'var(--bg-panel)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+      }
+    : {
+        position: 'fixed',
+        bottom: 24,
+        right: 24,
+        width: 56,
+        height: 56,
+        zIndex: 40,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '16px',
+        border: '1px solid var(--border)',
+        background: 'var(--bg-panel)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
+      };
+
   return (
     <>
       <motion.button
         onClick={handleOpen}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] text-[var(--text-primary)] shadow-lg transition-shadow hover:border-[var(--accent-gold)]"
+        style={btnStyle}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         title="El Sabio — Asistente IA"
       >
-        <Sparkles size={22} className="text-[var(--accent-gold)]" />
+        <Sparkles size={isMobile ? 16 : 22} className="text-[var(--accent-gold)]" />
 
         {hasNew && (
           <motion.div

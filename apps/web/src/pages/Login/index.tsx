@@ -45,7 +45,7 @@ export default function LoginPage() {
         err && typeof err === 'object' && 'response' in err
           ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
           : null;
-      setApiError(message ?? 'We could not sign you in. Please try again.');
+      setApiError(message ?? 'No se pudo iniciar sesión. Verifica tu conexión o intenta nuevamente.');
     }
   }
 

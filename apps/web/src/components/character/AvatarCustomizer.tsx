@@ -6,6 +6,7 @@ import { ColorPicker } from '../onboarding/ColorPicker';
 import { PixelButton } from '../ui/PixelButton';
 import { updateAvatar } from '../../services/user.service';
 import { useAuthStore } from '../../store/authStore';
+import { useToast } from '../../hooks/useToast';
 import type { AvatarConfig, HairStyle, Accessory, Expression } from '@lifequest/shared';
 
 const HAIR_COLORS  = ['#2c1810','#4a3728','#8b4513','#d4a017','#c8a2c8','#708090','#1a1a1a','#ff6b6b','#e8c090','#ffffff','#3d5a80','#c0392b'];
@@ -61,19 +62,22 @@ interface Props {
   onClose: () => void;
 }
 
+const DEFAULT_AVATAR: AvatarConfig = {
+  bodyType: 'male',
+  hairStyle: 'short',
+  hairColor: '#2c1810',
+  skinColor: '#c68642',
+  shirtColor: '#4d96ff',
+  pants: '#37474f',
+  accessory: 'none',
+  expression: 'normal',
+  pet: null,
+};
+
 export function AvatarCustomizer({ isOpen, onClose }: Props) {
   const { user, updateUser } = useAuthStore();
-  const [config, setConfig] = useState<AvatarConfig>(user?.avatarConfig ?? {
-    bodyType: 'male',
-    hairStyle: 'short',
-    hairColor: '#2c1810',
-    skinColor: '#c68642',
-    shirtColor: '#4d96ff',
-    pants: '#37474f',
-    accessory: 'none',
-    expression: 'normal',
-    pet: null,
-  });
+  const toast = useToast();
+  const [config, setConfig] = useState<AvatarConfig>(user?.avatarConfig ?? DEFAULT_AVATAR);
   const [saving, setSaving] = useState(false);
 
   const update = (key: keyof AvatarConfig) => (value: string) =>
@@ -86,7 +90,10 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
     try {
       const updatedUser = await updateAvatar(config);
       updateUser(updatedUser);
+      toast.success('¡Avatar guardado! ✨');
       onClose();
+    } catch {
+      toast.error('Error al guardar el avatar. Intenta de nuevo.');
     } finally {
       setSaving(false);
     }
