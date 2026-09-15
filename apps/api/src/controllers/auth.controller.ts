@@ -26,11 +26,12 @@ export async function login(req: Request, res: Response): Promise<void> {
     res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
     res.json({ user, accessToken });
   } catch (err) {
+    console.error('[LOGIN_ERROR]', err);
     const msg = err instanceof Error ? err.message : 'ERROR';
     if (msg === 'INVALID_CREDENTIALS') {
       res.status(401).json({ error: 'Email o contraseña incorrectos.' });
     } else {
-      res.status(500).json({ error: 'Error al iniciar sesión.' });
+      res.status(500).json({ error: 'Error al iniciar sesión en el servidor.', message: msg });
     }
   }
 }
