@@ -38,6 +38,18 @@ app.use(
   })
 );
 
+// Root endpoint landing response
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    name: 'LifeQuest API',
+    version: '2.0.0',
+    status: 'online',
+    health: '/health',
+    endpoints: '/api/v1',
+    message: '⚔️ ¡Bienvenido a la API de LifeQuest, héroe!',
+  });
+});
+
 // Root-level health check (for Railway healthcheck probe)
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
