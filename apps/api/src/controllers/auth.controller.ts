@@ -16,7 +16,10 @@ export async function register(req: Request, res: Response): Promise<void> {
     } else if (msg === 'USERNAME_TAKEN') {
       res.status(409).json({ error: 'Este nombre de usuario ya existe.' });
     } else {
-      res.status(500).json({ error: 'Error al crear la cuenta.', message: msg });
+      res.status(500).json({
+        error: msg ? `Error al crear la cuenta: ${msg}` : 'Error al crear la cuenta.',
+        message: msg,
+      });
     }
   }
 }
@@ -32,7 +35,10 @@ export async function login(req: Request, res: Response): Promise<void> {
     if (msg === 'INVALID_CREDENTIALS') {
       res.status(401).json({ error: 'Email o contraseña incorrectos.' });
     } else {
-      res.status(500).json({ error: 'Error al iniciar sesión en el servidor.', message: msg });
+      res.status(500).json({
+        error: msg ? `Error al iniciar sesión: ${msg}` : 'Error al iniciar sesión en el servidor.',
+        message: msg,
+      });
     }
   }
 }

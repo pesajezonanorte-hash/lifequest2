@@ -54,10 +54,8 @@ export default function RegisterPage() {
       setAuth(user, accessToken);
       navigate('/');
     } catch (err: unknown) {
-      const message =
-        err && typeof err === 'object' && 'response' in err
-          ? (err as { response?: { data?: { error?: string } } }).response?.data?.error
-          : null;
+      const responseData = (err as { response?: { data?: { error?: string; message?: string } } }).response?.data;
+      const message = responseData?.error || responseData?.message;
       setApiError(message ?? 'We could not create your account. Please try again.');
     }
   }
