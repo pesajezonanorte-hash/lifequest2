@@ -640,8 +640,10 @@ export default function AgendaPage() {
       const redirectUri = window.location.origin + window.location.pathname;
       const url = await agendaService.getGoogleAuthUrl(redirectUri);
       window.location.href = url;
-    } catch {
-      toast.error('No se pudo obtener la URL de autorización de Google.');
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { error?: string } }; message?: string };
+      const msg = errorObj.response?.data?.error || errorObj.message || 'No se pudo obtener la URL de autorización de Google.';
+      toast.error(msg);
     }
   }
 
@@ -652,8 +654,10 @@ export default function AgendaPage() {
       toast.success(res.message);
       setGoogleConnected(true);
       await load();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al sincronizar con Google Calendar');
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { error?: string } }; message?: string };
+      const msg = errorObj.response?.data?.error || errorObj.message || 'Error al sincronizar con Google Calendar';
+      toast.error(msg);
     } finally {
       setSyncingGoogle(false);
     }
@@ -664,8 +668,10 @@ export default function AgendaPage() {
       await agendaService.disconnectGoogleCalendar();
       toast.success('Google Calendar desconectado.');
       setGoogleConnected(false);
-    } catch {
-      toast.error('Error al desconectar Google Calendar');
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { error?: string } }; message?: string };
+      const msg = errorObj.response?.data?.error || errorObj.message || 'Error al desconectar Google Calendar';
+      toast.error(msg);
     }
   }
 

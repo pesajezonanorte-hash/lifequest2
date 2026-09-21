@@ -36,9 +36,20 @@ export async function deleteEvent(req: AuthRequest, res: Response) {
 // ─── Google Calendar Controllers ─────────────────────────────────────────────
 
 export async function getGoogleAuthUrl(req: AuthRequest, res: Response) {
-  const redirectUri = (req.query.redirectUri as string) || `${req.headers.origin}/agenda`;
-  const url = svc.getGoogleAuthUrl(redirectUri);
-  res.json({ url });
+  try {
+    const redirectUri = (req.query.redirectUri as string) || `${req.headers.origin}/agenda`;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      return res.status(400).json({
+        error: 'GOOGLE_CLIENT_ID no configurado en Vercel. Por favor añade GOOGLE_CLIENT_ID en las variables de entorno.',
+      });
+    }
+    const url = svc.getGoogleAuthUrl(redirectUri);
+    return res.json({ url });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error al obtener URL de autenticación de Google';
+    return res.status(500).json({ error: msg });
+  }
 }
 
 export async function handleGoogleCallback(req: AuthRequest, res: Response) {
