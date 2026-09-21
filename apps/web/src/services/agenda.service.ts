@@ -44,3 +44,23 @@ export async function updateEvent(id: string, body: Partial<AgendaEvent>): Promi
 export async function deleteEvent(id: string): Promise<void> {
   await api.delete(`/agenda/${id}`);
 }
+
+// ─── Google Calendar API Methods ─────────────────────────────────────────────
+
+export async function getGoogleAuthUrl(redirectUri?: string): Promise<string> {
+  const { data } = await api.get<{ url: string }>(`/agenda/google/url${redirectUri ? `?redirectUri=${encodeURIComponent(redirectUri)}` : ''}`);
+  return data.url;
+}
+
+export async function handleGoogleCallback(code: string, redirectUri: string): Promise<void> {
+  await api.post('/agenda/google/callback', { code, redirectUri });
+}
+
+export async function syncGoogleCalendar(): Promise<{ syncedCount: number; message: string }> {
+  const { data } = await api.post<{ syncedCount: number; message: string }>('/agenda/google/sync');
+  return data;
+}
+
+export async function disconnectGoogleCalendar(): Promise<void> {
+  await api.delete('/agenda/google/disconnect');
+}

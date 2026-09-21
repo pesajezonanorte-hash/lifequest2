@@ -85,3 +85,208 @@ export async function updateEvent(
 export async function deleteEvent(userId: string, id: string) {
   return prisma.agendaEvent.delete({ where: { id, userId } });
 }
+
+// ─── Google Calendar Integration ─────────────────────────────────────────────
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+
+export function getGoogleAuthUrl(redirectUri: string): string {
+  const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events');
+  return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+}
+
+export async function handleGoogleCallback(userId: string, code: string, redirectUri: string) {
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
+    }),
+  });
+
+  if (!tokenRes.ok) {
+    const errorData = await tokenRes.text();
+    throw new Error(`Error de autenticación con Google: ${errorData}`);
+  }
+
+  const tokens = (await tokenRes.json()) as {
+    access_token: string;
+    refresh_token?: string;
+    expires_in: number;
+  };
+
+  const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      googleAccessToken: tokens.access_token,
+      ...(tokens.refresh_token ? { googleRefreshToken: tokens.refresh_token } : {}),
+      googleTokenExpiresAt: expiresAt,
+      googleCalendarSyncEnabled: true,
+      googleCalendarLastSyncAt: new Date(),
+    },
+    select: {
+      id: true,
+      googleCalendarSyncEnabled: true,
+      googleCalendarLastSyncAt: true,
+    },
+  });
+
+  // Perform immediate initial sync
+  await syncGoogleCalendar(userId).catch((err) => {
+    console.error('[GOOGLE_CALENDAR_INITIAL_SYNC_ERROR]', err);
+  });
+
+  return updatedUser;
+}
+
+export async function refreshGoogleToken(userId: string, refreshToken: string): Promise<string> {
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error('No se pudo refrescar el token de Google.');
+  }
+
+  const data = (await res.json()) as { access_token: string; expires_in: number };
+  const expiresAt = new Date(Date.now() + data.expires_in * 1000);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      googleAccessToken: data.access_token,
+      googleTokenExpiresAt: expiresAt,
+    },
+  });
+
+  return data.access_token;
+}
+
+export async function syncGoogleCalendar(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      googleAccessToken: true,
+      googleRefreshToken: true,
+      googleTokenExpiresAt: true,
+      googleCalendarSyncEnabled: true,
+    },
+  });
+
+  if (!user || !user.googleCalendarSyncEnabled) {
+    return { syncedCount: 0, message: 'Google Calendar no está conectado.' };
+  }
+
+  let accessToken = user.googleAccessToken;
+
+  if (!accessToken || (user.googleTokenExpiresAt && user.googleTokenExpiresAt <= new Date())) {
+    if (user.googleRefreshToken) {
+      accessToken = await refreshGoogleToken(userId, user.googleRefreshToken);
+    } else {
+      throw new Error('Sesión de Google expirada. Por favor vuelve a conectar Google Calendar.');
+    }
+  }
+
+  const now = new Date();
+  const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  const calRes = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${now.toISOString()}&timeMax=${thirtyDaysLater.toISOString()}&singleEvents=true&orderBy=startTime`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }
+  );
+
+  if (!calRes.ok) {
+    const errText = await calRes.text();
+    throw new Error(`Error al consultar Google Calendar: ${errText}`);
+  }
+
+  const calData = (await calRes.json()) as {
+    items?: Array<{
+      id: string;
+      summary?: string;
+      description?: string;
+      location?: string;
+      start?: { dateTime?: string; date?: string };
+      end?: { dateTime?: string; date?: string };
+    }>;
+  };
+
+  const items = calData.items || [];
+  let syncedCount = 0;
+
+  for (const item of items) {
+    if (!item.summary) continue;
+
+    const startStr = item.start?.dateTime || item.start?.date;
+    const endStr = item.end?.dateTime || item.end?.date;
+
+    if (!startStr) continue;
+
+    const startDate = new Date(startStr);
+    const endDate = endStr ? new Date(endStr) : new Date(startDate.getTime() + 60 * 60 * 1000);
+    const isAllDay = Boolean(item.start?.date && !item.start?.dateTime);
+
+    await prisma.agendaEvent.upsert({
+      where: { googleEventId: item.id },
+      create: {
+        userId,
+        title: item.summary,
+        description: item.description ?? null,
+        location: item.location ?? null,
+        startDate,
+        endDate,
+        isAllDay,
+        category: 'work',
+        googleEventId: item.id,
+      },
+      update: {
+        title: item.summary,
+        description: item.description ?? null,
+        location: item.location ?? null,
+        startDate,
+        endDate,
+        isAllDay,
+      },
+    });
+
+    syncedCount++;
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { googleCalendarLastSyncAt: new Date() },
+  });
+
+  return { syncedCount, message: `Sincronizados ${syncedCount} eventos de Google Calendar.` };
+}
+
+export async function disconnectGoogleCalendar(userId: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      googleAccessToken: null,
+      googleRefreshToken: null,
+      googleTokenExpiresAt: null,
+      googleCalendarSyncEnabled: false,
+      googleCalendarLastSyncAt: null,
+    },
+  });
+
+  return { success: true };
+}

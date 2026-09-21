@@ -137,6 +137,15 @@ model User {
 
   refreshTokenHash String?
   lastLoginAt      DateTime?
+
+  // Google Calendar Integration
+  googleAccessToken         String?
+  googleRefreshToken        String?
+  googleTokenExpiresAt      DateTime?
+  googleCalendarId          String?   @default("primary")
+  googleCalendarSyncEnabled  Boolean   @default(false)
+  googleCalendarLastSyncAt  DateTime?
+
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -844,6 +853,8 @@ model AgendaEvent {
   recurrenceRule String?
   recurrenceEnd  DateTime?
   eventType      String    @default("personal") // personal | quest | habit
+
+  googleEventId  String?   @unique
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

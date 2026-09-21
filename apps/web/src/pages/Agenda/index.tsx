@@ -610,6 +610,65 @@ export default function AgendaPage() {
 
   const defaultDate = currentDate.toISOString().slice(0, 10);
 
+  // Google Calendar Integration State
+  const [syncingGoogle, setSyncingGoogle] = useState(false);
+  const [googleConnected, setGoogleConnected] = useState(false);
+
+  useEffect(() => {
+    // Check if redirect contains OAuth code
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    if (code) {
+      const redirectUri = window.location.origin + window.location.pathname;
+      agendaService
+        .handleGoogleCallback(code, redirectUri)
+        .then(() => {
+          toast.success('¡Google Calendar vinculado con éxito!');
+          setGoogleConnected(true);
+          // Remove code from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          load();
+        })
+        .catch((err) => {
+          toast.error(err instanceof Error ? err.message : 'Error al vincular Google Calendar');
+        });
+    }
+  }, [load, toast]);
+
+  async function handleConnectGoogle() {
+    try {
+      const redirectUri = window.location.origin + window.location.pathname;
+      const url = await agendaService.getGoogleAuthUrl(redirectUri);
+      window.location.href = url;
+    } catch {
+      toast.error('No se pudo obtener la URL de autorización de Google.');
+    }
+  }
+
+  async function handleSyncGoogle() {
+    setSyncingGoogle(true);
+    try {
+      const res = await agendaService.syncGoogleCalendar();
+      toast.success(res.message);
+      setGoogleConnected(true);
+      await load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al sincronizar con Google Calendar');
+    } finally {
+      setSyncingGoogle(false);
+    }
+  }
+
+  async function handleDisconnectGoogle() {
+    try {
+      await agendaService.disconnectGoogleCalendar();
+      toast.success('Google Calendar desconectado.');
+      setGoogleConnected(false);
+    } catch {
+      toast.error('Error al desconectar Google Calendar');
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -618,7 +677,13 @@ export default function AgendaPage() {
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>📅 AGENDA</h1>
           <p className="font-vt text-text-secondary text-base">Tu tiempo, tus misiones</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap items-center">
+          <PixelButton variant="ghost" onClick={handleConnectGoogle} className="text-xs flex items-center gap-1">
+            <span className="text-accent-gold">📆</span> {googleConnected ? 'Re-conectar Google' : 'Conectar Google'}
+          </PixelButton>
+          <PixelButton variant="secondary" onClick={handleSyncGoogle} disabled={syncingGoogle} className="text-xs">
+            {syncingGoogle ? 'Sincronizando...' : '🔄 Sincronizar'}
+          </PixelButton>
           <PixelButton variant="secondary" onClick={() => setCurrentDate(new Date())} className="text-sm">
             Hoy
           </PixelButton>
@@ -627,6 +692,39 @@ export default function AgendaPage() {
           </PixelButton>
         </div>
       </div>
+
+      {/* Google Sync Banner */}
+      <PixelPanel className="p-3 bg-bg-deep/40 flex items-center justify-between flex-wrap gap-2 border-border-pixel">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🗓️</span>
+          <div>
+            <p className="font-pixel text-text-primary" style={{ fontSize: '8px' }}>
+              INTEGRACIÓN GOOGLE CALENDAR
+            </p>
+            <p className="font-vt text-text-secondary text-sm">
+              Sincroniza tus reuniones y eventos de Google Calendar como misiones de tu agenda.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSyncGoogle}
+            disabled={syncingGoogle}
+            className="font-pixel px-3 py-1.5 bg-accent-gold/20 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/30 transition-colors text-xs flex items-center gap-1"
+            style={{ fontSize: '8px' }}
+          >
+            {syncingGoogle ? '⏳ Sincronizando...' : '🔄 Sincronizar Google Calendar'}
+          </button>
+          <button
+            onClick={handleDisconnectGoogle}
+            className="font-pixel px-2 py-1.5 text-text-muted hover:text-accent-red transition-colors text-xs"
+            style={{ fontSize: '8px' }}
+            title="Desconectar cuenta de Google"
+          >
+            🔌 Desconectar
+          </button>
+        </div>
+      </PixelPanel>
 
       {/* View tabs */}
       <div className="flex gap-0 border-b-2 border-border-pixel">

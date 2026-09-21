@@ -8,6 +8,13 @@ router.use(requireAuth);
 router.get('/upcoming', ctrl.upcomingEvents);
 router.get('/',         ctrl.listEvents);
 router.post('/',        ctrl.createEvent);
+
+// Google Calendar routes
+router.get('/google/url',        ctrl.getGoogleAuthUrl);
+router.post('/google/callback',  ctrl.handleGoogleCallback);
+router.post('/google/sync',      ctrl.syncGoogleCalendar);
+router.delete('/google/disconnect', ctrl.disconnectGoogleCalendar);
+
 router.get('/:id',      ctrl.getEvent);
 router.patch('/:id',    ctrl.updateEvent);
 router.delete('/:id',   ctrl.deleteEvent);

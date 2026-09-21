@@ -32,3 +32,44 @@ export async function deleteEvent(req: AuthRequest, res: Response) {
   await svc.deleteEvent(req.userId!, req.params.id);
   res.json({ ok: true });
 }
+
+// ─── Google Calendar Controllers ─────────────────────────────────────────────
+
+export async function getGoogleAuthUrl(req: AuthRequest, res: Response) {
+  const redirectUri = (req.query.redirectUri as string) || `${req.headers.origin}/agenda`;
+  const url = svc.getGoogleAuthUrl(redirectUri);
+  res.json({ url });
+}
+
+export async function handleGoogleCallback(req: AuthRequest, res: Response) {
+  try {
+    const { code, redirectUri } = req.body as { code: string; redirectUri: string };
+    if (!code) return res.status(400).json({ error: 'Código de autorización requerido.' });
+
+    const result = await svc.handleGoogleCallback(req.userId!, code, redirectUri);
+    return res.json({ success: true, user: result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error al vincular Google Calendar';
+    return res.status(500).json({ error: msg });
+  }
+}
+
+export async function syncGoogleCalendar(req: AuthRequest, res: Response) {
+  try {
+    const result = await svc.syncGoogleCalendar(req.userId!);
+    return res.json(result);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error al sincronizar Google Calendar';
+    return res.status(500).json({ error: msg });
+  }
+}
+
+export async function disconnectGoogleCalendar(req: AuthRequest, res: Response) {
+  try {
+    const result = await svc.disconnectGoogleCalendar(req.userId!);
+    return res.json(result);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error al desconectar Google Calendar';
+    return res.status(500).json({ error: msg });
+  }
+}
