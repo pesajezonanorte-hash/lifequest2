@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npx prisma db push --accept-data-loss && npm run build --workspace=@lifequest/api && npx prisma generate",
+  "buildCommand": "npx tsx src/migrate-db.ts && npm run build --workspace=@lifequest/api && npx prisma generate",
   "builds": [
     {
       "src": "src/server.ts",
