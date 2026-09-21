@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Swords, Wallet, Flame, NotebookPen, Zap } from 'lucide-react';
 import { createQuest } from '../../services/quest.service';
@@ -8,18 +8,14 @@ import { createJournalEntry } from '../../services/journal.service';
 import { useUIStore } from '../../store/uiStore';
 import type { Habit } from '../../services/habit.service';
 
-// Fan positions (angle in degrees, 90° = up, spread over arc)
-const FAN_ANGLES = [90, 125, 160, 215, 250];
-const FAN_RADIUS = 76;
-
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
 
-const ACTIONS: { icon: React.ReactNode; label: string; color: string; modal: ModalType }[] = [
-  { icon: <Swords size={15} />, label: 'Nueva Quest', color: '#ffd23f', modal: 'quest' },
-  { icon: <Wallet size={15} />, label: 'Gasto rápido', color: '#4ade80', modal: 'expense' },
-  { icon: <Flame size={15} />, label: 'Marcar hábito', color: '#f87171', modal: 'habit' },
-  { icon: <NotebookPen size={15} />, label: 'Nota rápida', color: '#22d3ee', modal: 'note' },
-  { icon: <Zap size={15} />, label: 'Check-in', color: '#a78bfa', modal: 'checkin' },
+const ACTIONS: { icon: React.ReactNode; label: string; color: string; modal: ModalType; emoji: string }[] = [
+  { icon: <Swords size={16} />, label: 'Nueva Quest',   color: '#ffd23f', modal: 'quest',   emoji: '⚔️' },
+  { icon: <Wallet size={16} />, label: 'Gasto rápido',  color: '#4ade80', modal: 'expense', emoji: '💸' },
+  { icon: <Flame size={16} />,  label: 'Marcar hábito', color: '#f87171', modal: 'habit',   emoji: '🔥' },
+  { icon: <NotebookPen size={16} />, label: 'Nota rápida', color: '#22d3ee', modal: 'note', emoji: '✍️' },
+  { icon: <Zap size={16} />,    label: 'Check-in',      color: '#a78bfa', modal: 'checkin', emoji: '⚡' },
 ];
 
 // ── Quest Modal ──────────────────────────────────────────────────────────────
@@ -202,11 +198,11 @@ function CheckinModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
 function ModalShell({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 8 }}
+      initial={{ opacity: 0, scale: 0.92, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: 8 }}
+      exit={{ opacity: 0, scale: 0.92, y: 12 }}
       transition={{ type: 'spring', stiffness: 380, damping: 26 }}
-      className="w-72 rounded-2xl shadow-2xl p-4"
+      className="w-80 rounded-2xl shadow-2xl p-4"
       style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}
       onClick={e => e.stopPropagation()}
     >
@@ -242,6 +238,28 @@ export function QuickActionsFAB() {
   const [open, setOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const { addFloatingXP } = useUIStore();
+  const fabRef = useRef<HTMLDivElement>(null);
+
+  // Cierra al hacer click fuera
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (fabRef.current && !fabRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  // Cierra con Escape
+  useEffect(() => {
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setOpen(false); setActiveModal(null); }
+    }
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, []);
 
   function openModal(modal: ModalType) {
     setOpen(false);
@@ -253,86 +271,143 @@ export function QuickActionsFAB() {
     addFloatingXP(10, window.innerWidth - 80, window.innerHeight - 100);
   }
 
-  const cx = 0; // center x offset (relative to button center)
-  const cy = 0; // center y offset
-
   return (
     <>
-      {/* Modal overlay */}
+      {/* Modal overlay - centrado en pantalla */}
       <AnimatePresence>
         {activeModal && (
-          <div className="fixed inset-0 z-50 flex items-end justify-end p-4 pb-24"
-            onClick={() => setActiveModal(null)}>
-            {activeModal === 'quest' && <QuestModal onClose={() => setActiveModal(null)} onDone={onDone} />}
-            {activeModal === 'expense' && <ExpenseModal onClose={() => setActiveModal(null)} onDone={onDone} />}
-            {activeModal === 'habit' && <HabitModal onClose={() => setActiveModal(null)} onDone={onDone} />}
-            {activeModal === 'note' && <NoteModal onClose={() => setActiveModal(null)} onDone={onDone} />}
-            {activeModal === 'checkin' && <CheckinModal onClose={() => setActiveModal(null)} onDone={onDone} />}
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
+            onClick={() => setActiveModal(null)}
+          >
+            <div onClick={e => e.stopPropagation()}>
+              {activeModal === 'quest'   && <QuestModal   onClose={() => setActiveModal(null)} onDone={onDone} />}
+              {activeModal === 'expense' && <ExpenseModal onClose={() => setActiveModal(null)} onDone={onDone} />}
+              {activeModal === 'habit'   && <HabitModal   onClose={() => setActiveModal(null)} onDone={onDone} />}
+              {activeModal === 'note'    && <NoteModal    onClose={() => setActiveModal(null)} onDone={onDone} />}
+              {activeModal === 'checkin' && <CheckinModal onClose={() => setActiveModal(null)} onDone={onDone} />}
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* FAB + Fan */}
-      <div className="fixed bottom-6 right-4 md:bottom-8 md:right-8 z-40">
-        {/* Fan buttons */}
+      {/* FAB container */}
+      <div
+        ref={fabRef}
+        className="fixed z-40"
+        style={{
+          // Desktop: right-8, bottom-8. Mobile: right-4, bottom-[4.5rem] (sobre la nav bar)
+          bottom: 'var(--fab-bottom, 2rem)',
+          right: 'var(--fab-right, 2rem)',
+        }}
+      >
+        {/* ── Menú vertical desplegable ── */}
         <AnimatePresence>
-          {open && ACTIONS.map((action, i) => {
-            const rad = (FAN_ANGLES[i] * Math.PI) / 180;
-            const x = -Math.cos(rad) * FAN_RADIUS;
-            const y = -Math.sin(rad) * FAN_RADIUS;
-            return (
-              <motion.div
-                key={action.label}
-                initial={{ opacity: 0, x: cx, y: cy, scale: 0.4 }}
-                animate={{ opacity: 1, x, y, scale: 1 }}
-                exit={{ opacity: 0, x: cx, y: cy, scale: 0.4 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 22, delay: i * 0.04 }}
-                className="absolute bottom-0 right-0"
-                style={{ transformOrigin: 'bottom right' }}
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 12 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              className="absolute bottom-[calc(100%+12px)] right-0 flex flex-col gap-2 items-end"
+              style={{ minWidth: 200 }}
+            >
+              {/* Etiqueta del menú */}
+              <div
+                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-1"
+                style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
               >
-                <div className="relative flex items-center group">
-                  {/* Tooltip */}
-                  <motion.span
-                    initial={{ opacity: 0, x: 4 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="absolute right-12 whitespace-nowrap text-[10px] font-semibold px-2 py-1 rounded-lg pointer-events-none"
-                    style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
-                  >
-                    {action.label}
-                  </motion.span>
+                Acciones rápidas
+              </div>
+
+              {ACTIONS.map((action, i) => (
+                <motion.div
+                  key={action.modal}
+                  initial={{ opacity: 0, x: 20, y: 4 }}
+                  animate={{ opacity: 1, x: 0, y: 0 }}
+                  exit={{ opacity: 0, x: 20, y: 4 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 26, delay: i * 0.035 }}
+                >
                   <motion.button
-                    whileTap={{ scale: 0.88 }}
+                    whileHover={{ scale: 1.04, x: -2 }}
+                    whileTap={{ scale: 0.94 }}
                     onClick={() => openModal(action.modal)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg border"
-                    style={{ background: `${action.color}18`, border: `1.5px solid ${action.color}66`, color: action.color }}
+                    className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold"
+                    style={{
+                      background: 'color-mix(in oklab, var(--bg-panel) 95%, transparent)',
+                      border: `1.5px solid color-mix(in oklab, ${action.color} 40%, var(--border))`,
+                      color: action.color,
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      minWidth: 180,
+                      boxShadow: `0 4px 16px rgba(0,0,0,0.25), 0 0 0 1px color-mix(in oklab, ${action.color} 10%, transparent) inset`,
+                    }}
                   >
-                    {action.icon}
+                    {/* Dot de color */}
+                    <span
+                      className="flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center"
+                      style={{ background: `${action.color}20` }}
+                    >
+                      {action.icon}
+                    </span>
+                    <span className="flex-1 text-left" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13 }}>
+                      {action.label}
+                    </span>
                   </motion.button>
-                </div>
-              </motion.div>
-            );
-          })}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {/* Main FAB button */}
+        {/* ── Botón principal + ── */}
         <motion.button
           whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.06 }}
           onClick={() => setOpen(o => !o)}
-          className="w-12 h-12 rounded-full flex items-center justify-center shadow-xl relative z-10"
+          aria-label={open ? 'Cerrar acciones rápidas' : 'Abrir acciones rápidas'}
+          aria-expanded={open}
+          className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl relative z-10"
           style={{
             background: open
-              ? 'linear-gradient(135deg, var(--accent-pink), var(--accent-gold))'
+              ? 'linear-gradient(135deg, #f87171, #ffd23f)'
               : 'linear-gradient(135deg, var(--accent-gold), var(--accent-cyan))',
             border: 'none',
             color: '#fff',
-            boxShadow: '0 6px 20px rgba(0,0,0,0.35)',
+            boxShadow: open
+              ? '0 8px 28px rgba(248,113,113,0.4)'
+              : '0 8px 28px rgba(0,0,0,0.35), 0 0 0 3px rgba(255,210,63,0.15)',
+            transition: 'background 0.3s ease, box-shadow 0.3s ease',
           }}
         >
-          <motion.div animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.22, type: 'spring', stiffness: 400 }}>
-            <Plus size={22} />
+          <motion.div
+            animate={{ rotate: open ? 45 : 0 }}
+            transition={{ duration: 0.2, type: 'spring', stiffness: 420, damping: 22 }}
+          >
+            <Plus size={24} />
           </motion.div>
         </motion.button>
       </div>
+
+      {/* CSS para posición responsive */}
+      <style>{`
+        @media (max-width: 767px) {
+          :root {
+            --fab-bottom: 5.5rem;
+            --fab-right: 1rem;
+          }
+        }
+        @media (min-width: 768px) {
+          :root {
+            --fab-bottom: 2rem;
+            --fab-right: 2rem;
+          }
+        }
+      `}</style>
     </>
   );
 }
