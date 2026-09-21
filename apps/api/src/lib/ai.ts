@@ -26,24 +26,66 @@ const GEMINI_API_URL =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const GEMINI_MAX_RETRIES = 3;
 
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-lite-preview:free';
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
 export function hasAIProvider(): boolean {
-  return Boolean(GROQ_API_KEY || OPENAI_API_KEY || GEMINI_API_KEY);
+  return Boolean(GROQ_API_KEY || GEMINI_API_KEY || OPENROUTER_API_KEY || OPENAI_API_KEY);
 }
 
 export async function generateText(messages: ChatMessage[], options: ChatOptions = {}): Promise<string> {
+  const errors: string[] = [];
+
+  // 1. Prioritize GROQ (100% Free: 14,400 requests/day)
   if (GROQ_API_KEY) {
-    return generateWithOpenAICompat(messages, options, GROQ_API_URL, GROQ_API_KEY, GROQ_MODEL);
+    try {
+      return await generateWithOpenAICompat(messages, options, GROQ_API_URL, GROQ_API_KEY, GROQ_MODEL);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[AI_GROQ_FALLBACK]', msg);
+      errors.push(`Groq: ${msg}`);
+    }
   }
 
-  if (OPENAI_API_KEY) {
-    return generateWithOpenAICompat(messages, options, OPENAI_API_URL, OPENAI_API_KEY, OPENAI_MODEL);
-  }
-
+  // 2. Fallback to Gemini API Studio (100% Free: 1,500 requests/day)
   if (GEMINI_API_KEY) {
-    return generateWithGemini(messages, options);
+    try {
+      return await generateWithGemini(messages, options);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[AI_GEMINI_FALLBACK]', msg);
+      errors.push(`Gemini: ${msg}`);
+    }
   }
 
-  throw new Error('No hay proveedor de IA configurado. Define GROQ_API_KEY, OPENAI_API_KEY o GEMINI_API_KEY.');
+  // 3. Fallback to OpenRouter (Free models)
+  if (OPENROUTER_API_KEY) {
+    try {
+      return await generateWithOpenAICompat(messages, options, OPENROUTER_API_URL, OPENROUTER_API_KEY, OPENROUTER_MODEL);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[AI_OPENROUTER_FALLBACK]', msg);
+      errors.push(`OpenRouter: ${msg}`);
+    }
+  }
+
+  // 4. Fallback to OpenAI
+  if (OPENAI_API_KEY) {
+    try {
+      return await generateWithOpenAICompat(messages, options, OPENAI_API_URL, OPENAI_API_KEY, OPENAI_MODEL);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[AI_OPENAI_FALLBACK]', msg);
+      errors.push(`OpenAI: ${msg}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Fallaron los proveedores de IA configurados: ${errors.join(' | ')}`);
+  }
+
+  throw new Error('No hay ningún proveedor de IA configurado. Por favor define GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY o OPENAI_API_KEY en Vercel.');
 }
 
 async function generateWithOpenAICompat(
