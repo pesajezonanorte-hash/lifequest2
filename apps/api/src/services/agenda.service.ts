@@ -88,22 +88,27 @@ export async function deleteEvent(userId: string, id: string) {
 
 // ─── Google Calendar Integration ─────────────────────────────────────────────
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
-
 export function getGoogleAuthUrl(redirectUri: string): string {
+  const clientId = process.env.GOOGLE_CLIENT_ID || '';
   const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events');
-  return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
+  return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
 }
 
 export async function handleGoogleCallback(userId: string, code: string, redirectUri: string) {
+  const clientId = process.env.GOOGLE_CLIENT_ID || '';
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
+
+  if (!clientId || !clientSecret) {
+    throw new Error('Las credenciales de Google OAuth (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET) no están configuradas en el servidor.');
+  }
+
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       code,
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
+      client_id: clientId,
+      client_secret: clientSecret,
       redirect_uri: redirectUri,
       grant_type: 'authorization_code',
     }),
@@ -111,6 +116,10 @@ export async function handleGoogleCallback(userId: string, code: string, redirec
 
   if (!tokenRes.ok) {
     const errorData = await tokenRes.text();
+    console.error('[GOOGLE_OAUTH_TOKEN_ERROR]', errorData);
+    if (errorData.includes('invalid_grant')) {
+      throw new Error('El código de autorización ya fue usado o expiró. Intenta conectar tu cuenta de Google nuevamente.');
+    }
     throw new Error(`Error de autenticación con Google: ${errorData}`);
   }
 
@@ -147,12 +156,15 @@ export async function handleGoogleCallback(userId: string, code: string, redirec
 }
 
 export async function refreshGoogleToken(userId: string, refreshToken: string): Promise<string> {
+  const clientId = process.env.GOOGLE_CLIENT_ID || '';
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
+
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
+      client_id: clientId,
+      client_secret: clientSecret,
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
     }),

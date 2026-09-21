@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { PixelPanel } from '../../components/ui/PixelPanel';
@@ -613,24 +613,31 @@ export default function AgendaPage() {
   // Google Calendar Integration State
   const [syncingGoogle, setSyncingGoogle] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
+  const handledCodeRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Check if redirect contains OAuth code
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
-    if (code) {
+
+    if (code && handledCodeRef.current !== code) {
+      handledCodeRef.current = code;
       const redirectUri = window.location.origin + window.location.pathname;
+
+      // Clean URL parameters immediately to avoid re-triggering on state changes
+      window.history.replaceState({}, document.title, window.location.pathname);
+
       agendaService
         .handleGoogleCallback(code, redirectUri)
         .then(() => {
           toast.success('¡Google Calendar vinculado con éxito!');
           setGoogleConnected(true);
-          // Remove code from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
           load();
         })
-        .catch((err) => {
-          toast.error(err instanceof Error ? err.message : 'Error al vincular Google Calendar');
+        .catch((err: unknown) => {
+          const errorObj = err as { response?: { data?: { error?: string } }; message?: string };
+          const msg = errorObj.response?.data?.error || errorObj.message || 'Error al vincular Google Calendar';
+          toast.error(msg);
         });
     }
   }, [load, toast]);
