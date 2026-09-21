@@ -95,8 +95,8 @@ export function getGoogleAuthUrl(redirectUri: string): string {
 }
 
 export async function handleGoogleCallback(userId: string, code: string, redirectUri: string) {
-  const clientId = process.env.GOOGLE_CLIENT_ID || '';
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET || '';
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
+  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
 
   if (!clientId || !clientSecret) {
     throw new Error('Las credenciales de Google OAuth (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET) no están configuradas en el servidor.');
