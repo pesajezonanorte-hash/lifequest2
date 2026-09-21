@@ -41,7 +41,7 @@ export function MusicPlayer({ url }: Props) {
   const height = type === 'spotify' ? 152 : 200;
 
   return (
-    <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end">
+    <div className="fixed bottom-20 right-[5.5rem] z-40 hidden md:flex flex-col items-end">
       <AnimatePresence>
         {open && (
           <motion.div

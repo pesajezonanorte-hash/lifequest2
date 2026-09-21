@@ -658,7 +658,7 @@ export function GameLayout({ children }: Props) {
       <motion.button
         onClick={() => setShowFocus(true)}
         whileTap={{ scale: 0.94 }}
-        className="hidden md:flex fixed bottom-8 right-24 z-40 w-10 h-10 rounded-full items-center justify-center shadow-md border border-[var(--border)] bg-[var(--bg-panel)]"
+        className="hidden md:flex fixed bottom-6 right-[5.5rem] z-40 w-10 h-10 rounded-full items-center justify-center shadow-md border border-[var(--border)] bg-[var(--bg-panel)]"
         style={{ color: 'var(--accent-cyan)' }}
         title="Modo Enfoque"
       >

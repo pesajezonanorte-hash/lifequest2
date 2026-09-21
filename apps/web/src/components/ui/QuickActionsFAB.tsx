@@ -300,25 +300,28 @@ export function QuickActionsFAB() {
         ref={fabRef}
         className="fixed z-40"
         style={{
-          // Desktop: right-8, bottom-8. Mobile: right-4, bottom-[4.5rem] (sobre la nav bar)
-          bottom: 'var(--fab-bottom, 2rem)',
-          right: 'var(--fab-right, 2rem)',
+          bottom: 'var(--fab-bottom, 1.5rem)',
+          right: 'var(--fab-right, 1.25rem)',
         }}
       >
         {/* ── Menú vertical desplegable ── */}
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 12 }}
+              initial={{ opacity: 0, scale: 0.94, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 12 }}
+              exit={{ opacity: 0, scale: 0.94, y: 10 }}
               transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-              className="absolute bottom-[calc(100%+12px)] right-0 flex flex-col gap-2 items-end"
-              style={{ minWidth: 200 }}
+              className="absolute flex flex-col gap-1.5 items-end"
+              style={{
+                bottom: 'calc(100% + 14px)',
+                right: 0,
+                minWidth: 200,
+              }}
             >
               {/* Etiqueta del menú */}
               <div
-                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-1"
+                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-0.5"
                 style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
               >
                 Acciones rápidas
@@ -327,30 +330,29 @@ export function QuickActionsFAB() {
               {ACTIONS.map((action, i) => (
                 <motion.div
                   key={action.modal}
-                  initial={{ opacity: 0, x: 20, y: 4 }}
+                  initial={{ opacity: 0, x: 12, y: 4 }}
                   animate={{ opacity: 1, x: 0, y: 0 }}
-                  exit={{ opacity: 0, x: 20, y: 4 }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 26, delay: i * 0.035 }}
+                  exit={{ opacity: 0, x: 12, y: 4 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 26, delay: i * 0.03 }}
+                  style={{ width: '100%' }}
                 >
                   <motion.button
-                    whileHover={{ scale: 1.04, x: -2 }}
+                    whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.94 }}
                     onClick={() => openModal(action.modal)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold"
+                    className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl shadow-lg text-sm font-semibold w-full"
                     style={{
-                      background: 'color-mix(in oklab, var(--bg-panel) 95%, transparent)',
-                      border: `1.5px solid color-mix(in oklab, ${action.color} 40%, var(--border))`,
-                      color: action.color,
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)',
-                      minWidth: 180,
-                      boxShadow: `0 4px 16px rgba(0,0,0,0.25), 0 0 0 1px color-mix(in oklab, ${action.color} 10%, transparent) inset`,
+                      background: 'color-mix(in oklab, var(--bg-panel) 97%, transparent)',
+                      border: `1.5px solid color-mix(in oklab, ${action.color} 35%, var(--border))`,
+                      backdropFilter: 'blur(14px)',
+                      WebkitBackdropFilter: 'blur(14px)',
+                      minWidth: 190,
+                      boxShadow: `0 4px 18px rgba(0,0,0,0.28)`,
                     }}
                   >
-                    {/* Dot de color */}
                     <span
                       className="flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center"
-                      style={{ background: `${action.color}20` }}
+                      style={{ background: `${action.color}20`, color: action.color }}
                     >
                       {action.icon}
                     </span>
@@ -397,14 +399,14 @@ export function QuickActionsFAB() {
       <style>{`
         @media (max-width: 767px) {
           :root {
-            --fab-bottom: 5.5rem;
-            --fab-right: 1rem;
+            --fab-bottom: 5rem;
+            --fab-right: 0.75rem;
           }
         }
         @media (min-width: 768px) {
           :root {
-            --fab-bottom: 2rem;
-            --fab-right: 2rem;
+            --fab-bottom: 1.5rem;
+            --fab-right: 1.25rem;
           }
         }
       `}</style>
