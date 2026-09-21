@@ -2,10 +2,17 @@ import { PrismaClient } from '@prisma/client';
 
 function getDatabaseUrl(): string {
   let url = process.env.DATABASE_URL || '';
-  if (url.includes('db.') && url.includes('.supabase.co')) {
-    url = url.replace(/db\.([a-z0-9]+)\.supabase\.co:5432/g, 'aws-0-us-east-1.pooler.supabase.com:5432');
-    url = url.replace(/db\.([a-z0-9]+)\.supabase\.co:6543/g, 'aws-0-us-east-1.pooler.supabase.com:6543');
-    url = url.replace(/db\.([a-z0-9]+)\.supabase\.co/g, 'aws-0-us-east-1.pooler.supabase.com:5432');
+  if (url.includes('.supabase.co') || url.includes('.pooler.supabase.com')) {
+    const refMatch = url.match(/db\.([a-z0-9]+)\.supabase\.co/) || url.match(/postgres\.([a-z0-9]+):/);
+    const ref = refMatch ? refMatch[1] : 'dkgjvvypliyfxdmbbnwt';
+
+    url = url.replace(/db\.[a-z0-9]+\.supabase\.co:?\d*/g, 'aws-0-us-east-1.pooler.supabase.com:6543');
+    if (ref && !url.includes(`postgres.${ref}`)) {
+      url = url.replace(/postgres:/g, `postgres.${ref}:`);
+    }
+    if (!url.includes('pgbouncer=true')) {
+      url += (url.includes('?') ? '&' : '?') + 'pgbouncer=true';
+    }
   }
   return url;
 }
