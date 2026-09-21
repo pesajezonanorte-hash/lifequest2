@@ -7,7 +7,6 @@ import { useBootstrapAuth } from './hooks/useAuth';
 import { GameLayout } from './components/layout/GameLayout';
 import { SplashScreen } from './components/animations/SplashScreen';
 import { SageWidget } from './components/sage/SageWidget';
-import { FeedbackButton } from './components/ui/FeedbackButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationPermissionModal, useNotificationModalState } from './components/ui/NotificationPermissionModal';
 import { useKeyboardAdjust } from './hooks/useKeyboardAdjust';
@@ -231,7 +230,6 @@ export default function App() {
                     </GameLayout>
                   </ErrorBoundary>
                   <SageWidget />
-                  <FeedbackButton />
                 </ProtectedRoute>
               }
             />

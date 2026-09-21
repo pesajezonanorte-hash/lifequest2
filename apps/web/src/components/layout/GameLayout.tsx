@@ -19,6 +19,7 @@ import {
   Scroll, MapPin,
 } from 'lucide-react';
 import { FocusMode } from '../ui/FocusMode';
+import { FeedbackButton } from '../ui/FeedbackButton';
 import { AnimatePresence as AP } from 'framer-motion';
 import { CommandPalette } from '../ui/CommandPalette';
 import { NotificationBell } from '../ui/NotificationPanel';
@@ -462,6 +463,7 @@ export function GameLayout({ children }: Props) {
                   <Wallet size={12} />{user.gold.toLocaleString('es-CO')}
                 </div>
                 <NotificationBell />
+                <FeedbackButton variant="mobile" />
                 <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={toggleAudio} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   {audioEnabled ? <Volume2 size={14} /> : <VolumeX size={14} className="text-red-400" />}
                 </motion.button>
@@ -515,6 +517,7 @@ export function GameLayout({ children }: Props) {
                   <Wallet size={15} />{user.gold.toLocaleString('es-CO')}
                 </div>
                 <LiveClock />
+                <FeedbackButton variant="desktop" />
                 <motion.button onClick={() => navigate('/guild')} whileTap={{ scale: 0.96 }} title="Añadir amigos" className="flex items-center justify-center" style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   <UserPlus size={16} />
                 </motion.button>

@@ -33,11 +33,11 @@ export function SageWidget() {
   const btnStyle: React.CSSProperties = isMobile
     ? {
         position: 'fixed',
-        top: 70,
+        top: 68,
         right: 12,
         width: 36,
         height: 36,
-        zIndex: 50,
+        zIndex: 45,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -48,18 +48,18 @@ export function SageWidget() {
       }
     : {
         position: 'fixed',
-        bottom: 24,
+        bottom: 96,
         right: 24,
-        width: 56,
-        height: 56,
-        zIndex: 40,
+        width: 52,
+        height: 52,
+        zIndex: 45,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '16px',
-        border: '1px solid var(--border)',
+        border: '1.5px solid var(--border)',
         background: 'var(--bg-panel)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
       };
 
   return (
