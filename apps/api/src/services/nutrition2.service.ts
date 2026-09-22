@@ -157,11 +157,26 @@ Comida del usuario: "${trimmed}"`;
 
 // ─── Daily Macro Summary ───────────────────────────────────────────────────────
 
-export async function getDailyMacros(userId: string, date: Date) {
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(date);
-  end.setHours(23, 59, 59, 999);
+export async function getDailyMacros(userId: string, dateParam: Date | string) {
+  let start: Date;
+  let end: Date;
+
+  if (typeof dateParam === 'string' && dateParam.includes('-')) {
+    const parts = dateParam.split('-').map(Number);
+    if (parts.length === 3 && parts.every((n) => !isNaN(n))) {
+      const [year, month, day] = parts;
+      start = new Date(year, month - 1, day, 0, 0, 0, 0);
+      end = new Date(year, month - 1, day, 23, 59, 59, 999);
+    } else {
+      const d = new Date(dateParam);
+      start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+      end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+    }
+  } else {
+    const d = new Date(dateParam);
+    start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+    end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+  }
 
   const [meals, goal] = await Promise.all([
     prisma.meal.findMany({

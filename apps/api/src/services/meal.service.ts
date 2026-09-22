@@ -1,12 +1,36 @@
 import { prisma } from '../lib/prisma';
 
+function parseDateRange(dateStr?: string) {
+  if (!dateStr) return undefined;
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length === 3 && parts.every((n) => !isNaN(n))) {
+    const [year, month, day] = parts;
+    const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const end = new Date(year, month - 1, day, 23, 59, 59, 999);
+    return { gte: start, lte: end };
+  }
+  const d = new Date(dateStr);
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+  return { gte: start, lte: end };
+}
+
+function parseMealDate(dateStr?: string): Date {
+  if (!dateStr) return new Date();
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length === 3 && parts.every((n) => !isNaN(n))) {
+    const [year, month, day] = parts;
+    const now = new Date();
+    return new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+  }
+  return new Date(dateStr);
+}
+
 export async function listMeals(userId: string, date?: string) {
   const where: Record<string, unknown> = { userId };
-  if (date) {
-    const d = new Date(date);
-    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const end = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
-    where.date = { gte: start, lt: end };
+  const range = parseDateRange(date);
+  if (range) {
+    where.date = range;
   }
   return prisma.meal.findMany({ where, orderBy: { date: 'asc' } });
 }
@@ -22,7 +46,7 @@ export async function createMeal(userId: string, body: { name: string; mealType:
       carbs: body.carbs,
       fat: body.fat,
       waterMl: body.waterMl,
-      date: body.date ? new Date(body.date) : new Date(),
+      date: parseMealDate(body.date),
     },
   });
 }

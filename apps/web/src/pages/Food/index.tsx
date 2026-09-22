@@ -113,13 +113,21 @@ function MealModal({ onClose, onSave }: { onClose: () => void; onSave: (m: Meal)
   );
 }
 
+function getTodayString(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default function FoodPage() {
   const toast = useToast();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tab, setTab] = useState<'log' | 'macros' | 'saved'>('log');
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayString();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -210,7 +218,7 @@ export default function FoodPage() {
         <div className="flex gap-2 mt-2">
           {[250, 500].map(ml => (
             <PixelButton key={ml} variant="secondary" onClick={async () => {
-              const m = await mealService.createMeal({ name: 'Agua', mealType: 'WATER', waterMl: ml });
+              const m = await mealService.createMeal({ name: 'Agua', mealType: 'WATER', waterMl: ml, date: today });
               setMeals(prev => [...prev, m]);
             }}>
               + {ml}ml 💧
