@@ -45,32 +45,39 @@ const NotFoundPage     = lazy(() => import('./pages/NotFound'));
 const AboutPage        = lazy(() => import('./pages/About'));
 const FAQPage          = lazy(() => import('./pages/FAQ'));
 
-// Page transition variants (context-aware)
+// Page transition variants (context-aware smooth bottom-to-top slide)
 const pageVariants = {
-  initial: { opacity: 0, y: 8, scale: 0.98 },
+  initial: { opacity: 0, y: 36, scale: 0.995 },
   animate: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: {
+      duration: 0.35,
+      ease: [0.16, 1, 0.3, 1], // Smooth spring-like easeOut
+    },
   },
   exit: {
     opacity: 0,
-    y: -4,
-    scale: 1.01,
-    transition: { duration: 0.15 },
+    y: -14,
+    scale: 0.995,
+    transition: {
+      duration: 0.18,
+      ease: [0.7, 0, 0.84, 0],
+    },
   },
 };
 
 function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-deep">
+    <div className="w-full min-h-[300px] flex items-center justify-center py-16">
       <motion.div
-        className="rounded-full border border-[var(--border)] bg-[var(--bg-panel)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)]"
-        animate={{ opacity: [1, 0.3, 1] }}
-        transition={{ duration: 1, repeat: Infinity }}
+        className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-semibold text-[var(--text-2)] shadow-lg flex items-center gap-2.5"
+        animate={{ opacity: [0.6, 1, 0.6], y: [0, -4, 0] }}
+        transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
       >
-        Loading LifeQuest...
+        <span className="w-2.5 h-2.5 rounded-full bg-[var(--primary)] animate-ping" />
+        Cargando sección...
       </motion.div>
     </div>
   );
@@ -83,14 +90,14 @@ function SafePage({ children }: { children: React.ReactNode }) {
 function AnimatedRoutes() {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
         variants={pageVariants}
         initial="initial"
         animate="animate"
         exit="exit"
-        style={{ width: '100%' }}
+        style={{ width: '100%', willChange: 'transform, opacity' }}
       >
         <Routes location={location}>
           <Route path="/"             element={<SafePage><DashboardPage /></SafePage>} />

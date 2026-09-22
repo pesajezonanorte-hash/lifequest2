@@ -212,7 +212,12 @@ export function GameLayout({ children }: Props) {
   const [showFocus, setShowFocus] = useState(false);
   const [zoneTooltipVisible, setZoneTooltipVisible] = useState(false);
 
+  const mainRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0 });
+    }
     const tooltip = ZONE_TOOLTIPS[location.pathname];
     if (!tooltip) return;
     const key = `lifequest_zone_tip_${location.pathname}`;
@@ -564,7 +569,7 @@ export function GameLayout({ children }: Props) {
           )}
         </header>
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main ref={mainRef} className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto max-w-7xl px-4 py-5 pb-6 md:px-6 md:py-6">
             {zoneTooltipVisible && ZONE_TOOLTIPS[location.pathname] && (
               <motion.div
