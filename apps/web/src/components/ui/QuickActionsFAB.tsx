@@ -298,70 +298,72 @@ export function QuickActionsFAB() {
       {/* FAB container */}
       <div
         ref={fabRef}
-        className="fixed z-40"
+        className="fixed z-50"
         style={{
           bottom: 'var(--fab-bottom, 1.5rem)',
           right: 'var(--fab-right, 1.25rem)',
         }}
       >
-        {/* ── Menú vertical desplegable ── */}
+        {/* ── Menú desplegable: panel único y organizado ── */}
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 10 }}
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 10 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-              className="absolute flex flex-col gap-1.5 items-end"
+              exit={{ opacity: 0, scale: 0.92, y: 12 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+              className="absolute flex flex-col overflow-hidden rounded-2xl"
               style={{
-                bottom: 'calc(100% + 14px)',
+                bottom: 'calc(100% + 12px)',
                 right: 0,
-                minWidth: 200,
+                width: 224,
+                maxWidth: 'calc(100vw - 2rem)',
+                maxHeight: 'min(420px, calc(100vh - var(--fab-bottom, 1.5rem) - 5.5rem))',
+                background: 'color-mix(in oklab, var(--bg-panel) 96%, transparent)',
+                border: '1px solid var(--border)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.38)',
+                transformOrigin: 'bottom right',
               }}
             >
-              {/* Etiqueta del menú */}
+              {/* Cabecera del menú */}
               <div
-                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-0.5"
-                style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
+                className="px-4 pt-3 pb-2 text-[10px] font-bold uppercase tracking-widest flex-shrink-0"
+                style={{ color: 'var(--text-3)', borderBottom: '1px solid var(--border)' }}
               >
                 Acciones rápidas
               </div>
 
-              {ACTIONS.map((action, i) => (
-                <motion.div
-                  key={action.modal}
-                  initial={{ opacity: 0, x: 12, y: 4 }}
-                  animate={{ opacity: 1, x: 0, y: 0 }}
-                  exit={{ opacity: 0, x: 12, y: 4 }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 26, delay: i * 0.03 }}
-                  style={{ width: '100%' }}
-                >
+              {/* Lista de acciones */}
+              <div className="flex flex-col gap-1 p-2 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                {ACTIONS.map((action, i) => (
                   <motion.button
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.94 }}
+                    key={action.modal}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 28, delay: i * 0.025 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => openModal(action.modal)}
-                    className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl shadow-lg text-sm font-semibold w-full"
-                    style={{
-                      background: 'color-mix(in oklab, var(--bg-panel) 97%, transparent)',
-                      border: `1.5px solid color-mix(in oklab, ${action.color} 35%, var(--border))`,
-                      backdropFilter: 'blur(14px)',
-                      WebkitBackdropFilter: 'blur(14px)',
-                      minWidth: 190,
-                      boxShadow: `0 4px 18px rgba(0,0,0,0.28)`,
-                    }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left transition-colors"
+                    style={{ background: 'transparent', border: 'none' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = `${action.color}14`; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                   >
                     <span
-                      className="flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center"
-                      style={{ background: `${action.color}20`, color: action.color }}
+                      className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
+                      style={{ background: `${action.color}1f`, color: action.color }}
                     >
                       {action.icon}
                     </span>
-                    <span className="flex-1 text-left" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13 }}>
+                    <span className="flex-1 truncate" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13 }}>
                       {action.label}
                     </span>
+                    <span className="flex-shrink-0 text-xs" style={{ color: 'var(--text-3)' }}>{action.emoji}</span>
                   </motion.button>
-                </motion.div>
-              ))}
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
