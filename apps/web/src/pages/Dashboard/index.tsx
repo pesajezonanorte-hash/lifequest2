@@ -532,19 +532,30 @@ export default function DashboardPage() {
         <PixelPanel animate className="p-4 md:col-span-1">
           <div className="flex flex-col items-center gap-3">
             <div className="w-24 h-24 rounded-full bg-[var(--bg-panel-light)] flex items-center justify-center relative overflow-hidden">
-              <MiguelSprite
-                size={80}
-                bodyType={avatarCfg.bodyType}
-                hairStyle={avatarCfg.hairStyle}
-                hairColor={avatarCfg.hairColor}
-                skinColor={avatarCfg.skinColor}
-                shirtColor={avatarCfg.shirtColor}
-                pantsColor={avatarCfg.pants}
-                accessory={avatarCfg.accessory}
-                expression={avatarCfg.expression}
-                mood={visualState?.mood ?? 3}
-                animate={(visualState?.mood ?? 3) >= 4 ? 'celebrate' : 'idle'}
-              />
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.displayName}
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <MiguelSprite
+                  size={80}
+                  bodyType={avatarCfg.bodyType}
+                  hairStyle={avatarCfg.hairStyle}
+                  hairColor={avatarCfg.hairColor}
+                  skinColor={avatarCfg.skinColor}
+                  shirtColor={avatarCfg.shirtColor}
+                  pantsColor={avatarCfg.pants}
+                  accessory={avatarCfg.accessory}
+                  expression={avatarCfg.expression}
+                  mood={visualState?.mood ?? 3}
+                  animate={(visualState?.mood ?? 3) >= 4 ? 'celebrate' : 'idle'}
+                />
+              )}
             </div>
 
             <div className="text-center">

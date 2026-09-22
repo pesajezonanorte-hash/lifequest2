@@ -93,6 +93,7 @@ model User {
   charisma     Int @default(1)
 
   avatarConfig Json @default("{\"hairColor\":\"#4a3728\",\"skinColor\":\"#c68642\",\"shirtColor\":\"#4d96ff\",\"pants\":\"#37474f\",\"accessory\":null,\"pet\":null}")
+  avatarUrl    String?
 
   timezone           String             @default("America/Bogota")
   currency           String             @default("COP")

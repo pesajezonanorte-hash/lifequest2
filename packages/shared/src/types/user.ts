@@ -15,6 +15,7 @@ export interface User {
   intelligence: number;
   charisma: number;
   avatarConfig: AvatarConfig;
+  avatarUrl?: string | null;
   timezone: string;
   currency: string;
   language: string;

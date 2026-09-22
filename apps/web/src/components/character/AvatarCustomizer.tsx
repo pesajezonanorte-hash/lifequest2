@@ -1,25 +1,20 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Upload, Link as LinkIcon, Trash2, Camera, User as UserIcon } from 'lucide-react';
 import { MiguelSprite } from './MiguelSprite';
 import { ColorPicker } from '../onboarding/ColorPicker';
 import { PixelButton } from '../ui/PixelButton';
-import { updateAvatar } from '../../services/user.service';
+import { updateAvatar, updateProfile } from '../../services/user.service';
 import { useAuthStore } from '../../store/authStore';
 import { useToast } from '../../hooks/useToast';
 import type { AvatarConfig, HairStyle, Accessory, Expression } from '@lifequest/shared';
 
 const HAIR_COLORS  = ['#2c1810','#4a3728','#8b4513','#d4a017','#c8a2c8','#708090','#1a1a1a','#ff6b6b','#e8c090','#ffffff','#3d5a80','#c0392b'];
 const SKIN_COLORS  = [
-  // Muy claro
   '#fdf0e8','#fde8d0','#fcd9c0','#f8d5b0',
-  // Claro
   '#f5c89f','#f0b98e','#e8a876','#d4956a',
-  // Medio
   '#c68642','#b87340','#a86035','#a0522d',
-  // Medio oscuro
   '#8b4513','#7b3f2c','#6b3422','#5c2e1a',
-  // Oscuro
   '#4a2010','#3d1a0c','#2d1009','#1c0806',
 ];
 const SHIRT_COLORS = ['#4d96ff','#ff6b9d','#4ecdc4','#6bcf7f','#ffd23f','#ff6347','#9b59b6','#2c3e50','#e74c3c','#1abc9c','#f97316','#64748b','#ffffff','#000000'];
@@ -74,26 +69,123 @@ const DEFAULT_AVATAR: AvatarConfig = {
   pet: null,
 };
 
+function compressAndResizeImage(file: File, maxWidth = 350, maxHeight = 350): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        } else {
+          resolve(e.target?.result as string);
+        }
+      };
+      img.onerror = () => reject(new Error('Error al cargar la imagen'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('Error al leer el archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function AvatarCustomizer({ isOpen, onClose }: Props) {
   const { user, updateUser } = useAuthStore();
   const toast = useToast();
+  const [activeTab, setActiveTab] = useState<'pixel' | 'photo'>('photo');
   const [config, setConfig] = useState<AvatarConfig>(user?.avatarConfig ?? DEFAULT_AVATAR);
+  const [photoUrl, setPhotoUrl] = useState<string>(user?.avatarUrl ?? '');
+  const [urlInput, setUrlInput] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const update = (key: keyof AvatarConfig) => (value: string) =>
     setConfig((c) => ({ ...c, [key]: value }));
 
   const hairStyles = (config.bodyType === 'female') ? HAIR_STYLES_FEMALE : HAIR_STYLES_MALE;
 
-  const handleSave = async () => {
+  const handleSavePixelAvatar = async () => {
     setSaving(true);
     try {
       const updatedUser = await updateAvatar(config);
       updateUser(updatedUser);
-      toast.success('¡Avatar guardado! ✨');
+      toast.success('¡Avatar pixel guardado! ✨');
       onClose();
     } catch {
       toast.error('Error al guardar el avatar. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor selecciona un archivo de imagen válido.');
+      return;
+    }
+
+    try {
+      const compressedBase64 = await compressAndResizeImage(file);
+      setPhotoUrl(compressedBase64);
+      toast.success('Imagen seleccionada correctamente 📷');
+    } catch {
+      toast.error('Error al procesar la imagen.');
+    }
+  };
+
+  const handleApplyUrl = () => {
+    if (!urlInput.trim()) return;
+    setPhotoUrl(urlInput.trim());
+    setUrlInput('');
+    toast.success('Vista previa actualizada 🌐');
+  };
+
+  const handleSavePhotoProfile = async () => {
+    setSaving(true);
+    try {
+      const updatedUser = await updateProfile({ avatarUrl: photoUrl.trim() || null });
+      updateUser(updatedUser);
+      toast.success(photoUrl ? '¡Foto de perfil actualizada! 📷' : 'Foto de perfil eliminada.');
+      onClose();
+    } catch {
+      toast.error('Error al actualizar foto de perfil.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setSaving(true);
+    try {
+      setPhotoUrl('');
+      const updatedUser = await updateProfile({ avatarUrl: null });
+      updateUser(updatedUser);
+      toast.success('Foto eliminada, se usará tu avatar pixel ✨');
+    } catch {
+      toast.error('Error al quitar foto.');
     } finally {
       setSaving(false);
     }
@@ -104,7 +196,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
       {isOpen && (
         <>
           <motion.div
-            className="fixed inset-0 z-40 bg-black/60"
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -116,167 +208,308 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
           >
-            <div className="bg-bg-panel border-4 border-accent-gold shadow-pixel-gold max-w-sm w-full max-h-screen overflow-y-auto">
-              <motion.div className="flex items-center justify-between p-5 border-b-2 border-accent-gold/30 bg-gradient-to-r from-accent-gold/10 to-transparent">
-                <h2 className="font-pixel text-accent-gold tracking-widest" style={{ fontSize: '11px', textShadow: '2px 2px 0 rgba(212, 160, 23, 0.3)' }}>
-                  ✨ PERSONALIZAR ✨
+            <div className="bg-[var(--bg-panel)] border-4 border-[var(--accent-gold)] shadow-pixel-gold max-w-md w-full max-h-[90vh] flex flex-col rounded-xl overflow-hidden">
+              {/* Header */}
+              <motion.div className="flex items-center justify-between p-4 border-b-2 border-[var(--accent-gold)]/30 bg-gradient-to-r from-[var(--accent-gold)]/10 to-transparent">
+                <h2 className="font-pixel text-[var(--accent-gold)] tracking-widest text-xs flex items-center gap-2">
+                  <span>✨ APARIENCIA & FOTO ✨</span>
                 </h2>
                 <motion.button
                   onClick={onClose}
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
-                  className="text-text-secondary hover:text-accent-gold transition-colors"
+                  className="text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors p-1"
                 >
                   <X size={18} />
                 </motion.button>
               </motion.div>
 
-              <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto">
-                <div>
-                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
-                    GÉNERO
-                  </label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {(['male', 'female'] as const).map((gender) => (
-                      <motion.button
-                        key={gender}
-                        onClick={() => {
-                          update('bodyType')(gender);
-                          setConfig((c) => {
-                            const femaleStyles: HairStyle[] = ['long', 'short', 'recogido', 'trenzas', 'ondulado', 'afro'];
-                            const maleStyles: HairStyle[] = ['short', 'medium', 'long', 'shaved', 'copete', 'afro'];
-                            const validStyles = gender === 'female' ? femaleStyles : maleStyles;
-                            return {
-                              ...c,
-                              bodyType: gender,
-                              hairStyle: validStyles.includes(c.hairStyle) ? c.hairStyle : validStyles[0],
-                            };
-                          });
-                        }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
-                          config.bodyType === gender
-                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
-                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
-                        }`}
+              {/* Tabs Selector */}
+              <div className="flex border-b border-[var(--border)] bg-[var(--bg-panel-light)]">
+                <button
+                  onClick={() => setActiveTab('photo')}
+                  className={`flex-1 py-2.5 px-3 text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                    activeTab === 'photo'
+                      ? 'bg-[var(--bg-panel)] text-[var(--accent-gold)] border-b-2 border-[var(--accent-gold)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <Camera size={15} />
+                  <span>Foto de Perfil</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('pixel')}
+                  className={`flex-1 py-2.5 px-3 text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                    activeTab === 'pixel'
+                      ? 'bg-[var(--bg-panel)] text-[var(--accent-gold)] border-b-2 border-[var(--accent-gold)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <UserIcon size={15} />
+                  <span>Avatar Pixel</span>
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-5 space-y-5 overflow-y-auto flex-1">
+                {activeTab === 'photo' ? (
+                  /* ── TAB FOTO DE PERFIL ── */
+                  <div className="space-y-5">
+                    <div className="text-center">
+                      <p className="text-xs text-[var(--text-secondary)] mb-3">
+                        Sube una foto real desde tu dispositivo o ingresa un enlace de imagen.
+                      </p>
+
+                      {/* Vista previa de la foto */}
+                      <div className="relative inline-block my-2">
+                        <div className="w-32 h-32 rounded-full border-4 border-[var(--accent-gold)] shadow-lg overflow-hidden bg-[var(--bg-panel-light)] flex items-center justify-center mx-auto">
+                          {photoUrl ? (
+                            <img
+                              src={photoUrl}
+                              alt="Vista previa"
+                              className="w-full h-full object-cover"
+                              onError={() => {
+                                toast.error('No se pudo cargar la imagen desde el enlace.');
+                              }}
+                            />
+                          ) : (
+                            <MiguelSprite
+                              size={120}
+                              bodyType={config.bodyType}
+                              hairStyle={config.hairStyle}
+                              hairColor={config.hairColor}
+                              skinColor={config.skinColor}
+                              shirtColor={config.shirtColor}
+                              pantsColor={config.pants}
+                              accessory={config.accessory}
+                              expression={config.expression}
+                              animate="idle"
+                            />
+                          )}
+                        </div>
+                        {photoUrl && (
+                          <span className="absolute bottom-1 right-1 bg-[var(--accent-green)] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                            Foto activa
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Botón para subir desde el dispositivo */}
+                    <div>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <PixelButton
+                        variant="primary"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center justify-center gap-2 text-xs py-2.5"
                       >
-                        {gender === 'male' ? '♂️ Masculino' : '♀️ Femenino'}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                        <Upload size={16} />
+                        <span>Subir desde dispositivo</span>
+                      </PixelButton>
+                    </div>
 
-                <div className="flex justify-center py-2">
-                  <motion.div
-                    key={JSON.stringify(config)}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    className="relative"
-                  >
-                    <div className="absolute inset-0 rounded-2xl" style={{ background: 'radial-gradient(circle at center, rgba(212,160,23,0.1), transparent)' }} />
-                    <MiguelSprite
-                      size={140}
-                      bodyType={config.bodyType}
-                      hairStyle={config.hairStyle}
-                      hairColor={config.hairColor}
-                      skinColor={config.skinColor}
-                      shirtColor={config.shirtColor}
-                      pantsColor={config.pants}
-                      accessory={config.accessory}
-                      expression={config.expression}
-                      animate="celebrate"
-                    />
-                  </motion.div>
-                </div>
+                    {/* Separador */}
+                    <div className="flex items-center my-3">
+                      <div className="flex-1 border-t border-[var(--border)]" />
+                      <span className="px-3 text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-semibold">o por enlace</span>
+                      <div className="flex-1 border-t border-[var(--border)]" />
+                    </div>
 
-                <div>
-                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
-                    ESTILOS DE CABELLO
-                  </label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {hairStyles.map((style) => (
-                      <motion.button
-                        key={style}
-                        onClick={() => update('hairStyle')(style)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
-                          config.hairStyle === style
-                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
-                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
-                        }`}
+                    {/* Input para URL de imagen */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-[var(--text-secondary)] flex items-center gap-1.5">
+                        <LinkIcon size={14} />
+                        <span>URL de imagen web</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          value={urlInput}
+                          onChange={(e) => setUrlInput(e.target.value)}
+                          placeholder="https://ejemplo.com/foto.jpg"
+                          className="flex-1 bg-[var(--bg-panel-light)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-gold)]"
+                        />
+                        <PixelButton variant="secondary" onClick={handleApplyUrl} className="text-xs px-3">
+                          Ver
+                        </PixelButton>
+                      </div>
+                    </div>
+
+                    {/* Acciones de foto */}
+                    <div className="pt-3 border-t border-[var(--border)] space-y-2">
+                      <PixelButton
+                        variant="primary"
+                        onClick={handleSavePhotoProfile}
+                        disabled={saving}
+                        className="w-full text-xs py-2"
                       >
-                        {HAIR_STYLE_LABELS[style]}
-                      </motion.button>
-                    ))}
+                        {saving ? 'Guardando...' : '💾 Guardar Foto de Perfil'}
+                      </PixelButton>
+
+                      {user?.avatarUrl && (
+                        <button
+                          onClick={handleRemovePhoto}
+                          disabled={saving}
+                          className="w-full text-xs text-[var(--accent-red)] hover:underline flex items-center justify-center gap-1.5 py-1"
+                        >
+                          <Trash2 size={13} />
+                          <span>Eliminar foto y volver al avatar pixel</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  /* ── TAB AVATAR PIXEL ── */
+                  <div className="space-y-5">
+                    <div>
+                      <label className="font-pixel text-[var(--accent-gold)] block mb-2 text-[9px] tracking-wider">
+                        GÉNERO
+                      </label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {(['male', 'female'] as const).map((gender) => (
+                          <motion.button
+                            key={gender}
+                            onClick={() => {
+                              update('bodyType')(gender);
+                              setConfig((c) => {
+                                const femaleStyles: HairStyle[] = ['long', 'short', 'recogido', 'trenzas', 'ondulado', 'afro'];
+                                const maleStyles: HairStyle[] = ['short', 'medium', 'long', 'shaved', 'copete', 'afro'];
+                                const validStyles = gender === 'female' ? femaleStyles : maleStyles;
+                                return {
+                                  ...c,
+                                  bodyType: gender,
+                                  hairStyle: validStyles.includes(c.hairStyle) ? c.hairStyle : validStyles[0],
+                                };
+                              });
+                            }}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
+                              config.bodyType === gender
+                                ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] font-bold shadow-pixel-gold'
+                                : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                            }`}
+                          >
+                            {gender === 'male' ? '♂️ Masculino' : '♀️ Femenino'}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
 
-                <ColorPicker label="CABELLO" value={config.hairColor} colors={HAIR_COLORS} onChange={update('hairColor')} />
-                <ColorPicker label="PIEL" value={config.skinColor} colors={SKIN_COLORS} onChange={update('skinColor')} />
-                <ColorPicker label="CAMISA" value={config.shirtColor} colors={SHIRT_COLORS} onChange={update('shirtColor')} />
-                <ColorPicker label="PANTALÓN" value={config.pants} colors={PANTS_COLORS} onChange={update('pants')} />
-
-                <div>
-                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
-                    ACCESORIOS
-                  </label>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {ACCESSORIES.map((acc) => (
-                      <motion.button
-                        key={acc}
-                        onClick={() => update('accessory')(acc)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
-                          config.accessory === acc
-                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
-                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
-                        }`}
+                    <div className="flex justify-center py-2">
+                      <motion.div
+                        key={JSON.stringify(config)}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        className="relative"
                       >
-                        {ACCESSORY_LABELS[acc]}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                        <div className="absolute inset-0 rounded-2xl" style={{ background: 'radial-gradient(circle at center, rgba(212,160,23,0.1), transparent)' }} />
+                        <MiguelSprite
+                          size={140}
+                          bodyType={config.bodyType}
+                          hairStyle={config.hairStyle}
+                          hairColor={config.hairColor}
+                          skinColor={config.skinColor}
+                          shirtColor={config.shirtColor}
+                          pantsColor={config.pants}
+                          accessory={config.accessory}
+                          expression={config.expression}
+                          animate="celebrate"
+                        />
+                      </motion.div>
+                    </div>
 
-                <div>
-                  <label className="font-pixel text-accent-gold block mb-2" style={{ fontSize: '8px', letterSpacing: '0.1em' }}>
-                    EXPRESIÓN
-                  </label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {EXPRESSIONS.map((expr) => (
-                      <motion.button
-                        key={expr}
-                        onClick={() => update('expression')(expr)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
-                          config.expression === expr
-                            ? 'border-accent-gold bg-accent-gold/20 text-accent-gold font-bold shadow-pixel-gold'
-                            : 'border-border-pixel text-text-secondary hover:border-accent-gold hover:bg-white/5'
-                        }`}
-                      >
-                        {EXPRESSION_LABELS[expr]}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                    <div>
+                      <label className="font-pixel text-[var(--accent-gold)] block mb-2 text-[9px] tracking-wider">
+                        ESTILOS DE CABELLO
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {hairStyles.map((style) => (
+                          <motion.button
+                            key={style}
+                            onClick={() => update('hairStyle')(style)}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
+                              config.hairStyle === style
+                                ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] font-bold shadow-pixel-gold'
+                                : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                            }`}
+                          >
+                            {HAIR_STYLE_LABELS[style]}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
 
-                <div className="flex gap-3 pt-3 border-t border-border-pixel">
-                  <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <PixelButton variant="ghost" onClick={onClose} className="w-full">
-                      CANCELAR
-                    </PixelButton>
-                  </motion.div>
-                  <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <PixelButton variant="primary" onClick={handleSave} disabled={saving} className="w-full">
-                      {saving ? 'GUARDANDO...' : 'GUARDAR ✨'}
-                    </PixelButton>
-                  </motion.div>
-                </div>
+                    <ColorPicker label="CABELLO" value={config.hairColor} colors={HAIR_COLORS} onChange={update('hairColor')} />
+                    <ColorPicker label="PIEL" value={config.skinColor} colors={SKIN_COLORS} onChange={update('skinColor')} />
+                    <ColorPicker label="CAMISA" value={config.shirtColor} colors={SHIRT_COLORS} onChange={update('shirtColor')} />
+                    <ColorPicker label="PANTALÓN" value={config.pants} colors={PANTS_COLORS} onChange={update('pants')} />
+
+                    <div>
+                      <label className="font-pixel text-[var(--accent-gold)] block mb-2 text-[9px] tracking-wider">
+                        ACCESORIOS
+                      </label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {ACCESSORIES.map((acc) => (
+                          <motion.button
+                            key={acc}
+                            onClick={() => update('accessory')(acc)}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
+                              config.accessory === acc
+                                ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] font-bold shadow-pixel-gold'
+                                : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                            }`}
+                          >
+                            {ACCESSORY_LABELS[acc]}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="font-pixel text-[var(--accent-gold)] block mb-2 text-[9px] tracking-wider">
+                        EXPRESIÓN
+                      </label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {EXPRESSIONS.map((expr) => (
+                          <motion.button
+                            key={expr}
+                            onClick={() => update('expression')(expr)}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className={`py-1.5 px-1.5 text-xs font-vt border-2 transition-all rounded-lg ${
+                              config.expression === expr
+                                ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] font-bold shadow-pixel-gold'
+                                : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                            }`}
+                          >
+                            {EXPRESSION_LABELS[expr]}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-3 border-t border-[var(--border)]">
+                      <PixelButton variant="ghost" onClick={onClose} className="flex-1 text-xs">
+                        CANCELAR
+                      </PixelButton>
+                      <PixelButton variant="primary" onClick={handleSavePixelAvatar} disabled={saving} className="flex-1 text-xs">
+                        {saving ? 'GUARDANDO...' : 'GUARDAR ✨'}
+                      </PixelButton>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

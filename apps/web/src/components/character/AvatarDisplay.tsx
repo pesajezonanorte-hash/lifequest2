@@ -12,6 +12,7 @@ const AURA_STYLES: Record<string, { gradient: string; shadow: string }> = {
 
 interface Props {
   avatarConfig?: unknown;
+  avatarUrl?: string | null;
   equippedAura?: string | null;
   equippedFrame?: string | null;
   size?: number;
@@ -22,6 +23,7 @@ interface Props {
 
 export function AvatarDisplay({
   avatarConfig,
+  avatarUrl,
   equippedAura,
   equippedFrame,
   size = 48,
@@ -46,22 +48,34 @@ export function AvatarDisplay({
         style={
           equippedFrame
             ? { border: '2px solid var(--accent-gold, #d4a017)', boxShadow: '0 0 8px #d4a01744', borderRadius: '50%', overflow: 'hidden' }
-            : undefined
+            : { borderRadius: '50%', overflow: 'hidden' }
         }
       >
-        <MiguelSprite
-          size={size}
-          bodyType={cfg.bodyType}
-          hairStyle={cfg.hairStyle}
-          hairColor={cfg.hairColor}
-          skinColor={cfg.skinColor}
-          shirtColor={cfg.shirtColor}
-          pantsColor={cfg.pants}
-          accessory={cfg.accessory}
-          expression={cfg.expression}
-          animate={animate}
-          mood={mood}
-        />
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt="Avatar"
+            className="object-cover rounded-full"
+            style={{ width: size, height: size }}
+            onError={(e) => {
+              (e.target as HTMLElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <MiguelSprite
+            size={size}
+            bodyType={cfg.bodyType}
+            hairStyle={cfg.hairStyle}
+            hairColor={cfg.hairColor}
+            skinColor={cfg.skinColor}
+            shirtColor={cfg.shirtColor}
+            pantsColor={cfg.pants}
+            accessory={cfg.accessory}
+            expression={cfg.expression}
+            animate={animate}
+            mood={mood}
+          />
+        )}
       </div>
     </div>
   );

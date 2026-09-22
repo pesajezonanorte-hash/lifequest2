@@ -65,21 +65,32 @@ export default function CharacterPage() {
               />
             )}
             <div
-              className="w-32 h-32 rounded-full bg-[var(--bg-panel-light)] flex items-center justify-center relative"
+              className="w-32 h-32 rounded-full bg-[var(--bg-panel-light)] flex items-center justify-center relative overflow-hidden"
               style={user.equippedFrame ? { border: '3px solid var(--accent-gold)', boxShadow: '0 0 14px var(--accent-gold)44' } : {}}
             >
-              <MiguelSprite
-                size={120}
-                bodyType={avatarCfg.bodyType}
-                hairStyle={avatarCfg.hairStyle}
-                hairColor={avatarCfg.hairColor}
-                skinColor={avatarCfg.skinColor}
-                shirtColor={avatarCfg.shirtColor}
-                pantsColor={avatarCfg.pants}
-                accessory={avatarCfg.accessory}
-                expression={avatarCfg.expression}
-                animate="idle"
-              />
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.displayName}
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <MiguelSprite
+                  size={120}
+                  bodyType={avatarCfg.bodyType}
+                  hairStyle={avatarCfg.hairStyle}
+                  hairColor={avatarCfg.hairColor}
+                  skinColor={avatarCfg.skinColor}
+                  shirtColor={avatarCfg.shirtColor}
+                  pantsColor={avatarCfg.pants}
+                  accessory={avatarCfg.accessory}
+                  expression={avatarCfg.expression}
+                  animate="idle"
+                />
+              )}
             </div>
           </motion.div>
 

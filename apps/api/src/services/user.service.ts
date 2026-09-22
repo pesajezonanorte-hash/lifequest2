@@ -7,7 +7,7 @@ const USER_SELECT = {
   level: true, xp: true, xpToNextLevel: true, gold: true,
   hp: true, maxHp: true, mp: true, maxMp: true,
   strength: true, intelligence: true, charisma: true,
-  avatarConfig: true, timezone: true, currency: true,
+  avatarConfig: true, avatarUrl: true, timezone: true, currency: true,
   language: true, relationshipStatus: true,
   onboardingCompleted: true, birthDate: true,
   currentStreak: true, longestStreak: true, lastActivityDate: true,
@@ -120,7 +120,7 @@ export async function completeOnboarding(userId: string, data: OnboardingData) {
   };
 }
 
-export async function updateProfile(userId: string, data: { displayName?: string; timezone?: string; currency?: string; language?: string; gymPlaylistUrl?: string | null }) {
+export async function updateProfile(userId: string, data: { displayName?: string; timezone?: string; currency?: string; language?: string; gymPlaylistUrl?: string | null; avatarUrl?: string | null }) {
   const updated = await prisma.user.update({
     where: { id: userId },
     data: {
@@ -129,6 +129,7 @@ export async function updateProfile(userId: string, data: { displayName?: string
       ...(data.currency !== undefined ? { currency: data.currency } : {}),
       ...(data.language !== undefined ? { language: data.language } : {}),
       ...(data.gymPlaylistUrl !== undefined ? { gymPlaylistUrl: data.gymPlaylistUrl } : {}),
+      ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
     },
     select: { ...USER_SELECT, gymPlaylistUrl: true },
   });
