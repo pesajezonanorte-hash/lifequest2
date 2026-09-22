@@ -9,10 +9,20 @@ import router from './routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { globalLimiter } from './middleware/rate-limit.middleware';
 import { initScheduler } from './jobs/scheduler';
-import { prisma } from './lib/prisma';
+import { prisma, ensureDbMigrated } from './lib/prisma';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
+
+// ─── Dynamic DB Migration Middleware ──────────────────────────
+app.use(async (_req, _res, next) => {
+  try {
+    await ensureDbMigrated();
+  } catch (err) {
+    console.error('Migration middleware error:', err);
+  }
+  next();
+});
 
 const allowedOrigins = [
   process.env.CORS_ORIGIN,
