@@ -5,6 +5,7 @@ import { useToast } from '../../hooks/useToast';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
+import { AnimatedCounter } from '../../components/ui/AnimatedCounter';
 import type { Transaction, Budget, FinancialGoal } from '@lifequest/shared';
 import * as financeService from '../../services/finance.service';
 import { SageContextButton } from '../../components/sage/SageContextButton';
@@ -267,18 +268,22 @@ export default function FinancesPage() {
         <PixelPanel className="p-5 text-center space-y-2">
           <div className="flex justify-around flex-wrap gap-4">
             <div>
-              <p className="font-pixel text-accent-green" style={{ fontSize: '8px' }}>INGRESOS</p>
-              <p className="font-vt text-accent-green text-2xl">{formatCOP(dashboard.summary.income)}</p>
+              <p className="font-pixel text-accent-green mb-1" style={{ fontSize: '8px' }}>INGRESOS</p>
+              <div className="font-vt text-accent-green text-2xl">
+                <AnimatedCounter value={dashboard.summary.income} prefix="$ " separator="." />
+              </div>
             </div>
             <div>
-              <p className="font-pixel text-accent-red" style={{ fontSize: '8px' }}>GASTOS</p>
-              <p className="font-vt text-accent-red text-2xl">{formatCOP(dashboard.summary.expenses)}</p>
+              <p className="font-pixel text-accent-red mb-1" style={{ fontSize: '8px' }}>GASTOS</p>
+              <div className="font-vt text-accent-red text-2xl">
+                <AnimatedCounter value={dashboard.summary.expenses} prefix="$ " separator="." />
+              </div>
             </div>
             <div>
-              <p className="font-pixel text-accent-gold" style={{ fontSize: '8px' }}>BALANCE</p>
-              <p className={`font-vt text-2xl ${dashboard.summary.balance >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-                {formatCOP(dashboard.summary.balance)}
-              </p>
+              <p className="font-pixel text-accent-gold mb-1" style={{ fontSize: '8px' }}>BALANCE</p>
+              <div className={`font-vt text-2xl ${dashboard.summary.balance >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
+                <AnimatedCounter value={dashboard.summary.balance} prefix="$ " separator="." />
+              </div>
             </div>
           </div>
         </PixelPanel>
