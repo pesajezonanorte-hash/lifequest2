@@ -266,60 +266,61 @@ export default function FinancesPage() {
       {/* ── Balance Hero Card ── */}
       {dashboard && (
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="rounded-2xl p-6 text-center space-y-4"
-          style={{
-            background: 'linear-gradient(145deg, var(--bg-panel-light) 0%, var(--bg-panel) 100%)',
-            border: '1px solid var(--border)',
-          }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="rounded-2xl overflow-hidden"
+          style={{ background: 'var(--bg-panel-light)', border: '1px solid var(--border)' }}
         >
-          {/* Balance principal animado */}
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)] font-medium">Balance del mes</p>
+          {/* Main balance area */}
+          <div className="px-6 pt-7 pb-5 text-center">
+            <p className="text-[10px] uppercase tracking-[0.25em] font-semibold mb-3"
+               style={{ color: 'var(--text-muted)' }}>
+              Balance del mes
+            </p>
             <div
-              className={`font-vt ${dashboard.summary.balance >= 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'}`}
-              style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', lineHeight: 1.1 }}
+              className={`font-vt leading-none ${dashboard.summary.balance >= 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'}`}
+              style={{ fontSize: 'clamp(2.4rem, 10vw, 4rem)' }}
             >
               <AnimatedCounter
-                value={dashboard.summary.balance}
+                value={Math.abs(dashboard.summary.balance)}
                 separator="."
-                prefix="$ "
-                duration={0.8}
+                prefix={`${dashboard.summary.balance < 0 ? '-' : ''}$ `}
+                duration={1}
               />
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-[var(--border)]" />
-
-          {/* Ingresos & Gastos */}
-          <div className="flex justify-center gap-10">
-            <div className="text-center space-y-1">
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[var(--accent-green)] inline-block" />
-                <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--text-muted)] font-medium">Ingresos</p>
-              </div>
-              <div className="font-vt text-[var(--accent-green)] text-xl">
-                <AnimatedCounter value={dashboard.summary.income} separator="." prefix="$ " duration={0.6} />
+          {/* Income / Expense row */}
+          <div
+            className="grid grid-cols-2"
+            style={{ borderTop: '1px solid var(--border)' }}
+          >
+            <div className="px-5 py-3.5 text-center space-y-0.5">
+              <p className="text-[9px] uppercase tracking-[0.18em] font-semibold flex items-center justify-center gap-1.5"
+                 style={{ color: 'var(--accent-green)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] inline-block" />
+                Ingresos
+              </p>
+              <div className="font-vt text-[var(--accent-green)]" style={{ fontSize: '1.35rem' }}>
+                <AnimatedCounter value={dashboard.summary.income} separator="." prefix="$ " duration={0.7} />
               </div>
             </div>
-
-            <div className="w-px bg-[var(--border)]" />
-
-            <div className="text-center space-y-1">
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[var(--accent-red)] inline-block" />
-                <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--text-muted)] font-medium">Gastos</p>
-              </div>
-              <div className="font-vt text-[var(--accent-red)] text-xl">
-                <AnimatedCounter value={dashboard.summary.expenses} separator="." prefix="$ " duration={0.6} />
+            <div className="px-5 py-3.5 text-center space-y-0.5"
+                 style={{ borderLeft: '1px solid var(--border)' }}>
+              <p className="text-[9px] uppercase tracking-[0.18em] font-semibold flex items-center justify-center gap-1.5"
+                 style={{ color: 'var(--accent-red)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-red)] inline-block" />
+                Gastos
+              </p>
+              <div className="font-vt text-[var(--accent-red)]" style={{ fontSize: '1.35rem' }}>
+                <AnimatedCounter value={dashboard.summary.expenses} separator="." prefix="$ " duration={0.7} />
               </div>
             </div>
           </div>
         </motion.div>
       )}
+
 
       {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto pb-1">

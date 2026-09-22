@@ -31,15 +31,20 @@ const FADE = `linear-gradient(to bottom,
   rgba(0,0,0,0) 100%)`;
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const BOUNCE = 0.18;
 const LEAVE = { duration: 0.18, ease: EASE } as const;
 const INSTANT = { duration: 0 } as const;
 
-const spring = (duration: number): Transition => ({
-  type: "spring",
-  visualDuration: duration,
-  bounce: BOUNCE,
-});
+// framer-motion compatible spring (stiffness/damping) instead of motion/react's visualDuration
+const spring = (duration: number): Transition => {
+  // map duration → stiffness roughly: longer duration = softer spring
+  const stiffness = Math.max(20, 300 / Math.max(duration, 0.1));
+  return {
+    type: "spring",
+    stiffness,
+    damping: 26,
+    mass: 1,
+  };
+};
 
 const MAX_DECIMALS = 15;
 const MAX_PAD = 24;
@@ -177,7 +182,8 @@ function useWheel(
           ? at - mod(at - digit, 10)
           : at + mod(digit - at, 10);
     }
-    const roll = animate(pos, goal.current, spring(duration) as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const roll = (animate as any)(pos, goal.current, spring(duration));
     return () => roll.stop();
   }, [digit, duration, reduced, pos]);
 
