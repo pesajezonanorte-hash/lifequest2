@@ -249,7 +249,7 @@ export default function FinancesPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Header minimal */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>💰 LA BÓVEDA</h1>
@@ -263,30 +263,62 @@ export default function FinancesPage() {
         </div>
       </div>
 
-      {/* Balance principal */}
+      {/* ── Balance Hero Card ── */}
       {dashboard && (
-        <PixelPanel className="p-5 text-center space-y-2">
-          <div className="flex justify-around flex-wrap gap-4">
-            <div>
-              <p className="font-pixel text-accent-green mb-1" style={{ fontSize: '8px' }}>INGRESOS</p>
-              <div className="font-vt text-accent-green text-2xl">
-                <AnimatedCounter value={dashboard.summary.income} prefix="$ " separator="." />
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="rounded-2xl p-6 text-center space-y-4"
+          style={{
+            background: 'linear-gradient(145deg, var(--bg-panel-light) 0%, var(--bg-panel) 100%)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          {/* Balance principal animado */}
+          <div className="space-y-1">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)] font-medium">Balance del mes</p>
+            <div
+              className={`font-vt ${dashboard.summary.balance >= 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'}`}
+              style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', lineHeight: 1.1 }}
+            >
+              <AnimatedCounter
+                value={dashboard.summary.balance}
+                separator="."
+                prefix="$ "
+                duration={0.8}
+              />
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-[var(--border)]" />
+
+          {/* Ingresos & Gastos */}
+          <div className="flex justify-center gap-10">
+            <div className="text-center space-y-1">
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[var(--accent-green)] inline-block" />
+                <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--text-muted)] font-medium">Ingresos</p>
+              </div>
+              <div className="font-vt text-[var(--accent-green)] text-xl">
+                <AnimatedCounter value={dashboard.summary.income} separator="." prefix="$ " duration={0.6} />
               </div>
             </div>
-            <div>
-              <p className="font-pixel text-accent-red mb-1" style={{ fontSize: '8px' }}>GASTOS</p>
-              <div className="font-vt text-accent-red text-2xl">
-                <AnimatedCounter value={dashboard.summary.expenses} prefix="$ " separator="." />
+
+            <div className="w-px bg-[var(--border)]" />
+
+            <div className="text-center space-y-1">
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[var(--accent-red)] inline-block" />
+                <p className="text-[9px] uppercase tracking-[0.15em] text-[var(--text-muted)] font-medium">Gastos</p>
               </div>
-            </div>
-            <div>
-              <p className="font-pixel text-accent-gold mb-1" style={{ fontSize: '8px' }}>BALANCE</p>
-              <div className={`font-vt text-2xl ${dashboard.summary.balance >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-                <AnimatedCounter value={dashboard.summary.balance} prefix="$ " separator="." />
+              <div className="font-vt text-[var(--accent-red)] text-xl">
+                <AnimatedCounter value={dashboard.summary.expenses} separator="." prefix="$ " duration={0.6} />
               </div>
             </div>
           </div>
-        </PixelPanel>
+        </motion.div>
       )}
 
       {/* Tabs */}
@@ -298,6 +330,7 @@ export default function FinancesPage() {
             className={`flex-shrink-0 px-3 py-1.5 border-2 font-pixel transition-all ${tab === key ? 'border-accent-gold bg-accent-gold text-bg-deep' : 'border-border-pixel text-text-secondary hover:border-text-secondary'}`}
             style={{ fontSize: '8px' }}
           >
+
             {label}
           </button>
         ))}
