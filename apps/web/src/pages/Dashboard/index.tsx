@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import type { Quest } from '@lifequest/shared';
@@ -371,15 +371,6 @@ export default function DashboardPage() {
     loadDashboard();
     fetchUpcoming().then(setUpcomingEvents).catch(() => null);
     fetchLifeScore().then(setLifeScore).catch(() => null);
-
-    const lastSeen = localStorage.getItem('briefing_seen_date');
-    const today = new Date().toDateString();
-    if (lastSeen !== today) {
-      setTimeout(() => {
-        setShowBriefing(true);
-        localStorage.setItem('briefing_seen_date', today);
-      }, 1200);
-    }
   }, []);
 
   useEffect(() => {

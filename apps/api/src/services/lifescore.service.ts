@@ -413,35 +413,26 @@ export async function getMorningBriefing(userId: string): Promise<{
   };
 
   if (!hasAIProvider()) {
-    const fallback = `¡Buenos días, ${user.displayName}! Tienes ${agendaToday.length} eventos hoy y ${pendingHabits} hábitos pendientes. ¡A conquistar el día, héroe!`;
+    const fallback = `⚡ **Eventos hoy:** ${agendaToday.length} · **Hábitos pendientes:** ${pendingHabits}\n💡 ¡Avanza paso a paso y conquista tu día!`;
     await prisma.user.update({ where: { id: userId }, data: { morningBriefingLastSeen: now } });
     return { briefing: fallback, cached: false };
   }
 
-  const prompt = `Eres el Sabio del Castillo, el consejero IA del héroe ${user.displayName} en LifeQuest RPG.
-Genera un Morning Briefing personalizado y motivacional para empezar el día. Usa el tono de un RPG épico pero cálido.
+  const prompt = `Eres el Sabio de LifeQuest RPG. Genera un briefing diario ULTRA MINIMALISTA de máximo 50 palabras para ${user.displayName}.
 
-DATOS DEL HÉROE HOY:
-- Nivel ${context.userLevel}${context.playerClass ? `, Clase: ${context.playerClass}` : ''}
-- Eventos de hoy: ${context.todayEvents.length > 0 ? context.todayEvents.join(', ') : 'ninguno'}
-- Hábitos pendientes hoy: ${context.pendingHabits}
-- Sueño anoche: ${context.sleepLastNight ?? 'sin registro'}
-- Balance del mes: $${context.monthBalance.toLocaleString('es-CO')} COP (quedan ${context.daysLeft} días)
-- Alertas de presupuesto: ${context.budgetAlerts.length > 0 ? context.budgetAlerts.join(', ') : 'ninguna'}
-- Rachas en riesgo: ${context.streakAtRisk.length > 0 ? context.streakAtRisk.join(', ') : 'ninguna'}
+DATOS:
+- Nivel ${context.userLevel}, Eventos hoy: ${context.todayEvents.length}, Hábitos pendientes: ${context.pendingHabits}
+- Sueño: ${context.sleepLastNight ?? 'normal'}, Rachas riesgo: ${context.streakAtRisk.length > 0 ? context.streakAtRisk.join(', ') : 'ninguna'}
 
-Estructura el briefing con estas secciones (usa emojis):
-📋 PRIORIDADES (2-3 bullets del día)
-💰 FINANZAS (1 insight financiero)
-🔥 RACHAS (si hay rachas en riesgo, menciónalas; si no, celebra el progreso)
-💡 SUGERENCIA DEL SABIO (1 consejo personalizado inteligente)
-
-Máximo 200 palabras. Habla directamente al héroe como "Héroe" o por su nombre.`;
+FORMATO ESTRICTO (3 líneas muy breves, sin texto de relleno):
+🎯 **Enfoque hoy:** [1 frase corta]
+🔥 **Rachas & Hábitos:** [1 frase corta]
+💡 **Consejo del Sabio:** [1 consejo directo de 1 frase]`;
 
   try {
     const briefing = await generateText([{ role: 'user', content: prompt }], {
-      temperature: 0.8,
-      maxTokens: 400,
+      temperature: 0.7,
+      maxTokens: 150,
     });
 
     await Promise.all([

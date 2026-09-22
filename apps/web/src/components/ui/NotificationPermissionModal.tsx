@@ -43,13 +43,15 @@ export function NotificationPermissionModal({ onClose }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-black/50"
+        className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-xs"
+        onClick={handleDeny}
       >
         <motion.div
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
-          className="w-full max-w-sm rounded-2xl border-2 border-[var(--border)] bg-[var(--bg-panel)] p-6 space-y-4"
+          className="w-full max-w-sm rounded-2xl border-2 border-[var(--border)] bg-[var(--bg-panel)] p-6 space-y-4 shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
