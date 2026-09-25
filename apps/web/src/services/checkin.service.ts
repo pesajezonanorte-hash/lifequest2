@@ -21,7 +21,15 @@ export async function getTodayCheckin(): Promise<DailyCheckin | null> {
   return data;
 }
 
-export async function upsertCheckin(mood: number, energy: number, note?: string): Promise<DailyCheckin> {
+export interface CheckinRewards {
+  xpEarned: number;
+  goldEarned: number;
+  leveledUp: boolean;
+  newLevel: number;
+}
+
+/** Solo el primer check-in del día otorga rewards (bonus diario de +15 XP). */
+export async function upsertCheckin(mood: number, energy: number, note?: string): Promise<DailyCheckin & { rewards: CheckinRewards | null }> {
   const { data } = await api.post('/checkin', { mood, energy, note });
   return data;
 }

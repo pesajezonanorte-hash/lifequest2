@@ -6,6 +6,8 @@ import { createTransaction } from '../../services/finance.service';
 import { fetchHabits, logHabit } from '../../services/habit.service';
 import { createJournalEntry } from '../../services/journal.service';
 import { useUIStore } from '../../store/uiStore';
+import { useToastStore } from '../../hooks/useToast';
+import { refreshUser } from '../../hooks/useAuth';
 import type { Habit } from '../../services/habit.service';
 
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
@@ -29,6 +31,7 @@ function QuestModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
     setSaving(true);
     try {
       await createQuest({ title, type, difficulty: 'EASY', category: 'PERSONAL', xpReward: type === 'DAILY' ? 30 : 50, goldReward: 10 });
+      useToastStore.getState().success('¡Misión creada! ⚔️', 'El XP se gana al completarla');
       onDone();
     } catch { setSaving(false); }
   }
@@ -67,6 +70,7 @@ function ExpenseModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
     setSaving(true);
     try {
       await createTransaction({ type: 'EXPENSE', amount: Number(amount), category: 'Otros', description: desc || undefined });
+      useToastStore.getState().success('Gasto registrado 💸');
       onDone();
     } catch { setSaving(false); }
   }
@@ -86,6 +90,7 @@ function ExpenseModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
 function HabitModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
+  const { addFloatingXP } = useUIStore();
 
   useEffect(() => {
     fetchHabits().then(h => setHabits(h.filter(h => !h.todayCompleted).slice(0, 5))).catch(() => null);
@@ -94,8 +99,11 @@ function HabitModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
   async function handleLog(id: string) {
     setSaving(id);
     try {
-      await logHabit(id, 'completed');
+      const r = await logHabit(id, 'completed');
       setHabits(prev => prev.filter(h => h.id !== id));
+      // XP REAL que otorgó el backend (no un número inventado)
+      addFloatingXP(r.rewards?.xpEarned ?? 0, window.innerWidth / 2, 200);
+      void refreshUser();
       if (habits.length <= 1) onDone();
       else setSaving(null);
     } catch { setSaving(null); }
@@ -136,6 +144,7 @@ function NoteModal({ onClose, onDone }: { onClose: () => void; onDone: () => voi
     setSaving(true);
     try {
       await createJournalEntry({ content, title: content.slice(0, 40) });
+      useToastStore.getState().success('Nota guardada ✍️');
       onDone();
     } catch { setSaving(false); }
   }
@@ -161,8 +170,16 @@ function CheckinModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
     setSaving(true);
     try {
       const api = (await import('../../lib/api')).default;
-      await api.post('/checkin', { mood, energy });
-      addFloatingXP(15, window.innerWidth / 2, 200);
+      const res = await api.post('/checkin', { mood, energy });
+      // Bonus diario REAL: +15 XP solo en el primer check-in del día
+      const rewards = (res.data as { rewards?: { xpEarned?: number } | null })?.rewards;
+      if (rewards && (rewards.xpEarned ?? 0) > 0) {
+        addFloatingXP(rewards.xpEarned!, window.innerWidth / 2, 200);
+        useToastStore.getState().success('Check-in registrado ⚡', `+${rewards.xpEarned} XP · ¡Bonus diario!`);
+      } else {
+        useToastStore.getState().success('Check-in actualizado ⚡', 'El bonus diario de hoy ya estaba reclamado');
+      }
+      void refreshUser();
       onDone();
     } catch { setSaving(false); }
   }
@@ -237,7 +254,6 @@ function SaveButton({ onClick, saving, disabled, color = 'var(--accent-gold)', l
 export function QuickActionsFAB() {
   const [open, setOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const { addFloatingXP } = useUIStore();
   const fabRef = useRef<HTMLDivElement>(null);
 
   // Cierra al hacer click fuera
@@ -267,8 +283,9 @@ export function QuickActionsFAB() {
   }
 
   function onDone() {
+    // Sin XP falso: crear quest/gasto/nota no otorga XP en LifeQuest (el XP se
+    // gana completando). El feedback honesto lo dan los toasts de cada modal.
     setActiveModal(null);
-    addFloatingXP(10, window.innerWidth - 80, window.innerHeight - 100);
   }
 
   return (

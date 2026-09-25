@@ -1,4 +1,12 @@
 import { prisma } from '../lib/prisma';
+import { awardXpAndGold } from './xp.service';
+
+export interface CheckinRewards {
+  xpEarned: number;
+  goldEarned: number;
+  leveledUp: boolean;
+  newLevel: number;
+}
 
 export async function getTodayCheckin(userId: string) {
   const today = new Date();
@@ -17,11 +25,36 @@ export async function upsertCheckin(
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return prisma.dailyCheckin.upsert({
+  const existing = await prisma.dailyCheckin.findUnique({
+    where: { userId_date: { userId, date: today } },
+  });
+
+  const checkin = await prisma.dailyCheckin.upsert({
     where: { userId_date: { userId, date: today } },
     create: { userId, mood, energy, note, date: today },
     update: { mood, energy, note },
   });
+
+  // Bonus diario real: +15 XP solo en el PRIMER check-in del día (el upsert
+  // del mismo día no vuelve a premiar, así no se puede farmear).
+  let rewards: CheckinRewards | null = null;
+  if (!existing) {
+    try {
+      const result = await awardXpAndGold(userId, 15, 0, 'checkin', {
+        description: 'Check-in diario (ánimo y energía)',
+      });
+      rewards = {
+        xpEarned: result.xpGained,
+        goldEarned: result.goldGained,
+        leveledUp: result.leveledUp,
+        newLevel: result.newLevel,
+      };
+    } catch {
+      rewards = null;
+    }
+  }
+
+  return { ...checkin, rewards };
 }
 
 export async function getCheckinHistory(userId: string, days = 30) {
