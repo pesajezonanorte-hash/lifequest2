@@ -109,12 +109,12 @@ export function NotificationBell() {
               onClick={() => setOpen(false)}
             />
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.97 }}
+              initial={{ opacity: 0, y: -8, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              exit={{ opacity: 0, y: -8, scale: 0.94 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="absolute right-0 w-80 max-w-[calc(100vw-1rem)] rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] shadow-2xl z-[999] overflow-hidden"
-              style={{ top: 'calc(100% + 8px)', boxShadow: '0 12px 32px rgba(0,0,0,0.35)' }}
+              style={{ top: 'calc(100% + 8px)', transformOrigin: 'top right', boxShadow: '0 12px 32px rgba(0,0,0,0.35)' }}
             >
             {/* Arrow indicator pointing to the bell */}
             <div

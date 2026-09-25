@@ -465,7 +465,7 @@ export function GameLayout({ children }: Props) {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header
-          className="sticky top-0 z-10"
+          className="sticky top-0 z-[100]"
           style={{
             borderBottom: '1px solid var(--border-soft)',
             background: 'color-mix(in oklab, var(--bg) 80%, transparent)',

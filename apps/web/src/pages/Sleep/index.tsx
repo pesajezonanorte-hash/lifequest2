@@ -221,9 +221,9 @@ export default function SleepPage() {
           <p className="font-pixel text-text-secondary mb-3" style={{ fontSize: '8px' }}>ÚLTIMAS 2 SEMANAS</p>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={chartData}>
-              <XAxis dataKey="date" tick={{ fontFamily: 'VT323', fontSize: 12, fill: '#8a7aaa' }} />
-              <YAxis domain={[0, 10]} tick={{ fontFamily: 'VT323', fontSize: 12, fill: '#8a7aaa' }} />
-              <Tooltip contentStyle={{ background: '#1a0d2e', border: '2px solid #3d2d5c', fontFamily: 'VT323', fontSize: '16px' }} formatter={(v: number) => `${v}h`} />
+              <XAxis dataKey="date" tick={{ fontFamily: 'Montserrat', fontSize: 12, fill: '#8a7aaa' }} />
+              <YAxis domain={[0, 10]} tick={{ fontFamily: 'Montserrat', fontSize: 12, fill: '#8a7aaa' }} />
+              <Tooltip contentStyle={{ background: '#1a0d2e', border: '2px solid #3d2d5c', fontFamily: 'Montserrat', fontSize: '16px' }} formatter={(v: number) => `${v}h`} />
               <Bar dataKey="horas">
                 {chartData.map((d, i) => (
                   <Cell key={i} fill={QUALITY_COLORS[d.quality] ?? '#4d96ff'} />

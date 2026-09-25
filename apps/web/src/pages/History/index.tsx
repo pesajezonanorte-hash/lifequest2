@@ -210,8 +210,8 @@ export default function HistoryPage() {
             <p className="font-pixel text-text-secondary mb-4" style={{ fontSize: '8px' }}>XP GANADO POR DÍA</p>
             <ResponsiveContainer width="100%" height={180}>
               <LineChart data={chartData}>
-                <XAxis dataKey="date" tick={{ fill: '#b8a888', fontSize: 10, fontFamily: 'VT323' }} />
-                <YAxis tick={{ fill: '#b8a888', fontSize: 10, fontFamily: 'VT323' }} />
+                <XAxis dataKey="date" tick={{ fill: '#b8a888', fontSize: 10, fontFamily: 'Montserrat' }} />
+                <YAxis tick={{ fill: '#b8a888', fontSize: 10, fontFamily: 'Montserrat' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Line type="monotone" dataKey="xp" stroke="#ffd23f" strokeWidth={2} dot={false} />
               </LineChart>

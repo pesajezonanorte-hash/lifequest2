@@ -11,60 +11,108 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationPermissionModal, useNotificationModalState } from './components/ui/NotificationPermissionModal';
 import { useKeyboardAdjust } from './hooks/useKeyboardAdjust';
 
-const LoginPage        = lazy(() => import('./pages/Login'));
-const RegisterPage     = lazy(() => import('./pages/Register'));
-const DashboardPage    = lazy(() => import('./pages/Dashboard'));
-const CharacterPage    = lazy(() => import('./pages/Character'));
-const OnboardingPage   = lazy(() => import('./pages/Onboarding'));
-const QuestsPage       = lazy(() => import('./pages/Quests'));
-const HabitsPage       = lazy(() => import('./pages/Habits'));
-const AchievementsPage = lazy(() => import('./pages/Achievements'));
-const HistoryPage      = lazy(() => import('./pages/History'));
-const GymPage          = lazy(() => import('./pages/Gym'));
-const FinancesPage     = lazy(() => import('./pages/Finances'));
-const SleepPage        = lazy(() => import('./pages/Sleep'));
-const FoodPage         = lazy(() => import('./pages/Food'));
-const LearningPage     = lazy(() => import('./pages/Learning'));
-const JournalPage      = lazy(() => import('./pages/Journal'));
-const LovePage         = lazy(() => import('./pages/Love'));
-const ShopPage         = lazy(() => import('./pages/Shop'));
-const SettingsPage     = lazy(() => import('./pages/Settings'));
-const LeaderboardPage  = lazy(() => import('./pages/Leaderboard'));
-const ChallengesPage   = lazy(() => import('./pages/Challenges'));
-const GuildPage        = lazy(() => import('./pages/Guild'));
-const StatsPage        = lazy(() => import('./pages/Stats'));
-const SeasonPage       = lazy(() => import('./pages/Season'));
-const AgendaPage       = lazy(() => import('./pages/Agenda'));
-const LifePage         = lazy(() => import('./pages/Life'));
-const GoalsPage        = lazy(() => import('./pages/Goals'));
-const RitualsPage      = lazy(() => import('./pages/Rituals'));
-const GlowUpPage       = lazy(() => import('./pages/GlowUp'));
-const WisdomPage       = lazy(() => import('./pages/Wisdom'));
-const CustomZonesPage  = lazy(() => import('./pages/CustomZones'));
-const NotFoundPage     = lazy(() => import('./pages/NotFound'));
-const AboutPage        = lazy(() => import('./pages/About'));
-const FAQPage          = lazy(() => import('./pages/FAQ'));
+// Páginas lazy. Los loaders viven en un mapa para poder precargarlos en idle:
+// así, al cambiar de zona, el módulo ya está cacheado y NO aparece el flash
+// del Suspense ("parpadeos al cambiar de zona").
+const loaders = {
+  LoginPage: () => import('./pages/Login'),
+  RegisterPage: () => import('./pages/Register'),
+  DashboardPage: () => import('./pages/Dashboard'),
+  CharacterPage: () => import('./pages/Character'),
+  OnboardingPage: () => import('./pages/Onboarding'),
+  QuestsPage: () => import('./pages/Quests'),
+  HabitsPage: () => import('./pages/Habits'),
+  AchievementsPage: () => import('./pages/Achievements'),
+  HistoryPage: () => import('./pages/History'),
+  GymPage: () => import('./pages/Gym'),
+  FinancesPage: () => import('./pages/Finances'),
+  SleepPage: () => import('./pages/Sleep'),
+  FoodPage: () => import('./pages/Food'),
+  LearningPage: () => import('./pages/Learning'),
+  JournalPage: () => import('./pages/Journal'),
+  LovePage: () => import('./pages/Love'),
+  ShopPage: () => import('./pages/Shop'),
+  SettingsPage: () => import('./pages/Settings'),
+  LeaderboardPage: () => import('./pages/Leaderboard'),
+  ChallengesPage: () => import('./pages/Challenges'),
+  GuildPage: () => import('./pages/Guild'),
+  StatsPage: () => import('./pages/Stats'),
+  SeasonPage: () => import('./pages/Season'),
+  AgendaPage: () => import('./pages/Agenda'),
+  LifePage: () => import('./pages/Life'),
+  GoalsPage: () => import('./pages/Goals'),
+  RitualsPage: () => import('./pages/Rituals'),
+  GlowUpPage: () => import('./pages/GlowUp'),
+  WisdomPage: () => import('./pages/Wisdom'),
+  CustomZonesPage: () => import('./pages/CustomZones'),
+  NotFoundPage: () => import('./pages/NotFound'),
+  AboutPage: () => import('./pages/About'),
+  FAQPage: () => import('./pages/FAQ'),
+} as const;
 
-// Page transition variants (context-aware smooth bottom-to-top slide)
+/** Calienta todos los módulos de página cuando el navegador está ocioso. */
+function preloadPages() {
+  const preload = () => Object.values(loaders).forEach((load) => void load());
+  const idle = (window as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+  if (idle) {
+    idle(preload, { timeout: 3000 });
+  } else {
+    window.setTimeout(preload, 1200);
+  }
+}
+
+const LoginPage        = lazy(loaders.LoginPage);
+const RegisterPage     = lazy(loaders.RegisterPage);
+const DashboardPage    = lazy(loaders.DashboardPage);
+const CharacterPage    = lazy(loaders.CharacterPage);
+const OnboardingPage   = lazy(loaders.OnboardingPage);
+const QuestsPage       = lazy(loaders.QuestsPage);
+const HabitsPage       = lazy(loaders.HabitsPage);
+const AchievementsPage = lazy(loaders.AchievementsPage);
+const HistoryPage      = lazy(loaders.HistoryPage);
+const GymPage          = lazy(loaders.GymPage);
+const FinancesPage     = lazy(loaders.FinancesPage);
+const SleepPage        = lazy(loaders.SleepPage);
+const FoodPage         = lazy(loaders.FoodPage);
+const LearningPage     = lazy(loaders.LearningPage);
+const JournalPage      = lazy(loaders.JournalPage);
+const LovePage         = lazy(loaders.LovePage);
+const ShopPage         = lazy(loaders.ShopPage);
+const SettingsPage     = lazy(loaders.SettingsPage);
+const LeaderboardPage  = lazy(loaders.LeaderboardPage);
+const ChallengesPage   = lazy(loaders.ChallengesPage);
+const GuildPage        = lazy(loaders.GuildPage);
+const StatsPage        = lazy(loaders.StatsPage);
+const SeasonPage       = lazy(loaders.SeasonPage);
+const AgendaPage       = lazy(loaders.AgendaPage);
+const LifePage         = lazy(loaders.LifePage);
+const GoalsPage        = lazy(loaders.GoalsPage);
+const RitualsPage      = lazy(loaders.RitualsPage);
+const GlowUpPage       = lazy(loaders.GlowUpPage);
+const WisdomPage       = lazy(loaders.WisdomPage);
+const CustomZonesPage  = lazy(loaders.CustomZonesPage);
+const NotFoundPage     = lazy(loaders.NotFoundPage);
+const AboutPage        = lazy(loaders.AboutPage);
+const FAQPage          = lazy(loaders.FAQPage);
+
+// Page transition variants (entrada suave, salida instantánea sin parpadeos)
 const pageVariants = {
-  initial: { opacity: 0, y: 36, scale: 0.995 },
+  initial: { opacity: 0, y: 16, scale: 0.995 },
   animate: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.35,
-      ease: [0.16, 1, 0.3, 1], // Smooth spring-like easeOut
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1], // easeOut suave y minimalista
     },
   },
+  // Salida instantánea: con mode="wait", una salida animada deja un frame en
+  // blanco entre zonas (los "parpadeos" que se ven). El swap inmediato +
+  // entrada fluida dan sensación de fluidez sin flashes.
   exit: {
     opacity: 0,
-    y: -14,
-    scale: 0.995,
-    transition: {
-      duration: 0.18,
-      ease: [0.7, 0, 0.84, 0],
-    },
+    transition: { duration: 0 },
   },
 };
 
@@ -175,6 +223,11 @@ export default function App() {
   const { initAudio } = useUIStore();
   const { user, isLoading, isAuthenticated } = useAuthStore();
   const { show: showNotifModal, setShow: setShowNotifModal } = useNotificationModalState();
+
+  // Precarga todas las zonas en idle: cero flashes del Suspense al navegar.
+  useEffect(() => {
+    preloadPages();
+  }, []);
 
   useEffect(() => {
     const theme = (user as any)?.activeTheme ?? 'aurora';

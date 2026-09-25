@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getOpenOrigin } from '@/lib/origin';
 import type { Quest } from '@lifequest/shared';
 import { CategoryIcon, CATEGORY_LABELS } from './CategoryIcon';
 import { DifficultyBadge } from './DifficultyBadge';
@@ -18,6 +20,8 @@ interface Props {
 }
 
 export function QuestModal({ quest, onClose, onComplete, onEdit, onArchive, onFail, onQuestUpdated }: Props) {
+  // Punto de apertura: de aquí crece la animación (desde donde se hizo click).
+  const [origin] = useState(() => getOpenOrigin());
   if (!quest) return null;
 
   const subObjectives = quest.subObjectives as Array<{ id: string; title: string; completed: boolean }>;
@@ -46,10 +50,9 @@ export function QuestModal({ quest, onClose, onComplete, onEdit, onArchive, onFa
         {/* Modal */}
         <motion.div
           className="relative bg-[var(--bg-panel)] border border-[var(--border)] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto z-10 shadow-lg"
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 80, opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: 'easeOut', delay: 0.05 }}
         >
           {/* Header */}
           <div className="p-4 border-b border-[var(--border)] bg-[var(--bg-panel-light)] rounded-t-2xl">

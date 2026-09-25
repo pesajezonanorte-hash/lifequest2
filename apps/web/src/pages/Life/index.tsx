@@ -131,7 +131,7 @@ export default function LifePage() {
             <ResponsiveContainer width="100%" height={250}>
               <RadarChart data={radarData}>
                 <PolarGrid stroke="var(--border)" />
-                <PolarAngleAxis dataKey="area" tick={{ fontFamily: 'VT323', fontSize: 13, fill: 'var(--text-secondary)' }} />
+                <PolarAngleAxis dataKey="area" tick={{ fontFamily: 'Montserrat', fontSize: 13, fill: 'var(--text-secondary)' }} />
                 <Radar dataKey="score" stroke="var(--accent-gold)" fill="var(--accent-gold)" fillOpacity={0.25} />
               </RadarChart>
             </ResponsiveContainer>

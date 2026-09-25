@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getOpenOrigin } from '@/lib/origin';
 import { PixelButton } from '../ui/PixelButton';
 import { PixelInput } from '../ui/PixelInput';
 import { CATEGORY_ICONS, CATEGORY_LABELS } from './CategoryIcon';
@@ -40,6 +41,8 @@ interface Props {
 
 export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
   const [step, setStep] = useState(0);
+  // Punto de apertura: de aquí crece la animación (desde donde se hizo click).
+  const [origin] = useState(() => getOpenOrigin());
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<FormData>({
     type: initialData?.type ?? 'SIDE',
@@ -73,15 +76,20 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
   // Portal al body: el backdrop fixed debe cubrir el viewport, no el
   // contenedor de la página (que por las transiciones crea containing block).
   return createPortal((
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+    <motion.div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+      style={{ transformOrigin: origin }}
+    >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
       <motion.div
         className="relative bg-[var(--bg-panel)] border border-[var(--border)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10 shadow-lg"
-        initial={{ y: 80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 80, opacity: 0 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, ease: 'easeOut', delay: 0.05 }}
       >
         {/* Header */}
         <div className="p-4 border-b border-[var(--border)] bg-[var(--bg-panel-light)] rounded-t-2xl flex items-center justify-between">
@@ -301,6 +309,6 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
           )}
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   ), document.body);
 }

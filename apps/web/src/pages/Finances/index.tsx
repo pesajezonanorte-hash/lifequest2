@@ -349,7 +349,7 @@ export default function FinancesPage() {
                     <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
                       {categoryData.map((_, i) => <Cell key={i} fill={COP_COLORS[i % COP_COLORS.length]} />)}
                     </Pie>
-                    <Tooltip formatter={(v: number) => formatCOP(v)} contentStyle={{ background: 'var(--bg-panel)', border: '2px solid var(--border)', fontFamily: 'VT323', fontSize: '16px', color: 'var(--text-primary)' }} />
+                    <Tooltip formatter={(v: number) => formatCOP(v)} contentStyle={{ background: 'var(--bg-panel)', border: '2px solid var(--border)', fontFamily: 'Montserrat', fontSize: '16px', color: 'var(--text-primary)' }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex flex-wrap gap-1">

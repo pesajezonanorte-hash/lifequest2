@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { getOpenOrigin } from '@/lib/origin';
 import { PixelButton } from '../ui/PixelButton';
 import { PixelInput } from '../ui/PixelInput';
 import type { CreateHabitPayload } from '../../services/habit.service';
@@ -25,6 +26,8 @@ interface Props {
 }
 
 export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
+  // Punto de apertura: de aquí crece la animación (desde donde se hizo click).
+  const [origin] = useState(() => getOpenOrigin());
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<CreateHabitPayload>({
     title: initial?.title ?? '',
@@ -57,7 +60,11 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
   }
 
   return createPortal((
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+      style={{ transformOrigin: origin }}
       className="fixed inset-0 z-[200] isolate overflow-y-auto overscroll-contain"
       role="dialog"
       aria-modal="true"
@@ -73,10 +80,9 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
       <div className="relative flex min-h-full items-start justify-center p-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:items-center sm:p-6">
         <motion.div
           className="relative z-10 flex w-full max-w-md min-h-0 max-h-[calc(100dvh-1.5rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] shadow-[0_24px_80px_rgba(0,0,0,0.55)] sm:max-h-[calc(100dvh-3rem)]"
-          initial={{ y: 28, opacity: 0, scale: 0.98 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: 28, opacity: 0, scale: 0.98 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: 'easeOut', delay: 0.05 }}
         >
           <div className="flex flex-shrink-0 items-center justify-between rounded-t-2xl border-b border-[var(--border)] bg-[var(--bg-panel-light)] p-4">
             <h2 id="habit-modal-title" className="text-base font-semibold text-[var(--text-primary)]">
@@ -191,6 +197,6 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
           </div>
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   ), document.body);
 }

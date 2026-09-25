@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { getOpenOrigin } from '@/lib/origin';
 
 interface Props {
   title: string;
@@ -15,6 +16,8 @@ interface Props {
 
 export function ConfirmDialog({ title, message, confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', onConfirm, onCancel, danger = false }: Props) {
   useEscapeKey(onCancel);
+  // Punto de apertura: de aquí crece la animación (desde donde se hizo click).
+  const [origin] = useState(() => getOpenOrigin());
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -28,9 +31,10 @@ export function ConfirmDialog({ title, message, confirmLabel = 'Confirmar', canc
   // `fixed inset-0` cubre el viewport completo y nunca se recorta.
   return createPortal((
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] } }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+      style={{ transformOrigin: origin }}
       className="fixed inset-0 z-[300] flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
@@ -43,10 +47,9 @@ export function ConfirmDialog({ title, message, confirmLabel = 'Confirmar', canc
       />
 
       <motion.div
-        initial={{ scale: 0.95, opacity: 0, y: 16 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2, ease: 'easeOut', delay: 0.05 }}
         className="relative z-10 w-full max-w-sm space-y-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
       >
         <div className="space-y-2">
