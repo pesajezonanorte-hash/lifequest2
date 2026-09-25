@@ -23,7 +23,10 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
  * translúcido), respetando la paleta del juego.
  */
 const variantClasses: Record<Variant, string> = {
-  primary:   'font-semibold text-primary bg-primary/15',
+  // NOTA: bg-primary/15 no funciona en Tailwind v3 con colores CSS-var (se come
+  // el /15 y pinta el fondo SÓLIDO, ese rectángulo morado-azul encima del glass).
+  // accent-purple es hex y respeta la opacidad.
+  primary:   'font-semibold text-primary bg-accent-purple/15',
   secondary: 'font-semibold text-accent-blue bg-accent-blue/15',
   danger:    'font-semibold text-accent-red bg-accent-red/15',
   ghost:     'text-text-secondary bg-transparent',
@@ -62,7 +65,7 @@ export function PixelButton({
       variant="default"
       size={sizeMap[size]}
       className={cn(
-        'font-sans select-none transition-colors duration-75',
+        'font-sans select-none',
         variantClasses[variant],
         fullWidth ? 'w-full' : '',
         isDisabled ? 'opacity-50 cursor-not-allowed' : '',
