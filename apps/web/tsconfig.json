@@ -15,7 +15,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@lifequest/shared": ["../../packages/shared/src/index.ts"]
+      "@lifequest/shared": ["../../packages/shared/src/index.ts"],
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],

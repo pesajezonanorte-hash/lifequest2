@@ -28,6 +28,27 @@ export default {
         'accent-red':     '#ef4444',
         'accent-blue':    '#3b82f6',
         'accent-purple':  '#8b5cf6',
+
+        // ── Tokens semánticos shadcn (para componentes tipo shadcn: LiquidButton, etc.) ──
+        // Mapeados a las CSS vars del tema LifeQuest (globals.css). No colisionan
+        // con las keys anteriores ('text-primary' genera .text-text-primary, no .text-primary).
+        'background':          'var(--bg-deep)',
+        'foreground':          'var(--text-primary)',
+        'primary':             'var(--primary)',
+        'primary-foreground':  'var(--text-inv)',
+        'secondary':           'var(--bg-panel-light)',
+        'secondary-foreground':'var(--text-primary)',
+        'muted':               'var(--bg-muted)',
+        'muted-foreground':    'var(--text-muted)',
+        'accent':              'var(--bg-soft)',
+        'accent-foreground':   'var(--text-primary)',
+        'destructive':         'var(--accent-red)',
+        'destructive-foreground': 'var(--text-inv)',
+        'border-input':        'var(--border-strong)',
+        'input':               'var(--border-strong)',
+        'ring':                'var(--primary)',
+        // `border` como color semántico (clase .border-border, estilo shadcn)
+        'border':              'var(--border)',
       },
       fontFamily: {
         sans:  ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
