@@ -15,6 +15,7 @@ import { getCheckinHistory } from '../../services/checkin.service';
 import type { DailyCheckin } from '../../services/checkin.service';
 import { useAuthStore } from '../../store/authStore';
 import { DynamicLifeScore } from '../../components/ui/DynamicLifeScore';
+import { E } from '@/components/ui/glyphs';
 
 type Period = 'week' | 'month' | '3months' | 'year';
 const PERIODS: { id: Period; label: string }[] = [
@@ -368,7 +369,7 @@ export default function StatsPage() {
         style={{ borderColor: 'var(--accent-gold)44' }}
       >
         <h2 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-          <span>⭐</span> Life Score Dinámico
+          <span><E e="⭐" /></span> Life Score Dinámico
           {dynamicScore && dynamicScore.trend !== 0 && (
             <span className={`text-xs ml-auto font-medium ${dynamicScore.trend > 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-pink)]'}`}>
               {dynamicScore.trend > 0 ? '▲' : '▼'} {Math.abs(dynamicScore.trend)} pts vs semana pasada
@@ -404,7 +405,7 @@ export default function StatsPage() {
               className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-4"
               style={{ borderColor: card.color + '44' }}
             >
-              <div className="text-2xl mb-2">{card.icon}</div>
+              <div className="text-2xl mb-2"><E e={card.icon} /></div>
               <p className="text-xl font-bold" style={{ color: card.color }}>{card.value}</p>
               <p className="text-xs text-[var(--text-muted)] mt-1">{card.label}</p>
             </motion.div>
@@ -482,7 +483,7 @@ export default function StatsPage() {
       {checkins.length > 0 && (
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5">
           <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-            <span className="text-sm">😊</span>
+            <span className="text-sm"><E e="😊" /></span>
             Estado emocional del mes
           </h3>
           <MoodHeatmap checkins={checkins} />

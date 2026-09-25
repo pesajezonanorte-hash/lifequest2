@@ -7,8 +7,9 @@ import { PixelButton } from '../../components/ui/PixelButton';
 import type { SleepLog, SleepStats } from '@lifequest/shared';
 import * as sleepService from '../../services/sleep.service';
 import { SageContextButton } from '../../components/sage/SageContextButton';
+import { E } from '@/components/ui/glyphs';
 
-const QUALITY_LABELS = ['', '😢 Terrible', '😔 Malo', '😐 Regular', '😊 Bueno', '😄 Excelente'];
+const QUALITY_LABELS = ['', ' Terrible', ' Malo', ' Regular', ' Bueno', ' Excelente'];
 const QUALITY_COLORS = ['', '#b5453a', '#a8a8b0', '#8a8a92', '#6cb98a', '#3f7a55'];
 
 function SleepModal({ onClose, onSave }: { onClose: () => void; onSave: (log: SleepLog) => void }) {
@@ -76,11 +77,11 @@ function SleepModal({ onClose, onSave }: { onClose: () => void; onSave: (log: Sl
                 onClick={() => setQuality(q)}
                 className={`text-2xl transition-all ${quality >= q ? 'opacity-100 scale-110' : 'opacity-40'}`}
               >
-                ⭐
+                <E e="⭐" />
               </motion.button>
             ))}
           </div>
-          <p className="font-vt text-center mt-1" style={{ color: QUALITY_COLORS[quality] }}>{QUALITY_LABELS[quality]}</p>
+          <p className="font-vt text-center mt-1" style={{ color: QUALITY_COLORS[quality] }}><E e={QUALITY_LABELS[quality]} /></p>
         </div>
 
         {/* Sleep factors */}
@@ -88,12 +89,12 @@ function SleepModal({ onClose, onSave }: { onClose: () => void; onSave: (log: Sl
           <p className="font-pixel text-text-secondary mb-2" style={{ fontSize: '7px' }}>FACTORES</p>
           <div className="space-y-2">
             {([
-              ['caffeineLate', '☕ Cafeína tarde (después de 4pm)', caffeineLate, setCaffeineLate],
-              ['screens', '📱 Pantallas antes de dormir', screensBeforeBed, setScreensBeforeBed],
-              ['exercise', '🏋️ Ejercicié hoy', exercisedToday, setExercisedToday],
+              ['caffeineLate', ' Cafeína tarde (después de 4pm)', caffeineLate, setCaffeineLate],
+              ['screens', ' Pantallas antes de dormir', screensBeforeBed, setScreensBeforeBed],
+              ['exercise', ' Ejercicié hoy', exercisedToday, setExercisedToday],
             ] as [string, string, boolean, (v: boolean) => void][]).map(([key, label, val, setter]) => (
               <button key={key} onClick={() => setter(!val)} className={`w-full flex items-center gap-3 px-3 py-2 border-2 transition-all text-left ${val ? 'border-accent-gold bg-accent-gold/10' : 'border-border-pixel'}`}>
-                <span className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>{val ? '☑' : '☐'}</span>
+                <span className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>{val ? <E e="☑" s={11} /> : <E e="☐" s={11} />}</span>
                 <span className="font-vt text-text-primary text-base">{label}</span>
               </button>
             ))}
@@ -105,7 +106,7 @@ function SleepModal({ onClose, onSave }: { onClose: () => void; onSave: (log: Sl
         <div className="flex gap-2">
           <PixelButton variant="ghost" onClick={onClose} className="flex-1">Cancelar</PixelButton>
           <PixelButton variant="primary" onClick={save} disabled={saving} className="flex-1">
-            {saving ? 'Guardando...' : '🌙 REGISTRAR'}
+            {saving ? 'Guardando...' : <><E e="🌙" s={11} /> REGISTRAR</>}
           </PixelButton>
         </div>
       </motion.div>
@@ -156,7 +157,7 @@ export default function SleepPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>🌙 TORRE DEL SUEÑO</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="🌙" /> TORRE DEL SUEÑO</h1>
           <p className="font-vt text-text-secondary text-base">Tu descanso es tu HP, héroe</p>
         </div>
         <div className="flex items-center gap-2">
@@ -175,7 +176,7 @@ export default function SleepPage() {
             { label: 'TENDENCIA', value: stats.trend === 'improving' ? '↑ Mejorando' : stats.trend === 'declining' ? '↓ Bajando' : '→ Estable', icon: '📈' },
           ].map(s => (
             <PixelPanel key={s.label} className="p-3 text-center">
-              <p className="text-2xl">{s.icon}</p>
+              <p className="text-2xl"><E e={s.icon} /></p>
               <p className="font-pixel text-accent-gold mt-1" style={{ fontSize: '11px' }}>{s.value}</p>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '6px' }}>{s.label}</p>
             </PixelPanel>
@@ -196,8 +197,8 @@ export default function SleepPage() {
               <p className="font-pixel text-accent-gold mt-1" style={{ fontSize: '12px' }}>{lastLog.duration.toFixed(1)}h</p>
             </div>
             <div className="text-right">
-              <p className="font-vt text-text-primary text-2xl">{'⭐'.repeat(lastLog.quality)}</p>
-              <p className="font-vt text-text-secondary text-base">{QUALITY_LABELS[lastLog.quality]}</p>
+              <p className="font-vt text-text-primary text-2xl">{Array.from({ length: lastLog.quality }).map((_, i) => <E key={i} e="⭐" s={16} className="inline-block" />)}</p>
+              <p className="font-vt text-text-secondary text-base"><E e={QUALITY_LABELS[lastLog.quality]} /></p>
               {(lastLog as any).sleepScore != null && (
                 <div className="mt-1 inline-block px-2 py-0.5 border-2 font-pixel" style={{
                   fontSize: '9px',
@@ -210,7 +211,7 @@ export default function SleepPage() {
             </div>
           </div>
           {lastLog.duration < 7 && (
-            <p className="font-vt text-accent-red text-base mt-2">⚠️ Tu HP está bajo, héroe. Descansa más esta noche.</p>
+            <p className="font-vt text-accent-red text-base mt-2"><E e="⚠" /> Tu HP está bajo, héroe. Descansa más esta noche.</p>
           )}
         </PixelPanel>
       )}
@@ -250,8 +251,8 @@ export default function SleepPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <p className="font-pixel text-accent-gold" style={{ fontSize: '11px' }}>{l.duration.toFixed(1)}h</p>
-                    <p className="font-vt text-base" style={{ color: QUALITY_COLORS[l.quality] }}>{'⭐'.repeat(l.quality)}</p>
-                    <button onClick={() => handleDelete(l.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}>✕</button>
+                    <p className="font-vt text-base" style={{ color: QUALITY_COLORS[l.quality] }}>{Array.from({ length: l.quality }).map((_, i) => <E key={i} e="⭐" s={14} className="inline-block" />)}</p>
+                    <button onClick={() => handleDelete(l.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}><E e="✕" /></button>
                   </div>
                 </PixelPanel>
               </motion.div>

@@ -10,6 +10,7 @@ import * as authService from '../../services/auth.service';
 import { PixelButton } from '../../components/ui/PixelButton';
 import { PixelInput } from '../../components/ui/PixelInput';
 import { MiguelSprite } from '../../components/character/MiguelSprite';
+import { E } from '@/components/ui/glyphs';
 
 const schema = z.object({
   displayName: z.string().min(2, 'At least 2 characters').max(50),
@@ -111,7 +112,7 @@ export default function RegisterPage() {
                         : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
                     }`}
                   >
-                    {g === 'male' ? '⚔️ Héroe' : '🗡️ Heroína'}
+                    {g === 'male' ? <><E e="⚔️" s={11} /> Héroe</> : <><E e="🗡️" s={11} /> Heroína</>}
                   </button>
                 ))}
               </div>

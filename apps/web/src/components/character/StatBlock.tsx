@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   icon: string;
@@ -21,7 +22,7 @@ export function StatBlock({ icon, label, value, max, color, barColor, tooltip }:
         onMouseEnter={() => setShowTip(true)}
         onMouseLeave={() => setShowTip(false)}
       >
-        <span className="text-xl w-6 text-center">{icon}</span>
+        <span className="text-xl w-6 text-center"><E e={icon} /></span>
         <div className="flex-1">
           <div className="flex justify-between items-center mb-0.5">
             <span className={`font-pixel ${color}`} style={{ fontSize: '8px' }}>{label}</span>

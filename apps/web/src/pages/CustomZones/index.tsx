@@ -5,6 +5,7 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import { useToastStore } from '../../hooks/useToast';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -129,7 +130,7 @@ function ActionForm({
         style={{ background: `${zone.accentColor}10`, border: `1px solid ${zone.accentColor}30` }}
       >
         <p className="text-xs font-semibold" style={{ color: zone.accentColor }}>
-          {isHabit ? '🔥 Nuevo hábito' : `✦ ${action.label}`}
+          {isHabit ? <><E e="🔥" s={11} /> Nuevo hábito</> : `+ ${action.label}`}
         </p>
         <input
           ref={inputRef}
@@ -157,7 +158,7 @@ function ActionForm({
                   color: difficulty === d ? DIFFICULTY_COLORS[d] : 'var(--text-muted)',
                 }}
               >
-                {DIFFICULTY_LABELS[d]}
+                <E e={DIFFICULTY_LABELS[d]} />
               </button>
             ))}
           </div>
@@ -216,7 +217,7 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
     setCompletingQuest(questId);
     try {
       await api.post(`/quests/${questId}/complete`);
-      toast.success('¡Misión completada! ⚔️');
+      toast.success('¡Misión completada! ');
       await refreshZone();
     } catch { toast.error('Error completando misión'); }
     finally { setCompletingQuest(null); }
@@ -240,7 +241,7 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
             className="flex items-center gap-3 flex-1 text-left"
             onClick={() => setExpanded(v => !v)}
           >
-            <span style={{ fontSize: 22 }}>{zone.icon}</span>
+            <span style={{ fontSize: 22 }}><E e={zone.icon} /></span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <p className="font-bold text-sm truncate">{zone.name}</p>
@@ -306,7 +307,7 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
                             border: `1px solid ${zone.accentColor}50`,
                           }}
                         >
-                          {activeAction?.label === a.label ? '✕ Cancelar' : `+ ${a.label}`}
+                          {activeAction?.label === a.label ? <><E e="✕" s={11} /> Cancelar</> : `+ ${a.label}`}
                         </button>
                       ))}
                     </div>
@@ -330,7 +331,7 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
                 {zone.quests.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                      ⚔️ Misiones ({zone.quests.length})
+                      <E e="⚔" /> Misiones ({zone.quests.length})
                     </p>
                     <div className="space-y-1">
                       {zone.quests.map(q => (
@@ -355,7 +356,7 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
                             className="text-[10px] font-medium flex-shrink-0"
                             style={{ color: DIFFICULTY_COLORS[q.difficulty] ?? 'var(--text-muted)' }}
                           >
-                            {DIFFICULTY_LABELS[q.difficulty] ?? q.difficulty}
+                            <E e={DIFFICULTY_LABELS[q.difficulty] ?? q.difficulty} />
                           </span>
                           <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--accent-cyan)' }}>
                             +{q.xpReward}xp
@@ -370,7 +371,7 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
                 {zone.habits.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                      🔥 Hábitos ({zone.habits.length})
+                      <E e="🔥" /> Hábitos ({zone.habits.length})
                     </p>
                     <div className="space-y-1">
                       {zone.habits.map(h => (
@@ -379,14 +380,14 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
                           className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
                           style={{ background: 'var(--bg-soft)' }}
                         >
-                          <span className="flex-shrink-0">{h.icon}</span>
+                          <span className="flex-shrink-0"><E e={h.icon} /></span>
                           <span className="text-sm flex-1 truncate" style={{ color: 'var(--text)' }}>{h.title}</span>
                           {h.currentStreak > 0 && (
                             <span
                               className="text-[10px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded"
                               style={{ background: 'color-mix(in oklab, var(--accent-gold) 15%, transparent)', color: 'var(--accent-gold)' }}
                             >
-                              🔥 {h.currentStreak}d
+                              <E e="🔥" /> {h.currentStreak}d
                             </span>
                           )}
                           <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--accent-cyan)' }}>
@@ -595,7 +596,7 @@ export default function CustomZonesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-pixel text-[var(--accent-gold)]" style={{ fontSize: '14px' }}>
-            📍 MIS ZONAS
+            <E e="📍" /> MIS ZONAS
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-2)' }}>
             Zonas personalizadas creadas con El Sabio · {zones.length}/10 activas
@@ -629,7 +630,7 @@ export default function CustomZonesPage() {
         </div>
       ) : zones.length === 0 ? (
         <PixelPanel className="p-10 text-center">
-          <p className="text-4xl mb-3">🏰</p>
+          <p className="text-4xl mb-3"><E e="🏰" /></p>
           <p className="font-pixel text-[var(--text-2)]" style={{ fontSize: '10px' }}>SIN ZONAS PERSONALIZADAS</p>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
             El Sabio puede construir una zona personalizada a partir de tu descripción

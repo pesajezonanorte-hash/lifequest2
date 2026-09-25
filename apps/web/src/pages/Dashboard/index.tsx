@@ -33,6 +33,7 @@ import { ProgressRings } from '../../components/ui/ProgressRings';
 import { SageProactiveCard } from '../../components/dashboard/SageProactiveCard';
 import { WhatToDoWidget } from '../../components/dashboard/WhatToDoWidget';
 import { getLevelTitle } from '../../lib/gameProgress';
+import { E } from '@/components/ui/glyphs';
 
 interface HabitSummary {
   id: string;
@@ -116,19 +117,19 @@ interface DashboardData {
 }
 
 const ZONES: { icon: ReactNode; label: string; sublabel: string; to: string; color: string; badge: undefined }[] = [
-  { icon: <span className="text-4xl leading-none block">🏋️</span>, label: 'Gym', sublabel: 'Coliseo', to: '/gym', color: 'border-[var(--accent-red)]', badge: undefined },
-  { icon: <span className="text-4xl leading-none block">💰</span>, label: 'Finanzas', sublabel: 'La Bóveda', to: '/finances', color: 'border-[var(--accent-gold)]', badge: undefined },
-  { icon: <span className="text-4xl leading-none block">📚</span>, label: 'Aprend.', sublabel: 'Biblioteca', to: '/learning', color: 'border-[var(--accent-blue)]', badge: undefined },
-  { icon: <span className="text-4xl leading-none block">🍽️</span>, label: 'Comida', sublabel: 'La Posada', to: '/food', color: 'border-[var(--accent-green)]', badge: undefined },
-  { icon: <span className="text-4xl leading-none block">🌙</span>, label: 'Sueño', sublabel: 'La Torre', to: '/sleep', color: 'border-[var(--accent-cyan)]', badge: undefined },
-  { icon: <span className="text-4xl leading-none block">💕</span>, label: 'Amor', sublabel: 'El Jardín', to: '/love', color: 'border-[var(--accent-pink)]', badge: undefined },
+  { icon: <span className="text-4xl leading-none block"><E e="🏋" /></span>, label: 'Gym', sublabel: 'Coliseo', to: '/gym', color: 'border-[var(--accent-red)]', badge: undefined },
+  { icon: <span className="text-4xl leading-none block"><E e="💰" /></span>, label: 'Finanzas', sublabel: 'La Bóveda', to: '/finances', color: 'border-[var(--accent-gold)]', badge: undefined },
+  { icon: <span className="text-4xl leading-none block"><E e="📚" /></span>, label: 'Aprend.', sublabel: 'Biblioteca', to: '/learning', color: 'border-[var(--accent-blue)]', badge: undefined },
+  { icon: <span className="text-4xl leading-none block"><E e="🍽" /></span>, label: 'Comida', sublabel: 'La Posada', to: '/food', color: 'border-[var(--accent-green)]', badge: undefined },
+  { icon: <span className="text-4xl leading-none block"><E e="🌙" /></span>, label: 'Sueño', sublabel: 'La Torre', to: '/sleep', color: 'border-[var(--accent-cyan)]', badge: undefined },
+  { icon: <span className="text-4xl leading-none block"><E e="💕" /></span>, label: 'Amor', sublabel: 'El Jardín', to: '/love', color: 'border-[var(--accent-pink)]', badge: undefined },
 ];
 
 const CLASS_TITLES: Record<string, string> = {
-  warrior: '⚔️ Guerrero',
-  mage: '🧙 Mago',
-  merchant: '💰 Mercader',
-  paladin: '🛡️ Paladín',
+  warrior: ' Guerrero',
+  mage: ' Mago',
+  merchant: ' Mercader',
+  paladin: ' Paladín',
 };
 
 function LifeScoreWidget({ score }: { score: LifeScore }) {
@@ -145,7 +146,7 @@ function LifeScoreWidget({ score }: { score: LifeScore }) {
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18, padding: 22, boxShadow: 'var(--shadow-rest)' }}>
       <div className="flex items-center gap-3 mb-4">
         <div style={{ width: 36, height: 36, borderRadius: 10, background: 'color-mix(in oklab, var(--primary) 14%, transparent)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          📊
+          <E e="📊" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--primary)' }}>Life Score</div>
@@ -187,7 +188,7 @@ function WeeklySummaryCard({ summary }: { summary: WeeklySummaryCardData }) {
     <PixelPanel className="p-4">
       <div className="flex items-center justify-between gap-3 mb-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--accent-gold)]">📊 Resumen semanal</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--accent-gold)]"><E e="📊" /> Resumen semanal</p>
           <p className="text-xs text-[var(--text-secondary)]">{weekLabel}</p>
         </div>
         <div className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'rgba(217,180,74,0.12)', color: 'var(--accent-gold)' }}>
@@ -259,7 +260,7 @@ function SevenDayGuideCard({
           </p>
         </div>
         <button onClick={onDismiss} className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-          Ya sé cómo funciona ✕
+          Ya sé cómo funciona <E e="✕" />
         </button>
       </div>
 
@@ -313,7 +314,7 @@ function RecoveryOverlay({ open, bonusXp }: { open: boolean; bonusXp: number }) 
                   animate={{ y: [-6, -30, -12], opacity: [0.3, 1, 0.2] }}
                   transition={{ duration: 1.1, repeat: Infinity, delay: index * 0.08 }}
                 >
-                  ✨
+                  <E e="✨" />
                 </motion.span>
               ))}
             </div>
@@ -344,7 +345,7 @@ function CoinBurst({ count }: { count: number }) {
           transition={{ duration: 1, ease: 'easeIn' }}
           style={{ left: `calc(50% + ${(index - count / 2) * 8}px)`, top: 110 }}
         >
-          🪙
+          <E e="🪙" />
         </motion.span>
       ))}
     </div>
@@ -517,12 +518,12 @@ export default function DashboardPage() {
             </span>
           ) : user.level >= 10 ? (
             <button onClick={() => setShowClassModal(true)} className="text-xs font-semibold text-[var(--accent-gold)] animate-pulse">
-              ⚡ ¡Elige tu Clase! (Nivel 10)
+              <E e="⚡" /> ¡Elige tu Clase! (Nivel 10)
             </button>
           ) : null}
         </div>
         <button onClick={() => setShowBriefing(true)} className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors">
-          📋 Briefing del día
+          <E e="📋" /> Briefing del día
         </button>
       </div>
 
@@ -595,13 +596,13 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-1 bg-[var(--bg-panel-light)] border border-[var(--border)] rounded-lg px-3 py-1.5">
-              <span className="text-base font-semibold text-[var(--accent-gold)]">💰 {user.gold.toLocaleString()}</span>
+              <span className="text-base font-semibold text-[var(--accent-gold)]"><E e="💰" /> {user.gold.toLocaleString()}</span>
               <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide ml-1">GOLD</span>
             </div>
 
             {user.currentStreak > 0 && (
               <motion.div className="flex items-center gap-1 text-[var(--accent-red)]" animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                <span>🔥</span>
+                <span><E e="🔥" /></span>
                 <span className="text-sm">{user.currentStreak} días de racha</span>
               </motion.div>
             )}
@@ -621,7 +622,7 @@ export default function DashboardPage() {
           {habits.length > 0 && (
             <PixelPanel className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">🔥 HÁBITOS DE HOY</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide"><E e="🔥" /> HÁBITOS DE HOY</h3>
                 <button onClick={() => navigate('/habits')} className="text-xs font-medium text-[var(--accent-gold)] hover:text-[var(--text-primary)]">
                   VER TODOS →
                 </button>
@@ -629,7 +630,7 @@ export default function DashboardPage() {
               <div className="space-y-2">
                 {habits.slice(0, 5).map((habit) => (
                   <div key={habit.id} className="flex items-center gap-2 py-1">
-                    <span className="text-lg">{habit.icon}</span>
+                    <span className="text-lg"><E e={habit.icon} /></span>
                     <span className="text-sm text-[var(--text-primary)] flex-1 truncate">{habit.title}</span>
                     <StreakFlame streak={habit.currentStreak} size="sm" />
                     <motion.button
@@ -655,9 +656,9 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {topHabit && (
               <PixelPanel className="p-3 cursor-pointer hover:border-[var(--accent-gold)] transition-colors" onClick={() => navigate('/habits')}>
-                <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-1">🏆 MEJOR RACHA ACTUAL</p>
+                <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-1"><E e="🏆" /> MEJOR RACHA ACTUAL</p>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">{topHabit.icon}</span>
+                  <span className="text-xl"><E e={topHabit.icon} /></span>
                   <div>
                     <p className="text-sm text-[var(--text-primary)]">{topHabit.title}</p>
                     <p className="text-sm text-[var(--accent-gold)]">{topHabit.currentStreak} días seguidos</p>
@@ -668,9 +669,9 @@ export default function DashboardPage() {
 
             {dashData?.recentAchievements?.[0] && (
               <PixelPanel className="p-3 cursor-pointer hover:border-[var(--accent-gold)] transition-colors" onClick={() => navigate('/achievements')}>
-                <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-1">⭐ LOGRO RECIENTE</p>
+                <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-1"><E e="⭐" /> LOGRO RECIENTE</p>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">{dashData.recentAchievements[0].icon}</span>
+                  <span className="text-xl"><E e={dashData.recentAchievements[0].icon} /></span>
                   <div>
                     <p className="text-base font-semibold text-[var(--accent-gold)]">{dashData.recentAchievements[0].title}</p>
                     <p className="text-sm text-[var(--text-secondary)]">{dashData.recentAchievements[0].description}</p>
@@ -687,7 +688,7 @@ export default function DashboardPage() {
           {upcomingEvents.length > 0 && (
             <PixelPanel className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">📅 PRÓXIMOS EVENTOS</h3>
+                <h3 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide"><E e="📅" /> PRÓXIMOS EVENTOS</h3>
                 <button onClick={() => navigate('/agenda')} className="text-xs font-medium text-[var(--accent-gold)] hover:text-[var(--text-primary)]">
                   VER AGENDA →
                 </button>

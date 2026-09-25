@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useToastStore } from '../../hooks/useToast';
+import { E } from '@/components/ui/glyphs';
 
 const ICONS: Record<string, string> = {
   success: '✅',
@@ -33,7 +34,7 @@ export function ToastContainer() {
             className={`pointer-events-auto border-2 shadow-pixel p-3 flex items-start gap-3 cursor-pointer ${COLORS[toast.type] ?? COLORS.info}`}
             onClick={() => remove(toast.id)}
           >
-            <span className="text-lg flex-shrink-0">{ICONS[toast.type]}</span>
+            <span className="text-lg flex-shrink-0"><E e={ICONS[toast.type]} /></span>
             <div className="flex-1 min-w-0">
               <p className="font-pixel text-text-primary" style={{ fontSize: '8px' }}>{toast.message}</p>
               {toast.subtitle && (

@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import { completeQuest } from '../../services/quest.service';
 import type { Quest } from '@lifequest/shared';
+import { E } from '@/components/ui/glyphs';
 
 const TYPE_ICONS: Record<string, string> = {
   MAIN: '🏆', SIDE: '⚔️', DAILY: '🔄', WEEKLY: '📅',
@@ -65,7 +66,7 @@ export function TodayQuestsWidget({ quests, onQuestCompleted }: Props) {
           No tienes misiones activas, héroe.
         </p>
         <p className="font-vt text-text-secondary text-lg text-center">
-          ¡Crea una misión para empezar tu aventura! ⚔️
+          ¡Crea una misión para empezar tu aventura! <E e="⚔" />
         </p>
       </PixelPanel>
     );
@@ -107,7 +108,7 @@ export function TodayQuestsWidget({ quests, onQuestCompleted }: Props) {
                       className="text-border-pixel font-pixel"
                       style={{ fontSize: '10px' }}
                     >
-                      ✓
+                      <E e="✓" />
                     </motion.span>
                   ) : completing === quest.id ? (
                     <motion.div
@@ -120,7 +121,7 @@ export function TodayQuestsWidget({ quests, onQuestCompleted }: Props) {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
-                    <span>{TYPE_ICONS[quest.type] ?? '📜'}</span>
+                    <span><E e={TYPE_ICONS[quest.type] ?? '📜'} /></span>
                     <p className={`font-pixel truncate ${done ? 'text-text-secondary line-through' : 'text-text-primary'}`} style={{ fontSize: '8px' }}>
                       {quest.title}
                     </p>
@@ -130,7 +131,7 @@ export function TodayQuestsWidget({ quests, onQuestCompleted }: Props) {
                       {quest.difficulty}
                     </span>
                     <span className="font-vt text-accent-gold text-sm">+{quest.xpReward} XP</span>
-                    <span className="font-vt text-yellow-600 text-sm">+{quest.goldReward} 💰</span>
+                    <span className="font-vt text-yellow-600 text-sm">+{quest.goldReward} <E e="💰" /></span>
                   </div>
                 </div>
               </motion.div>

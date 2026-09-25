@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Zap, CheckCircle2 } from 'lucide-react';
 import * as checkinService from '../../services/checkin.service';
 import type { DailyCheckin } from '../../services/checkin.service';
+import { E } from '@/components/ui/glyphs';
 
 const MOOD_OPTIONS = [
   { value: 1, emoji: '😔', label: 'Mal' },
@@ -63,7 +64,7 @@ export function DailyCheckinWidget() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span>{MOOD_OPTIONS.find((m) => m.value === checkin.mood)?.emoji} {MOOD_OPTIONS.find((m) => m.value === checkin.mood)?.label}</span>
-            <span className="text-[var(--text-muted)]">⚡{checkin.energy}/10</span>
+            <span className="text-[var(--text-muted)]"><E e="⚡" />{checkin.energy}/10</span>
           </div>
         </div>
       </motion.div>
@@ -96,7 +97,7 @@ export function DailyCheckinWidget() {
               border: `1px solid ${mood === m.value ? 'var(--accent-cyan)' : 'transparent'}`,
             }}
           >
-            <span className="text-xl">{m.emoji}</span>
+            <span className="text-xl"><E e={m.emoji} /></span>
             <span className="text-[10px] text-[var(--text-muted)]">{m.label}</span>
           </motion.button>
         ))}

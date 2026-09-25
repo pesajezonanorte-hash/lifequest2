@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { E } from '@/components/ui/glyphs';
 
 interface Props { children: ReactNode; }
 interface State { hasError: boolean; error?: Error; }
@@ -23,7 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-deep)] text-[var(--text-primary)] p-8">
         <div className="text-center max-w-md space-y-6">
-          <div className="text-7xl">⚔️</div>
+          <div className="text-7xl"><E e="⚔" /></div>
           <h1 className="text-2xl font-bold">El héroe tropezó</h1>
           <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
             Ocurrió un error inesperado en la aventura. No se perdió ningún progreso.
@@ -39,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
             className="px-6 py-3 rounded-xl font-semibold text-sm transition-all"
             style={{ background: 'var(--accent-gold)', color: 'var(--bg-deep)' }}
           >
-            🔄 Recargar la aventura
+            <E e="🔄" /> Recargar la aventura
           </button>
         </div>
       </div>

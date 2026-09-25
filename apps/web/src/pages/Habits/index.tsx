@@ -14,6 +14,7 @@ import { refreshUser } from '../../hooks/useAuth';
 import { useToastStore } from '../../hooks/useToast';
 import * as habitService from '../../services/habit.service';
 import type { Habit } from '../../services/habit.service';
+import { E } from '@/components/ui/glyphs';
 
 export default function HabitsPage() {
   const user = useAuthStore((s) => s.user);
@@ -138,7 +139,7 @@ export default function HabitsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>
-            {showRituals ? '⚡ TUS RITUALES' : '🔥 TUS HÁBITOS DIARIOS'}
+            {showRituals ? ' TUS RITUALES' : ' TUS HÁBITOS DIARIOS'}
           </h1>
           <p className="font-vt text-text-secondary text-base">
             {showRituals
@@ -179,7 +180,7 @@ export default function HabitsPage() {
         <SkeletonList count={3} />
       ) : habits.length === 0 ? (
         <PixelPanel className="p-8 text-center">
-          <p className="text-4xl mb-3">🔥</p>
+          <p className="text-4xl mb-3"><E e="🔥" /></p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>SIN HÁBITOS AÚN</p>
           <p className="font-vt text-text-secondary text-base mt-1">Crea tu primer hábito y empieza a construir racha</p>
           <div className="mt-4">
@@ -216,7 +217,7 @@ export default function HabitsPage() {
             exit={{ y: 40, opacity: 0, scale: 0.8 }}
             style={{ fontSize: '10px' }}
           >
-            🔥 ¡{streakToast.streak} DÍAS!<br />
+            <E e="🔥" /> ¡{streakToast.streak} DÍAS!<br />
             <span style={{ fontSize: '8px' }}>{streakToast.name}</span>
           </motion.div>
         )}

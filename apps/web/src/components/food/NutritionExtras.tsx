@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { PixelPanel } from '../ui/PixelPanel';
 import { PixelButton } from '../ui/PixelButton';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 interface NutritionGoal { calories: number; protein: number; carbs: number; fat: number }
 interface DailyMacros { calories: number; protein: number; carbs: number; fat: number; goal: NutritionGoal | null }
@@ -77,7 +78,7 @@ export function MacroGoalsWidget({ date }: { date: string }) {
       <div className="flex items-center justify-between">
         <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}>MACROS HOY</p>
         <button onClick={() => setEditGoal(e => !e)} className="font-pixel text-text-secondary hover:text-accent-gold transition-colors" style={{ fontSize: '7px' }}>
-          {editGoal ? '✕ CERRAR' : '⚙ META'}
+          {editGoal ? <><E e="✕" s={11} /> CERRAR</> : <><E e="⚙" s={11} /> META</>}
         </button>
       </div>
 
@@ -175,7 +176,7 @@ export function AIQuickLog({ onLogged }: { onLogged: (meal: { name: string; calo
 
   return (
     <PixelPanel className="p-4 space-y-3">
-      <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}>🤖 REGISTRO RÁPIDO CON IA</p>
+      <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}><E e="🤖" /> REGISTRO RÁPIDO CON IA</p>
       <div className="flex gap-2">
         <input
           value={text}
@@ -190,7 +191,7 @@ export function AIQuickLog({ onLogged }: { onLogged: (meal: { name: string; calo
       </div>
 
       {aiError && (
-        <p className="font-vt text-[var(--accent-gold)] text-sm">⚠ {aiError}</p>
+        <p className="font-vt text-[var(--accent-gold)] text-sm"><E e="⚠" /> {aiError}</p>
       )}
       {parsed && (
         <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
@@ -230,8 +231,8 @@ export function AIQuickLog({ onLogged }: { onLogged: (meal: { name: string; calo
               <option value="DINNER">Cena</option>
               <option value="SNACK">Snack</option>
             </select>
-            <PixelButton variant="primary" onClick={confirmLog}>✓ AGREGAR</PixelButton>
-            <PixelButton variant="ghost" onClick={() => setParsed(null)}>✕</PixelButton>
+            <PixelButton variant="primary" onClick={confirmLog}><E e="✓" /> AGREGAR</PixelButton>
+            <PixelButton variant="ghost" onClick={() => setParsed(null)}><E e="✕" /></PixelButton>
           </div>
         </motion.div>
       )}
@@ -284,9 +285,9 @@ export function SavedMealsPanel({ onAdd }: { onAdd: (meal: SavedMeal) => void })
   return (
     <PixelPanel className="p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}>⭐ COMIDAS GUARDADAS</p>
+        <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}><E e="⭐" /> COMIDAS GUARDADAS</p>
         <button onClick={() => setShowForm(f => !f)} className="font-pixel text-text-secondary hover:text-accent-gold transition-colors" style={{ fontSize: '7px' }}>
-          {showForm ? '✕' : '+ NUEVA'}
+          {showForm ? <E e="✕" s={11} /> : '+ NUEVA'}
         </button>
       </div>
 
@@ -329,7 +330,7 @@ export function SavedMealsPanel({ onAdd }: { onAdd: (meal: SavedMeal) => void })
               </div>
               <div className="flex gap-2">
                 <button onClick={() => handleAdd(m)} className="font-pixel text-accent-green hover:opacity-70 transition-opacity" style={{ fontSize: '8px' }}>+ AGREGAR</button>
-                <button onClick={() => handleDelete(m.id)} className="font-pixel text-accent-red hover:opacity-70 transition-opacity" style={{ fontSize: '8px' }}>✕</button>
+                <button onClick={() => handleDelete(m.id)} className="font-pixel text-accent-red hover:opacity-70 transition-opacity" style={{ fontSize: '8px' }}><E e="✕" /></button>
               </div>
             </div>
           ))}

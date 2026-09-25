@@ -10,6 +10,7 @@ import { useUIStore } from '../../store/uiStore';
 import { useToastStore } from '../../hooks/useToast';
 import { refreshUser } from '../../hooks/useAuth';
 import type { Habit } from '../../services/habit.service';
+import { E } from '@/components/ui/glyphs';
 
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
 
@@ -32,13 +33,13 @@ function QuestModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
     setSaving(true);
     try {
       await createQuest({ title, type, difficulty: 'EASY', category: 'PERSONAL', xpReward: type === 'DAILY' ? 30 : 50, goldReward: 10 });
-      useToastStore.getState().success('¡Misión creada! ⚔️', 'El XP se gana al completarla');
+      useToastStore.getState().success('¡Misión creada!', 'El XP se gana al completarla');
       onDone();
     } catch { setSaving(false); }
   }
 
   return (
-    <ModalShell title="⚔️ Nueva Quest" onClose={onClose}>
+    <ModalShell title="Nueva Quest" onClose={onClose}>
       <input
         autoFocus
         value={title}
@@ -51,7 +52,7 @@ function QuestModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
         {(['DAILY', 'SIDE', 'MAIN'] as const).map(t => (
           <button key={t} onClick={() => setType(t)} className="flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all"
             style={{ border: `1px solid ${type === t ? 'var(--accent-gold)' : 'var(--border)'}`, background: type === t ? 'color-mix(in oklab, var(--accent-gold) 12%, transparent)' : 'transparent', color: type === t ? 'var(--accent-gold)' : 'var(--text-muted)' }}>
-            {t === 'DAILY' ? '📅 Diaria' : t === 'SIDE' ? '📜 Side' : '⚔️ Main'}
+            {t === 'DAILY' ? <><E e="📅" s={11} /> Diaria</> : t === 'SIDE' ? <><E e="📜" s={11} /> Side</> : <><E e="⚔️" s={11} /> Main</>}
           </button>
         ))}
       </div>
@@ -71,13 +72,13 @@ function ExpenseModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
     setSaving(true);
     try {
       await createTransaction({ type: 'EXPENSE', amount: Number(amount), category: 'Otros', description: desc || undefined });
-      useToastStore.getState().success('Gasto registrado 💸');
+      useToastStore.getState().success('Gasto registrado');
       onDone();
     } catch { setSaving(false); }
   }
 
   return (
-    <ModalShell title="💸 Gasto Rápido" onClose={onClose}>
+    <ModalShell title="Gasto Rápido" onClose={onClose}>
       <input autoFocus type="number" value={amount} onChange={e => setAmount(e.target.value)}
         placeholder="Monto" className="w-full px-3 py-2 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-deep)] text-[var(--text-primary)] outline-none focus:border-[var(--accent-green)]" />
       <input value={desc} onChange={e => setDesc(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSave()}
@@ -111,7 +112,7 @@ function HabitModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
   }
 
   return (
-    <ModalShell title="🔥 Marcar Hábito" onClose={onClose}>
+    <ModalShell title="Marcar Hábito" onClose={onClose}>
       {habits.length === 0 ? (
         <p className="text-xs text-center py-3" style={{ color: 'var(--text-muted)' }}>¡Todos tus hábitos del día están completos!</p>
       ) : (
@@ -121,10 +122,10 @@ function HabitModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
               disabled={saving === h.id}
               className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] text-left transition-all hover:border-[var(--accent-red)] disabled:opacity-50"
               style={{ background: 'var(--bg-panel-light)' }}>
-              <span className="text-base">{h.icon}</span>
+              <span className="text-base"><E e={h.icon} /></span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{h.title}</p>
-                {h.currentStreak > 0 && <p className="text-[10px]" style={{ color: 'var(--accent-gold)' }}>🔥 {h.currentStreak} días</p>}
+                {h.currentStreak > 0 && <p className="text-[10px]" style={{ color: 'var(--accent-gold)' }}><E e="🔥" /> {h.currentStreak} días</p>}
               </div>
               <span className="text-xs font-bold" style={{ color: 'var(--accent-cyan)' }}>+{h.xpReward} XP</span>
             </motion.button>
@@ -145,13 +146,13 @@ function NoteModal({ onClose, onDone }: { onClose: () => void; onDone: () => voi
     setSaving(true);
     try {
       await createJournalEntry({ content, title: content.slice(0, 40) });
-      useToastStore.getState().success('Nota guardada ✍️');
+      useToastStore.getState().success('Nota guardada');
       onDone();
     } catch { setSaving(false); }
   }
 
   return (
-    <ModalShell title="✍️ Nota Rápida" onClose={onClose}>
+    <ModalShell title="Nota Rápida" onClose={onClose}>
       <textarea autoFocus value={content} onChange={e => setContent(e.target.value)} rows={3}
         placeholder="Escribe tu nota aquí..."
         className="w-full px-3 py-2 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-deep)] text-[var(--text-primary)] outline-none focus:border-[var(--accent-cyan)] resize-none" />
@@ -176,9 +177,9 @@ function CheckinModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
       const rewards = (res.data as { rewards?: { xpEarned?: number } | null })?.rewards;
       if (rewards && (rewards.xpEarned ?? 0) > 0) {
         addFloatingXP(rewards.xpEarned!, window.innerWidth / 2, 200);
-        useToastStore.getState().success('Check-in registrado ⚡', `+${rewards.xpEarned} XP · ¡Bonus diario!`);
+        useToastStore.getState().success('Check-in registrado', `+${rewards.xpEarned} XP · ¡Bonus diario!`);
       } else {
-        useToastStore.getState().success('Check-in actualizado ⚡', 'El bonus diario de hoy ya estaba reclamado');
+        useToastStore.getState().success('Check-in actualizado', 'El bonus diario de hoy ya estaba reclamado');
       }
       void refreshUser();
       onDone();
@@ -188,7 +189,7 @@ function CheckinModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
   const MOODS = ['😢', '😕', '😐', '🙂', '😄'];
 
   return (
-    <ModalShell title="⚡ Check-in" onClose={onClose}>
+    <ModalShell title="Check-in" onClose={onClose}>
       <div className="space-y-3">
         <div>
           <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>Estado de ánimo</p>
@@ -196,7 +197,7 @@ function CheckinModal({ onClose, onDone }: { onClose: () => void; onDone: () => 
             {MOODS.map((m, i) => (
               <button key={i} onClick={() => setMood(i + 1)} className="text-xl transition-all"
                 style={{ opacity: mood === i + 1 ? 1 : 0.35, transform: mood === i + 1 ? 'scale(1.25)' : 'scale(1)' }}>
-                {m}
+                <E e={m} s={18} className="inline-block" />
               </button>
             ))}
           </div>
@@ -378,7 +379,7 @@ export function QuickActionsFAB() {
                     <span className="flex-1 truncate" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13 }}>
                       {action.label}
                     </span>
-                    <span className="flex-shrink-0 text-xs" style={{ color: 'var(--text-3)' }}>{action.emoji}</span>
+                    <span className="flex-shrink-0 text-xs" style={{ color: 'var(--text-3)' }}><E e={action.emoji} /></span>
                   </motion.button>
                 ))}
               </div>

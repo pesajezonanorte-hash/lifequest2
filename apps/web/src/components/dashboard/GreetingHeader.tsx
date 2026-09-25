@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { getHeroLabel } from '../../utils/gender';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   displayName: string;
@@ -107,7 +108,7 @@ export function GreetingHeader({ displayName, currentStreak, createdAt, gender =
             className="m-0 truncate text-[28px] sm:text-[32px] font-extrabold tracking-[-0.03em] leading-[1.05]"
             style={{ color: 'var(--text)' }}
           >
-            {firstName} <span style={{ color: 'var(--primary)' }}>⚔️</span>
+            {firstName} <span style={{ color: 'var(--primary)' }}><E e="⚔" /></span>
           </h1>
           <div className="text-[13px]" style={{ color: 'var(--text-2)' }}>
             {dateStr} · Día {daysSinceJoin} en LifeQuest
@@ -140,7 +141,7 @@ export function GreetingHeader({ displayName, currentStreak, createdAt, gender =
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1.2, repeat: Infinity }}
             >
-              🔥
+              <E e="🔥" />
             </motion.span>
             <div>
               <p

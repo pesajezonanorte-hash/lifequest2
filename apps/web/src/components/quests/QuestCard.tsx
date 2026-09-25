@@ -5,6 +5,7 @@ import { CategoryIcon } from './CategoryIcon';
 import { DifficultyBadge, DIFFICULTY_CONFIG } from './DifficultyBadge';
 import { DeadlineBadge } from './DeadlineBadge';
 import { audio } from '../../lib/audio';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   quest: Quest;
@@ -108,12 +109,12 @@ export const QuestCard = memo(function QuestCard({ quest, onComplete, onClick }:
             whileTap={{ scale: 0.85 }}
             title="Completar misión"
           >
-            <span className="text-sm">✓</span>
+            <span className="text-sm"><E e="✓" /></span>
           </motion.button>
         )}
 
-        {isCompleted && <span className="text-xl flex-shrink-0">✅</span>}
-        {isFailed    && <span className="text-xl flex-shrink-0">💀</span>}
+        {isCompleted && <span className="text-xl flex-shrink-0"><E e="✅" /></span>}
+        {isFailed    && <span className="text-xl flex-shrink-0"><E e="💀" /></span>}
       </div>
 
       {/* Progress bar */}
@@ -138,10 +139,10 @@ export const QuestCard = memo(function QuestCard({ quest, onComplete, onClick }:
       <div className="flex items-center gap-1.5 flex-wrap mt-1 relative z-10">
         <DifficultyBadge difficulty={quest.difficulty} />
         <ShimmerBadge><span className="text-[var(--accent-gold)]">+{quest.xpReward}XP</span></ShimmerBadge>
-        <ShimmerBadge><span className="text-yellow-400">💰{quest.goldReward}</span></ShimmerBadge>
+        <ShimmerBadge><span className="text-yellow-400"><E e="💰" />{quest.goldReward}</span></ShimmerBadge>
         <DeadlineBadge deadline={quest.deadline} />
         <span className="text-xs text-[var(--text-secondary)]">
-          {quest.type === 'DAILY' ? '☀️' : quest.type === 'WEEKLY' ? '📅' : quest.type === 'MAIN' ? '⚔️' : quest.type === 'META' ? '🎯' : '🗡️'}
+          <E e={quest.type === 'DAILY' ? '☀️' : quest.type === 'WEEKLY' ? '📅' : quest.type === 'MAIN' ? '⚔️' : quest.type === 'META' ? '🎯' : '🗡️'} />
         </span>
       </div>
 

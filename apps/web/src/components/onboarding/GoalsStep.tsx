@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PixelButton } from '../ui/PixelButton';
+import { E } from '@/components/ui/glyphs';
 
 const GOAL_OPTIONS = [
   { id: 'FITNESS',  icon: '💪', label: 'Gimnasio y Fuerza',  desc: 'Entrenar, ganar músculo, perder grasa' },
@@ -68,7 +69,7 @@ export function GoalsStep({ onNext, onBack }: Props) {
                   : 'border-border-pixel bg-bg-panel hover:border-accent-gold'
               }`}
             >
-              <div className="text-2xl mb-1">{opt.icon}</div>
+              <div className="text-2xl mb-1"><E e={opt.icon} /></div>
               <p className="font-pixel text-text-primary" style={{ fontSize: '7px', lineHeight: 1.4 }}>
                 {opt.label}
               </p>
@@ -80,7 +81,7 @@ export function GoalsStep({ onNext, onBack }: Props) {
                   animate={{ scale: 1 }}
                   style={{ fontSize: '12px' }}
                 >
-                  ✓
+                  <E e="✓" />
                 </motion.div>
               )}
             </motion.button>

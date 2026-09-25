@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles, Compass } from 'lucide-react';
 import { fetchMorningBriefing } from '../../services/lifescore.service';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   onClose: () => void;
@@ -18,7 +19,7 @@ export function MorningBriefing({ onClose }: Props) {
         setLoading(false);
       })
       .catch(() => {
-        setBriefing('🎯 **Enfoque hoy:** Mantén tus misiones al día.\n💡 **Consejo:** Avanza con constancia y cuida tus rachas.');
+        setBriefing('**Enfoque hoy:** Mantén tus misiones al día.\n**Consejo:** Avanza con constancia y cuida tus rachas.');
         setLoading(false);
       });
   }, []);

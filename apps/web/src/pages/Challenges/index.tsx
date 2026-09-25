@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Swords, Plus, Users, Trophy } from 'lucide-react';
 import { getChallenges, createChallenge, joinChallenge } from '../../services/social.service';
 import { useAuthStore } from '../../store/authStore';
+import { E } from '@/components/ui/glyphs';
 
 interface Challenge {
   id: string;
@@ -189,9 +190,9 @@ export default function ChallengesPage() {
                       {c.title}
                     </div>
                     <div className="flex items-center gap-2 font-vt text-text-dim text-xs">
-                      <span className="px-1 border border-text-dim">{TYPE_LABELS[c.type] ?? c.type}</span>
+                      <span className="px-1 border border-text-dim"><E e={TYPE_LABELS[c.type] ?? c.type} /></span>
                       <span>Meta: {c.targetValue}</span>
-                      {c.goldWager > 0 && <span className="text-accent-gold">💰 {c.goldWager} Gold</span>}
+                      {c.goldWager > 0 && <span className="text-accent-gold"><E e="💰" /> {c.goldWager} Gold</span>}
                     </div>
                   </div>
                   <div className="text-right ml-2">
@@ -234,7 +235,7 @@ export default function ChallengesPage() {
                     </button>
                   )}
                   {c.isParticipant && (
-                    <span className="font-pixel text-accent-emerald" style={{ fontSize: '9px' }}>✓ PARTICIPANDO</span>
+                    <span className="font-pixel text-accent-emerald" style={{ fontSize: '9px' }}><E e="✓" /> PARTICIPANDO</span>
                   )}
                 </div>
 
@@ -243,7 +244,7 @@ export default function ChallengesPage() {
                   <div className="space-y-1">
                     {c.participants.slice(0, 3).map((p, i) => (
                       <div key={p.userId} className="flex items-center gap-2 text-xs font-vt">
-                        <span>{['🥇', '🥈', '🥉'][i]}</span>
+                        <span><E e={['🥇', '🥈', '🥉'][i]} s={14} /></span>
                         <span className={p.userId === user?.id ? 'text-accent-gold' : 'text-text-dim'}>
                           {p.user.displayName}
                         </span>

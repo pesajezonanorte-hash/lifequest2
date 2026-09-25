@@ -10,6 +10,7 @@ import type { Workout, Exercise, Routine } from '@lifequest/shared';
 import * as workoutService from '../../services/workout.service';
 import { SageContextButton } from '../../components/sage/SageContextButton';
 import { BodyWeightTracker, OneRMCalculator, WeeklyVolumeWidget, ProgressPhotos, RestTimer } from '../../components/gym/GymExtras';
+import { E } from '@/components/ui/glyphs';
 
 const MUSCLE_GROUPS = ['Todos', 'Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps', 'Piernas', 'Core', 'Cardio'];
 
@@ -314,7 +315,7 @@ function ActiveWorkoutView({
             </span>
           )}
           <PixelButton variant="primary" onClick={() => onFinish(activeWorkout)}>
-            ✓ FINALIZAR
+            <E e="✓" /> FINALIZAR
           </PixelButton>
         </div>
       </div>
@@ -353,7 +354,7 @@ function ActiveWorkoutView({
                       animate={{ scale: 1 }}
                       className="text-accent-green text-lg"
                     >
-                      ✅
+                      <E e="✅" />
                     </motion.span>
                   )}
                 </div>
@@ -445,7 +446,7 @@ function ActiveWorkoutView({
                                 className="font-pixel text-accent-gold"
                                 style={{ fontSize: '6px' }}
                               >
-                                🏆PR
+                                <E e="🏆" />PR
                               </motion.span>
                             )}
                           </div>
@@ -628,7 +629,7 @@ export default function GymPage() {
         {/* Spotify quick-open */}
         {user?.gymPlaylistUrl && (
           <div className="flex items-center justify-between bg-bg-panel border border-accent-green/40 px-3 py-2">
-            <p className="font-vt text-text-secondary text-base">🎵 Playlist de entrenamiento</p>
+            <p className="font-vt text-text-secondary text-base"><E e="🎵" /> Playlist de entrenamiento</p>
             <div className="flex gap-2">
               <a
                 href={user.gymPlaylistUrl}
@@ -644,14 +645,14 @@ export default function GymPage() {
                 className="font-pixel text-text-muted hover:text-text-secondary"
                 style={{ fontSize: '8px' }}
               >
-                ✏
+                <E e="✏" />
               </button>
             </div>
           </div>
         )}
         {!user?.gymPlaylistUrl && (
           <div className="flex items-center justify-between bg-bg-panel border border-border-pixel px-3 py-2 opacity-60">
-            <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>🎵 Sin playlist configurada</p>
+            <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}><E e="🎵" /> Sin playlist configurada</p>
             <button
               onClick={() => navigate('/settings')}
               className="font-pixel text-accent-gold hover:text-text-primary"
@@ -675,7 +676,7 @@ export default function GymPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>
-            ⚔️ EL COLISEO
+            <E e="⚔" /> EL COLISEO
           </h1>
           <p className="font-vt text-text-secondary text-base">Forja tu cuerpo, héroe</p>
         </div>
@@ -685,7 +686,7 @@ export default function GymPage() {
             ⏱ DESCANSO
           </PixelButton>
           <PixelButton variant="primary" onClick={() => setShowStartModal(true)}>
-            ⚔️ INICIAR
+            <E e="⚔" /> INICIAR
           </PixelButton>
         </div>
       </div>
@@ -720,7 +721,7 @@ export default function GymPage() {
       ) : tab === 'history' ? (
         workouts.length === 0 ? (
           <PixelPanel className="p-8 text-center">
-            <p className="text-4xl mb-3">⚔️</p>
+            <p className="text-4xl mb-3"><E e="⚔" /></p>
             <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>
               EL COLISEO ESPERA
             </p>
@@ -759,7 +760,7 @@ export default function GymPage() {
                       <div className="text-right">
                         <p className="font-vt text-accent-gold text-lg">+{w.xpEarned} XP</p>
                         <p className="font-vt text-accent-gold text-base">
-                          +{w.goldEarned} 🪙
+                          +{w.goldEarned} <E e="🪙" />
                         </p>
                       </div>
                     </div>

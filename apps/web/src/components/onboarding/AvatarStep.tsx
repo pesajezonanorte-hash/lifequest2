@@ -5,6 +5,7 @@ import { PixelButton } from '../ui/PixelButton';
 import { PixelPanel } from '../ui/PixelPanel';
 import { ColorPicker } from './ColorPicker';
 import type { AvatarConfig, HairStyle, Accessory, Expression } from '@lifequest/shared';
+import { E } from '@/components/ui/glyphs';
 
 const HAIR_COLORS = ['#2c1810', '#4a3728', '#8b4513', '#d4a017', '#c8a2c8', '#708090', '#1a1a1a', '#ff6b6b', '#e8c090', '#ffffff', '#3d5a80', '#c0392b'];
 const SKIN_COLORS = [

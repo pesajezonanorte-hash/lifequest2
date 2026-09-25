@@ -6,6 +6,7 @@ import { PixelButton } from '../../components/ui/PixelButton';
 import { useToast } from '../../hooks/useToast';
 import * as agendaService from '../../services/agenda.service';
 import type { AgendaEvent } from '../../services/agenda.service';
+import { E } from '@/components/ui/glyphs';
 
 type ViewMode = 'day' | 'week' | 'month';
 
@@ -71,7 +72,7 @@ function EventCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span>{cat.emoji}</span>
+            <span><E e={cat.emoji} /></span>
             <p className={`font-vt text-text-primary text-lg ${event.isCompleted ? 'line-through' : ''}`}>
               {event.title}
             </p>
@@ -79,7 +80,7 @@ function EventCard({
           <p className="font-pixel text-text-secondary mt-0.5" style={{ fontSize: '7px' }}>
             {event.isAllDay ? 'Todo el día' : formatTime(event.startDate)}
             {event.endDate && !event.isAllDay ? ` — ${formatTime(event.endDate)}` : ''}
-            {event.location ? ` · 📍 ${event.location}` : ''}
+            {event.location ? ` · ${event.location}` : ''}
             {event.reminder ? ` · ⏰ ${REMINDERS.find(r => r.value === event.reminder)?.label ?? ''}` : ''}
           </p>
           {event.description && (
@@ -100,14 +101,14 @@ function EventCard({
             className="font-pixel text-text-secondary hover:text-accent-gold transition-colors"
             style={{ fontSize: '10px' }}
           >
-            ✏
+            <E e="✏" />
           </button>
           <button
             onClick={onDelete}
             className="font-pixel text-text-secondary hover:text-accent-red transition-colors"
             style={{ fontSize: '10px' }}
           >
-            ✕
+            <E e="✕" />
           </button>
         </div>
       </div>
@@ -217,7 +218,7 @@ function EventModal({
                   color: category === c.key ? c.color : 'var(--text-secondary)',
                 }}
               >
-                {c.emoji} {c.label}
+                <E e={c.emoji} /> {c.label}
               </button>
             ))}
           </div>
@@ -276,7 +277,7 @@ function EventModal({
           type="text"
           value={location}
           onChange={e => setLocation(e.target.value)}
-          placeholder="📍 Lugar (opcional)"
+          placeholder=" Lugar (opcional)"
           className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-3 py-2 focus:border-accent-gold outline-none"
         />
 
@@ -286,7 +287,7 @@ function EventModal({
             type="text"
             value={asignatura}
             onChange={e => setAsignatura(e.target.value)}
-            placeholder="📚 Asignatura (ej. Matemáticas)"
+            placeholder=" Asignatura (ej. Matemáticas)"
             className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-3 py-2 focus:border-accent-gold outline-none"
           />
         )}
@@ -687,15 +688,15 @@ export default function AgendaPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>📅 AGENDA</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="📅" /> AGENDA</h1>
           <p className="font-vt text-text-secondary text-base">Tu tiempo, tus misiones</p>
         </div>
         <div className="flex gap-2 flex-wrap items-center">
           <PixelButton variant="ghost" onClick={handleConnectGoogle} className="text-xs flex items-center gap-1">
-            <span className="text-accent-gold">📆</span> {googleConnected ? 'Re-conectar Google' : 'Conectar Google'}
+            <span className="text-accent-gold"><E e="📆" /></span> {googleConnected ? 'Re-conectar Google' : 'Conectar Google'}
           </PixelButton>
           <PixelButton variant="secondary" onClick={handleSyncGoogle} disabled={syncingGoogle} className="text-xs">
-            {syncingGoogle ? 'Sincronizando...' : '🔄 Sincronizar'}
+            {syncingGoogle ? 'Sincronizando...' : ' Sincronizar'}
           </PixelButton>
           <PixelButton variant="secondary" onClick={() => setCurrentDate(new Date())} className="text-sm">
             Hoy
@@ -709,7 +710,7 @@ export default function AgendaPage() {
       {/* Google Sync Banner */}
       <PixelPanel className="p-3 bg-bg-deep/40 flex items-center justify-between flex-wrap gap-2 border-border-pixel">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🗓️</span>
+          <span className="text-lg"><E e="🗓" /></span>
           <div>
             <p className="font-pixel text-text-primary" style={{ fontSize: '8px' }}>
               INTEGRACIÓN GOOGLE CALENDAR
@@ -726,7 +727,7 @@ export default function AgendaPage() {
             className="font-pixel px-3 py-1.5 bg-accent-gold/20 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold/30 transition-colors text-xs flex items-center gap-1"
             style={{ fontSize: '8px' }}
           >
-            {syncingGoogle ? '⏳ Sincronizando...' : '🔄 Sincronizar Google Calendar'}
+            {syncingGoogle ? '⏳ Sincronizando...' : ' Sincronizar Google Calendar'}
           </button>
           <button
             onClick={handleDisconnectGoogle}
@@ -734,7 +735,7 @@ export default function AgendaPage() {
             style={{ fontSize: '8px' }}
             title="Desconectar cuenta de Google"
           >
-            🔌 Desconectar
+            <E e="🔌" /> Desconectar
           </button>
         </div>
       </PixelPanel>

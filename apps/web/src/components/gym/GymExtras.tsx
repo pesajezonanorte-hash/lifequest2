@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, 
 import { PixelPanel } from '../ui/PixelPanel';
 import { PixelButton } from '../ui/PixelButton';
 import * as gym2 from '../../services/gym2.service';
+import { E } from '@/components/ui/glyphs';
 
 // ─── Rest Timer ────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ export function RestTimer({ onClose }: { onClose: () => void }) {
       <motion.div className="pixel-panel p-6 w-80 text-center" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}>
         <div className="flex items-center justify-between mb-4">
           <p className="pixel-text text-xs text-[var(--accent-gold)]">⏱ DESCANSO</p>
-          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-lg">✕</button>
+          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-lg"><E e="✕" /></button>
         </div>
 
         {/* Circular countdown */}
@@ -121,7 +122,7 @@ export function RestTimer({ onClose }: { onClose: () => void }) {
 
         {remaining === 0 && (
           <motion.p className="mt-3 text-[var(--accent-green)] text-sm font-bold" initial={{ scale: 0 }} animate={{ scale: 1 }}>
-            ¡Listo! Siguiente serie 💪
+            ¡Listo! Siguiente serie <E e="💪" />
           </motion.p>
         )}
       </motion.div>
@@ -170,7 +171,7 @@ export function BodyWeightTracker() {
   return (
     <PixelPanel className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="pixel-text text-sm text-[var(--accent-gold)]">⚖️ PESO CORPORAL</h3>
+        <h3 className="pixel-text text-sm text-[var(--accent-gold)]"><E e="⚖" /> PESO CORPORAL</h3>
         {latest && (
           <div className="text-right">
             <p className="text-xl font-bold text-[var(--text-primary)]">{latest.weight} kg</p>
@@ -221,7 +222,7 @@ export function BodyWeightTracker() {
               <span className="text-[var(--text-secondary)]">{new Date(r.date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}</span>
               <span className="font-bold text-[var(--text-primary)]">{r.weight} kg</span>
               {r.notes && <span className="text-[var(--text-muted)] truncate max-w-[100px]">{r.notes}</span>}
-              <button onClick={() => handleDelete(r.id)} className="text-red-400 hover:text-red-300 ml-1">✕</button>
+              <button onClick={() => handleDelete(r.id)} className="text-red-400 hover:text-red-300 ml-1"><E e="✕" /></button>
             </div>
           ))}
         </div>
@@ -253,7 +254,7 @@ export function OneRMCalculator() {
 
   return (
     <PixelPanel className="p-4">
-      <h3 className="pixel-text text-sm text-[var(--accent-gold)] mb-4">💪 CALCULADORA 1RM</h3>
+      <h3 className="pixel-text text-sm text-[var(--accent-gold)] mb-4"><E e="💪" /> CALCULADORA 1RM</h3>
       <div className="flex gap-2 mb-3">
         <input value={weight} onChange={e => setWeight(e.target.value)} placeholder="Peso (kg)" type="number" step="0.5"
           className="flex-1 bg-[var(--bg-deep)] border border-[var(--border)] rounded px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-gold)]" />
@@ -301,7 +302,7 @@ export function WeeklyVolumeWidget() {
 
   return (
     <PixelPanel className="p-4">
-      <h3 className="pixel-text text-sm text-[var(--accent-gold)] mb-4">📊 VOLUMEN SEMANAL POR MÚSCULO</h3>
+      <h3 className="pixel-text text-sm text-[var(--accent-gold)] mb-4"><E e="📊" /> VOLUMEN SEMANAL POR MÚSCULO</h3>
       <ResponsiveContainer width="100%" height={140}>
         <BarChart data={chartData} barSize={24}>
           <XAxis dataKey="muscle" tick={{ fontSize: 10, fill: 'var(--text-secondary)' }} />
@@ -371,7 +372,7 @@ export function ProgressPhotos() {
   return (
     <PixelPanel className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="pixel-text text-sm text-[var(--accent-gold)]">📸 PROGRESO VISUAL</h3>
+        <h3 className="pixel-text text-sm text-[var(--accent-gold)]"><E e="📸" /> PROGRESO VISUAL</h3>
         <button
           onClick={() => fileRef.current?.click()}
           disabled={uploading}

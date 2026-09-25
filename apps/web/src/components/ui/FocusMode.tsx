@@ -5,6 +5,7 @@ import { logFocusSession } from '../../services/focus.service';
 import { useUIStore } from '../../store/uiStore';
 import { useToastStore } from '../../hooks/useToast';
 import { refreshUser } from '../../hooks/useAuth';
+import { E } from '@/components/ui/glyphs';
 
 const PRESETS = [
   { label: '25 min', minutes: 25, color: 'var(--accent-cyan)' },
@@ -440,7 +441,7 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 {done ? (
                   <div className="text-center">
-                    <div className="text-5xl mb-2">🎉</div>
+                    <div className="text-5xl mb-2"><E e="🎉" /></div>
                     <p className="text-lg font-bold" style={{ color: preset.color }}>¡Completado!</p>
                   </div>
                 ) : (

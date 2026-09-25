@@ -10,6 +10,7 @@ import type { Transaction, Budget, FinancialGoal } from '@lifequest/shared';
 import * as financeService from '../../services/finance.service';
 import { SageContextButton } from '../../components/sage/SageContextButton';
 import { DebtsPanel, RecurringPanel, ProjectionPanel, PaydayModal } from '../../components/finances/FinancesExtras';
+import { E } from '@/components/ui/glyphs';
 
 const CATEGORY_ICONS: Record<string, string> = {
   FOOD: '🍔', TRANSPORT: '🚌', ENTERTAINMENT: '🎮', HEALTH: '🏥',
@@ -78,14 +79,14 @@ function TransactionModal({ onClose, onSave }: { onClose: () => void; onSave: (t
             className={`flex-1 py-2 border-2 font-pixel transition-all ${type === 'INCOME' ? 'border-accent-green bg-accent-green/20 text-accent-green' : 'border-border-pixel text-text-secondary'}`}
             style={{ fontSize: '8px' }}
           >
-            🟢 INGRESO
+            <E e="🟢" /> INGRESO
           </button>
           <button
             onClick={() => setType('EXPENSE')}
             className={`flex-1 py-2 border-2 font-pixel transition-all ${type === 'EXPENSE' ? 'border-accent-red bg-accent-red/20 text-accent-red' : 'border-border-pixel text-text-secondary'}`}
             style={{ fontSize: '8px' }}
           >
-            🔴 GASTO
+            <E e="🔴" /> GASTO
           </button>
         </div>
 
@@ -113,7 +114,7 @@ function TransactionModal({ onClose, onSave }: { onClose: () => void; onSave: (t
               className={`flex flex-col items-center p-2 border transition-all ${category === key ? 'border-accent-gold bg-accent-gold/10' : 'border-border-pixel hover:border-text-secondary'}`}
             >
               <span className="text-lg">{icon}</span>
-              <span className="font-pixel text-text-secondary mt-0.5" style={{ fontSize: '6px' }}>{CATEGORY_LABELS[key]}</span>
+              <span className="font-pixel text-text-secondary mt-0.5" style={{ fontSize: '6px' }}><E e={CATEGORY_LABELS[key]} /></span>
             </button>
           ))}
         </div>
@@ -252,7 +253,7 @@ export default function FinancesPage() {
       {/* Header minimal */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>💰 LA BÓVEDA</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="💰" /> LA BÓVEDA</h1>
           <p className="font-vt text-text-secondary text-base">Finanzas en COP — dinero real</p>
         </div>
         <div className="flex items-center gap-2">
@@ -324,7 +325,7 @@ export default function FinancesPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto pb-1">
-        {([['dashboard', '📊 Resumen'], ['transactions', '💸 Transacciones'], ['budgets', '📋 Presupuestos'], ['goals', '🎯 Metas'], ['debts', '💳 Deudas'], ['recurring', '🔄 Recurrentes'], ['projection', '📈 Proyección']] as const).map(([key, label]) => (
+        {([['dashboard', ' Resumen'], ['transactions', ' Transacciones'], ['budgets', ' Presupuestos'], ['goals', ' Metas'], ['debts', ' Deudas'], ['recurring', ' Recurrentes'], ['projection', ' Proyección']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -371,7 +372,7 @@ export default function FinancesPage() {
               {dashboard.recent.slice(0, 5).map(t => (
                 <div key={t.id} className="flex items-center justify-between py-1 border-b border-border-pixel/30">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{CATEGORY_ICONS[t.category] ?? '📦'}</span>
+                    <span className="text-lg"><E e={CATEGORY_ICONS[t.category] ?? '📦'} /></span>
                     <div>
                       <p className="font-vt text-text-primary text-base">{t.description ?? CATEGORY_LABELS[t.category]}</p>
                       <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>{new Date(t.date).toLocaleDateString('es-CO')}</p>
@@ -392,7 +393,7 @@ export default function FinancesPage() {
         <div className="space-y-2">
           {transactions.length === 0 ? (
             <PixelPanel className="p-8 text-center">
-              <p className="text-4xl mb-2">💸</p>
+              <p className="text-4xl mb-2"><E e="💸" /></p>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>SIN TRANSACCIONES</p>
             </PixelPanel>
           ) : (
@@ -407,11 +408,11 @@ export default function FinancesPage() {
                 >
                   <PixelPanel className="p-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{CATEGORY_ICONS[t.category] ?? '📦'}</span>
+                      <span className="text-2xl"><E e={CATEGORY_ICONS[t.category] ?? '📦'} /></span>
                       <div>
                         <p className="font-vt text-text-primary text-lg">{t.description ?? CATEGORY_LABELS[t.category]}</p>
                         <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>
-                          {CATEGORY_LABELS[t.category]} · {new Date(t.date).toLocaleDateString('es-CO')}
+                          <E e={CATEGORY_LABELS[t.category]} /> · {new Date(t.date).toLocaleDateString('es-CO')}
                         </p>
                       </div>
                     </div>
@@ -424,7 +425,7 @@ export default function FinancesPage() {
                         className="font-pixel text-accent-red hover:opacity-70 transition-opacity"
                         style={{ fontSize: '8px' }}
                       >
-                        ✕
+                        <E e="✕" />
                       </button>
                     </div>
                   </PixelPanel>
@@ -440,7 +441,7 @@ export default function FinancesPage() {
         <div className="space-y-3">
           {dashboard.budgets.length === 0 ? (
             <PixelPanel className="p-8 text-center">
-              <p className="text-4xl mb-2">📋</p>
+              <p className="text-4xl mb-2"><E e="📋" /></p>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>SIN PRESUPUESTOS</p>
               <p className="font-vt text-text-secondary text-base mt-1">Crea presupuestos para controlar tus gastos</p>
             </PixelPanel>
@@ -453,8 +454,8 @@ export default function FinancesPage() {
                 <PixelPanel key={b.id} className="p-3">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">{CATEGORY_ICONS[b.category]}</span>
-                      <p className="font-vt text-text-primary text-lg">{CATEGORY_LABELS[b.category]}</p>
+                      <span className="text-xl"><E e={CATEGORY_ICONS[b.category]} /></span>
+                      <p className="font-vt text-text-primary text-lg"><E e={CATEGORY_LABELS[b.category]} /></p>
                     </div>
                     <p className={`font-pixel ${color}`} style={{ fontSize: '8px' }}>{Math.round(pct)}%</p>
                   </div>
@@ -480,7 +481,7 @@ export default function FinancesPage() {
           </div>
           {goals.length === 0 ? (
             <PixelPanel className="p-8 text-center">
-              <p className="text-4xl mb-2">🎯</p>
+              <p className="text-4xl mb-2"><E e="🎯" /></p>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>SIN METAS DE AHORRO</p>
             </PixelPanel>
           ) : (
@@ -490,7 +491,7 @@ export default function FinancesPage() {
                 <PixelPanel key={g.id} className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-vt text-text-primary text-xl">{g.title}</p>
-                    {g.isCompleted && <span className="font-pixel text-accent-gold" style={{ fontSize: '8px' }}>✓ COMPLETADA</span>}
+                    {g.isCompleted && <span className="font-pixel text-accent-gold" style={{ fontSize: '8px' }}><E e="✓" /> COMPLETADA</span>}
                   </div>
                   {g.description && <p className="font-vt text-text-secondary text-base mb-2">{g.description}</p>}
                   <div className="stat-bar h-4 mb-1">

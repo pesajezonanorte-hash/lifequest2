@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollText, X, Sparkles } from 'lucide-react';
 import * as scrollsService from '../../services/scrolls.service';
 import type { SageScroll } from '../../services/scrolls.service';
+import { E } from '@/components/ui/glyphs';
 
 const CATEGORY_CONFIG = {
   praise:    { color: 'var(--accent-gold)',  icon: '⭐', bg: 'var(--accent-gold)' },
@@ -96,7 +97,7 @@ export function SageScrollsWidget() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-1">
               <span className="text-xs font-semibold" style={{ color: cfg.color }}>
-                {cfg.icon} El Sabio dice
+                <E e={cfg.icon} /> El Sabio dice
               </span>
               {scrolls.length > 1 && (
                 <span className="text-[10px] text-[var(--text-muted)]">+{scrolls.length - 1} más</span>

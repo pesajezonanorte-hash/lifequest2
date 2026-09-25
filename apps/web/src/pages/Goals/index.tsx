@@ -4,6 +4,7 @@ import { Plus, Target, Sparkles, Trash2, CheckCircle2, Circle, ChevronDown, Chev
 import { useToastStore } from '../../hooks/useToast';
 import * as goalsService from '../../services/goals.service';
 import type { MasterGoal } from '../../services/goals.service';
+import { E } from '@/components/ui/glyphs';
 
 const CATEGORIES = [
   { value: 'fitness',      label: 'Fitness',      emoji: '💪', color: 'var(--accent-pink)' },
@@ -89,7 +90,7 @@ function GoalCard({ goal, onUpdate }: { goal: MasterGoal; onUpdate: () => void }
           <div className="relative flex-shrink-0">
             <ProgressRing progress={goal.progress} color={cat.color} />
             <div className="absolute inset-0 flex items-center justify-center text-xl" style={{ transform: 'none' }}>
-              {goal.icon}
+              <E e={goal.icon} />
             </div>
           </div>
 
@@ -102,7 +103,7 @@ function GoalCard({ goal, onUpdate }: { goal: MasterGoal; onUpdate: () => void }
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: cat.color + '22', color: cat.color }}>
-                    {cat.emoji} {cat.label}
+                    <E e={cat.emoji} /> {cat.label}
                   </span>
                   <span className="text-xs font-semibold" style={{ color: STATUS_COLORS[goal.status] }}>
                     {goal.progress}%
@@ -289,7 +290,7 @@ function GoalWizard({ onClose, onCreated }: { onClose: () => void; onCreated: ()
                         onClick={() => setForm((f) => ({ ...f, category: c.value }))}
                         className={`px-3 py-2 rounded-xl text-sm flex items-center gap-2 border transition-all ${form.category === c.value ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10 text-[var(--text-primary)]' : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent-gold)]/50'}`}
                       >
-                        <span>{c.emoji}</span> <span>{c.label}</span>
+                        <span><E e={c.emoji} /></span> <span>{c.label}</span>
                       </button>
                     ))}
                   </div>
@@ -339,7 +340,7 @@ function GoalWizard({ onClose, onCreated }: { onClose: () => void; onCreated: ()
 
                 <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel-light)] p-4">
                   <h4 className="text-sm font-semibold mb-1 text-[var(--text-primary)]">Resumen de tu meta</h4>
-                  <p className="text-base font-bold" style={{ color: cat.color }}>{cat.emoji} {form.title}</p>
+                  <p className="text-base font-bold" style={{ color: cat.color }}><E e={cat.emoji} /> {form.title}</p>
                   {form.why && <p className="text-xs text-[var(--text-muted)] mt-1 italic">"{form.why}"</p>}
                 </div>
               </motion.div>
@@ -347,7 +348,7 @@ function GoalWizard({ onClose, onCreated }: { onClose: () => void; onCreated: ()
 
             {step === 3 && (
               <motion.div key="s3" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-4 py-4">
-                <div className="text-5xl">🎯</div>
+                <div className="text-5xl"><E e="🎯" /></div>
                 <h3 className="text-lg font-bold text-[var(--text-primary)]">¡Meta creada!</h3>
                 <p className="text-sm text-[var(--text-secondary)]">
                   ¿Quieres que el Sabio genere los milestones para llegar a tu meta?
@@ -485,7 +486,7 @@ export default function GoalsPage() {
           animate={{ opacity: 1 }}
           className="text-center py-16 space-y-4"
         >
-          <div className="text-6xl">🎯</div>
+          <div className="text-6xl"><E e="🎯" /></div>
           <h3 className="text-lg font-semibold text-[var(--text-primary)]">Sin metas todavía</h3>
           <p className="text-sm text-[var(--text-secondary)] max-w-xs mx-auto">
             Las Metas Maestras son los grandes objetivos de tu vida. No tareas — sueños con plan.

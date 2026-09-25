@@ -9,6 +9,7 @@ import type { JournalEntry, JournalStreak } from '@lifequest/shared';
 import * as journalService from '../../services/journal.service';
 import { relativeTime } from '../../lib/time';
 import { SageContextButton } from '../../components/sage/SageContextButton';
+import { E } from '@/components/ui/glyphs';
 
 const MOOD_EMOJIS = ['', '😢', '😔', '😐', '😊', '😄'];
 
@@ -65,7 +66,7 @@ function EntryEditor({ entry, onClose, onSave }: { entry?: JournalEntry; onClose
         saved = await journalService.createJournalEntry({ title: title || undefined, content, mood, date, tags });
       }
       onSave(saved);
-      toast.success('Entrada guardada ✍️');
+      toast.success('Entrada guardada ');
     } catch { toast.error('Error al guardar'); }
     finally { setSaving(false); }
   }
@@ -80,7 +81,7 @@ function EntryEditor({ entry, onClose, onSave }: { entry?: JournalEntry; onClose
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 z-50 flex items-end md:items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
       <motion.div initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }} transition={{ type: 'spring', stiffness: 350, damping: 28 }} className="bg-bg-panel border-2 border-border-pixel w-full max-w-2xl space-y-4 p-5 my-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <p className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>📜 ENTRADA DEL DIARIO</p>
+          <p className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}><E e="📜" /> ENTRADA DEL DIARIO</p>
           {lastSaved && <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>Auto-guardado {lastSaved.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</p>}
         </div>
 
@@ -96,7 +97,7 @@ function EntryEditor({ entry, onClose, onSave }: { entry?: JournalEntry; onClose
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map(q => (
                 <motion.button key={q} whileTap={{ scale: 0.85 }} onClick={() => setMood(q)} className={`text-xl transition-all ${mood === q ? 'scale-125' : 'opacity-40'}`}>
-                  {MOOD_EMOJIS[q]}
+                  <E e={MOOD_EMOJIS[q]} />
                 </motion.button>
               ))}
             </div>
@@ -136,7 +137,7 @@ function EntryEditor({ entry, onClose, onSave }: { entry?: JournalEntry; onClose
         <div className="flex gap-2">
           <PixelButton variant="ghost" onClick={onClose} className="flex-1">Cancelar</PixelButton>
           <PixelButton variant="primary" onClick={save} disabled={!content.trim() || saving} className="flex-1">
-            {saving ? '...' : '✍️ GUARDAR'}
+            {saving ? '...' : <><E e="✍️" s={11} /> GUARDAR</>}
           </PixelButton>
         </div>
       </motion.div>
@@ -192,12 +193,12 @@ export default function JournalPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>📜 DIARIO DE AVENTURAS</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="📜" /> DIARIO DE AVENTURAS</h1>
           <p className="font-vt text-text-secondary text-base">El registro de tu historia, héroe</p>
         </div>
         <div className="flex items-center gap-2">
           <SageContextButton message="Dame un tema profundo para reflexionar hoy en mi diario." label="Tema de reflexión" />
-          <PixelButton variant="primary" onClick={() => { setEditing(null); setShowEditor(true); }}>✍️ ESCRIBIR</PixelButton>
+          <PixelButton variant="primary" onClick={() => { setEditing(null); setShowEditor(true); }}><E e="✍" /> ESCRIBIR</PixelButton>
         </div>
       </div>
 
@@ -205,13 +206,13 @@ export default function JournalPage() {
       <div className="grid grid-cols-2 gap-3">
         {streak && (
           <PixelPanel className="p-3 text-center">
-            <p className="text-2xl">🔥</p>
+            <p className="text-2xl"><E e="🔥" /></p>
             <p className="font-pixel text-accent-gold mt-1" style={{ fontSize: '14px' }}>{streak.currentStreak}</p>
             <p className="font-pixel text-text-secondary" style={{ fontSize: '6px' }}>DÍAS SEGUIDOS</p>
           </PixelPanel>
         )}
         <PixelPanel className="p-3 text-center cursor-pointer hover:border-accent-gold/50 transition-colors" onClick={() => { setEditing(todayEntry ?? null); setShowEditor(true); }}>
-          <p className="text-2xl">{todayEntry ? '✅' : '📝'}</p>
+          <p className="text-2xl">{todayEntry ? <E e="✅" s={14} /> : <E e="📝" s={14} />}</p>
           <p className="font-pixel text-accent-gold mt-1" style={{ fontSize: '10px' }}>{todayEntry ? 'HOY ESCRITO' : 'ESCRIBIR HOY'}</p>
           {todayEntry && <p className="font-vt text-text-secondary text-base mt-0.5">{todayEntry.title ?? 'Sin título'}</p>}
         </PixelPanel>
@@ -220,10 +221,10 @@ export default function JournalPage() {
       {/* Daily prompt */}
       {!todayEntry && (
         <PixelPanel className="p-4 border-accent-purple/50">
-          <p className="font-pixel text-accent-purple mb-2" style={{ fontSize: '8px' }}>💬 PROMPT DEL DÍA</p>
+          <p className="font-pixel text-accent-purple mb-2" style={{ fontSize: '8px' }}><E e="💬" /> PROMPT DEL DÍA</p>
           <p className="font-vt text-text-primary text-lg italic">"{todayPrompt}"</p>
           <PixelButton variant="secondary" onClick={() => { setEditing(null); setShowEditor(true); }} className="mt-3 w-full">
-            ✍️ RESPONDER PROMPT
+            <E e="✍" /> RESPONDER PROMPT
           </PixelButton>
         </PixelPanel>
       )}
@@ -238,7 +239,7 @@ export default function JournalPage() {
           </button>
           {[1, 2, 3, 4, 5].map(m => (
             <button key={m} onClick={() => setMoodFilter(moodFilter === m ? null : m)} className={`px-2 py-0.5 border transition-all ${moodFilter === m ? 'border-accent-gold' : 'border-border-pixel'}`}>
-              <span className={moodFilter === m ? 'opacity-100' : 'opacity-50'}>{MOOD_EMOJIS[m]}</span>
+              <span className={moodFilter === m ? 'opacity-100' : 'opacity-50'}><E e={MOOD_EMOJIS[m]} /></span>
             </button>
           ))}
         </div>
@@ -249,7 +250,7 @@ export default function JournalPage() {
         <div className="text-center py-8"><motion.p className="font-vt text-text-secondary text-xl" animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }}>Leyendo el diario...</motion.p></div>
       ) : filteredEntries.length === 0 ? (
         <PixelPanel className="p-8 text-center">
-          <p className="text-4xl mb-2">📜</p>
+          <p className="text-4xl mb-2"><E e="📜" /></p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>{entries.length === 0 ? 'EL DIARIO ESTÁ EN BLANCO' : 'SIN RESULTADOS'}</p>
           <p className="font-vt text-text-secondary text-base mt-1">{entries.length === 0 ? 'El héroe no ha escrito aún...' : 'Prueba otro filtro'}</p>
         </PixelPanel>
@@ -262,7 +263,7 @@ export default function JournalPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        {e.mood && <span className="text-xl flex-shrink-0">{MOOD_EMOJIS[e.mood]}</span>}
+                        {e.mood && <span className="text-xl flex-shrink-0"><E e={MOOD_EMOJIS[e.mood]} /></span>}
                         <p className="font-vt text-text-primary text-lg truncate">{e.title ?? `Día ${new Date(e.date).toLocaleDateString('es-CO', { weekday: 'long', month: 'long', day: 'numeric' })}`}</p>
                       </div>
                       <p className="font-pixel text-text-secondary mt-0.5" style={{ fontSize: '7px' }} title={new Date(e.date).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}>{relativeTime(e.date)}</p>
@@ -273,7 +274,7 @@ export default function JournalPage() {
                         </div>
                       )}
                     </div>
-                    <button onClick={(ev) => { ev.stopPropagation(); handleDelete(e.id); }} className="font-pixel text-accent-red hover:opacity-70 flex-shrink-0" style={{ fontSize: '8px' }}>✕</button>
+                    <button onClick={(ev) => { ev.stopPropagation(); handleDelete(e.id); }} className="font-pixel text-accent-red hover:opacity-70 flex-shrink-0" style={{ fontSize: '8px' }}><E e="✕" /></button>
                   </div>
                 </PixelPanel>
               </motion.div>

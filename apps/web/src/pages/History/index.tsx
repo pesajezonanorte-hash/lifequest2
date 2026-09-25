@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, 
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { fetchHistory, fetchDayDetail } from '../../services/history.service';
 import type { HistorySummary, DayDetail } from '../../services/history.service';
+import { E } from '@/components/ui/glyphs';
 
 const CATEGORY_COLORS: Record<string, string> = {
   FITNESS: '#5c5c64', HEALTH: '#8a8a92', FINANCE: '#a8871e',
@@ -72,7 +73,7 @@ export default function HistoryPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>📊 HISTORIAL DE AVENTURAS</h1>
+        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="📊" /> HISTORIAL DE AVENTURAS</h1>
         <p className="font-vt text-text-secondary text-base">Los últimos 30 días de tu épica</p>
       </div>
 
@@ -95,7 +96,7 @@ export default function HistoryPage() {
 
       {/* View toggle */}
       <div className="flex gap-2">
-        {[{ key: 'calendar', label: '📅 Calendario' }, { key: 'charts', label: '📈 Gráficas' }].map(({ key, label }) => (
+        {[{ key: 'calendar', label: ' Calendario' }, { key: 'charts', label: ' Gráficas' }].map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setView(key as 'calendar' | 'charts')}
@@ -172,14 +173,14 @@ export default function HistoryPage() {
               </p>
               <div className="flex gap-4 mb-3">
                 <span className="font-vt text-accent-gold text-base">+{dayDetail.totalXp} XP</span>
-                <span className="font-vt text-yellow-400 text-base">💰{dayDetail.totalGold}</span>
+                <span className="font-vt text-yellow-400 text-base"><E e="💰" />{dayDetail.totalGold}</span>
               </div>
               {dayDetail.questsCompleted.length > 0 && (
                 <div className="mb-2">
                   <p className="font-pixel text-text-secondary mb-1" style={{ fontSize: '7px' }}>MISIONES COMPLETADAS</p>
                   {dayDetail.questsCompleted.map((q) => (
                     <div key={q.questId} className="flex items-center gap-2 py-0.5">
-                      <span className="text-accent-green">✓</span>
+                      <span className="text-accent-green"><E e="✓" /></span>
                       <span className="font-vt text-text-primary text-sm">{q.title}</span>
                       <span className="font-pixel text-accent-gold ml-auto" style={{ fontSize: '7px' }}>+{q.xpEarned}XP</span>
                     </div>
@@ -191,7 +192,7 @@ export default function HistoryPage() {
                   <p className="font-pixel text-text-secondary mb-1" style={{ fontSize: '7px' }}>HÁBITOS</p>
                   {dayDetail.habitLogs.map((l) => (
                     <div key={l.habitId} className="flex items-center gap-2 py-0.5">
-                      <span>{l.icon}</span>
+                      <span><E e={l.icon} /></span>
                       <span className="font-vt text-text-primary text-sm">{l.title}</span>
                       <span className={`ml-auto font-vt text-sm ${l.status === 'completed' ? 'text-accent-green' : l.status === 'failed' ? 'text-accent-red' : 'text-yellow-400'}`}>
                         {l.status === 'completed' ? '✓' : l.status === 'failed' ? '✗' : '~'}

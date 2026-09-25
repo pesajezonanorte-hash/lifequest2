@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import { E } from '@/components/ui/glyphs';
 
 const CLASSES = [
   {
@@ -91,7 +92,7 @@ export function ClassSelectionModal({ onClose }: Props) {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="pixel-text text-xl text-yellow-300">⚡ Elige tu Clase</h2>
+                <h2 className="pixel-text text-xl text-yellow-300"><E e="⚡" /> Elige tu Clase</h2>
                 <p className="text-purple-300 font-mono text-sm mt-1">Has alcanzado el Nivel 10 — ¡es hora de especializarte!</p>
               </div>
 
@@ -107,7 +108,7 @@ export function ClassSelectionModal({ onClose }: Props) {
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-3xl">{c.emoji}</span>
+                      <span className="text-3xl"><E e={c.emoji} /></span>
                       <span className="font-bold text-white pixel-text text-sm">{c.name}</span>
                     </div>
                     <p className="text-xs text-gray-400 mb-1">{c.description}</p>
@@ -129,7 +130,7 @@ export function ClassSelectionModal({ onClose }: Props) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {loading ? '...' : '⚡ Confirmar Clase'}
+                  {loading ? '...' : <><E e="⚡" s={11} /> Confirmar Clase</>}
                 </motion.button>
               </div>
             </>

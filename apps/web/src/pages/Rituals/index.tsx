@@ -4,6 +4,7 @@ import { Plus, Sun, Moon, Zap, Play, CheckCircle2, ChevronRight, Loader2, Flame,
 import { useToastStore } from '../../hooks/useToast';
 import * as ritualsService from '../../services/rituals.service';
 import type { Ritual, RitualStep } from '../../services/rituals.service';
+import { E } from '@/components/ui/glyphs';
 
 const TYPE_CONFIG = {
   morning: { label: 'Mañana',  color: 'var(--accent-gold)',  icon: <Sun size={16} /> },
@@ -100,7 +101,7 @@ function ExecutionMode({ ritual, onClose, onComplete }: {
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
         <div>
-          <span className="text-lg mr-2">{ritual.icon}</span>
+          <span className="text-lg mr-2"><E e={ritual.icon} /></span>
           <span className="font-semibold text-[var(--text-primary)]">{ritual.name}</span>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl hover:bg-[var(--bg-panel-light)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
@@ -157,7 +158,7 @@ function ExecutionMode({ ritual, onClose, onComplete }: {
           )}
 
           {timer === null && (
-            <div className="text-5xl">✅</div>
+            <div className="text-5xl"><E e="✅" /></div>
           )}
 
           <p className="text-sm text-[var(--text-muted)]">
@@ -226,7 +227,7 @@ function RitualCard({ ritual, onRefresh }: { ritual: Ritual; onRefresh: () => vo
             className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"
             style={{ background: cfg.color + '22' }}
           >
-            {ritual.icon}
+            <E e={ritual.icon} />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -357,7 +358,7 @@ export default function RitualsPage() {
         </div>
       ) : rituals.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16 space-y-4">
-          <div className="text-6xl">⚡</div>
+          <div className="text-6xl"><E e="⚡" /></div>
           <h3 className="text-lg font-semibold text-[var(--text-primary)]">Sin rituales todavía</h3>
           <p className="text-sm text-[var(--text-secondary)] max-w-xs mx-auto">
             Los rituales son secuencias de pasos que ejecutas cada día. Empieza con los presets o crea los tuyos.

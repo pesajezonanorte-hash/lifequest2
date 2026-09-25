@@ -5,6 +5,7 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import { useToastStore } from '../../hooks/useToast';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,9 +26,9 @@ interface PresenceCheckin {
 }
 
 const TABS = [
-  { key: 'care',     label: '🧴 Cuidado Personal' },
-  { key: 'style',    label: '👔 Estilo' },
-  { key: 'presence', label: '💫 Presencia' },
+  { key: 'care',     label: ' Cuidado Personal' },
+  { key: 'style',    label: ' Estilo' },
+  { key: 'presence', label: ' Presencia' },
 ] as const;
 
 const CATEGORIES = ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories'];
@@ -37,7 +38,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 const TIME_OF_DAY = ['morning', 'night', 'weekly', 'custom'];
 const TIME_LABELS: Record<string, string> = {
-  morning: '🌅 Mañana', night: '🌙 Noche', weekly: '📅 Semanal', custom: '⚡ Custom',
+  morning: ' Mañana', night: ' Noche', weekly: ' Semanal', custom: ' Custom',
 };
 
 // ─── Care Section ────────────────────────────────────────────────────────────
@@ -110,7 +111,7 @@ function CareSection() {
                   background: form.timeOfDay === t ? 'color-mix(in oklab, var(--primary) 14%, transparent)' : 'var(--bg-panel)',
                   color: form.timeOfDay === t ? 'var(--primary)' : 'var(--text-2)',
                 }}
-              >{TIME_LABELS[t]}</button>
+              ><E e={TIME_LABELS[t]} /></button>
             ))}
           </div>
           <p className="text-xs font-semibold" style={{ color: 'var(--text-2)' }}>Pasos:</p>
@@ -138,7 +139,7 @@ function CareSection() {
         <p className="text-sm text-center" style={{ color: 'var(--text-muted)' }}>Cargando...</p>
       ) : routines.length === 0 ? (
         <PixelPanel className="p-8 text-center">
-          <p className="text-3xl mb-2">🧴</p>
+          <p className="text-3xl mb-2"><E e="🧴" /></p>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Sin rutinas aún. ¡Crea tu primera!</p>
         </PixelPanel>
       ) : (
@@ -150,11 +151,11 @@ function CareSection() {
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm">{r.name}</span>
                     <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-soft)', color: 'var(--text-2)' }}>
-                      {TIME_LABELS[r.timeOfDay]}
+                      <E e={TIME_LABELS[r.timeOfDay]} />
                     </span>
                   </div>
                   {r.currentStreak > 0 && (
-                    <p className="text-xs mt-1" style={{ color: 'var(--c-gold)' }}>🔥 {r.currentStreak} días de racha</p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--c-gold)' }}><E e="🔥" /> {r.currentStreak} días de racha</p>
                   )}
                   {r.steps.length > 0 && (
                     <div className="mt-2 space-y-1">
@@ -243,7 +244,7 @@ function StyleSection() {
               border: `1px solid ${activeCategory === c ? 'var(--primary)' : 'var(--border)'}`,
               background: activeCategory === c ? 'color-mix(in oklab, var(--primary) 14%, transparent)' : 'var(--bg-panel)',
               color: activeCategory === c ? 'var(--primary)' : 'var(--text-2)',
-            }}>{CATEGORY_LABELS[c]}</button>
+            }}><E e={CATEGORY_LABELS[c]} /></button>
         ))}
       </div>
 
@@ -266,7 +267,7 @@ function StyleSection() {
           <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
             className="w-full px-3 py-2 rounded-lg text-sm"
             style={{ background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text)' }}>
-            {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>)}
+            {CATEGORIES.map(c => <option key={c} value={c}><E e={CATEGORY_LABELS[c]} /></option>)}
           </select>
           <div className="flex gap-2">
             <PixelButton variant="primary" onClick={handleCreate} disabled={!form.name}>Añadir</PixelButton>
@@ -294,7 +295,7 @@ function StyleSection() {
                   <Trash2 size={12} />
                 </button>
               </div>
-              <p className="text-xs" style={{ color: 'var(--text-2)' }}>{CATEGORY_LABELS[item.category]}</p>
+              <p className="text-xs" style={{ color: 'var(--text-2)' }}><E e={CATEGORY_LABELS[item.category]} /></p>
               {item.brand && <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.brand}</p>}
               <div className="flex items-center justify-between">
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>

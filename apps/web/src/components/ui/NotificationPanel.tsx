@@ -4,6 +4,7 @@ import { Bell, Check, CheckCheck, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as notifService from '../../services/notification.service';
 import type { InAppNotification } from '../../services/notification.service';
+import { E } from '@/components/ui/glyphs';
 
 function timeAgo(iso: string): string {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -165,7 +166,7 @@ export function NotificationBell() {
                     >
                       <div className="flex items-start gap-3">
                         <span className="text-lg flex-shrink-0 mt-0.5">
-                          {n.icon ?? TYPE_ICON[n.type] ?? '📢'}
+                          <E e={n.icon ?? TYPE_ICON[n.type] ?? '📢'} />
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className={`text-xs font-semibold truncate ${!n.isRead ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>

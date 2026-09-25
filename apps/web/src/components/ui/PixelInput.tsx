@@ -1,5 +1,6 @@
 import { forwardRef, useState, type InputHTMLAttributes } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { E } from '@/components/ui/glyphs';
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -75,7 +76,7 @@ export const PixelInput = forwardRef<HTMLInputElement, Props>(
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
-              ✓
+              <E e="✓" />
             </motion.span>
           )}
         </motion.div>
@@ -88,7 +89,7 @@ export const PixelInput = forwardRef<HTMLInputElement, Props>(
               exit={{ opacity: 0, y: -6 }}
               transition={{ type: 'spring', stiffness: 280, damping: 20 }}
             >
-              <span>✕</span> {error}
+              <span><E e="✕" /></span> {error}
             </motion.p>
           )}
         </AnimatePresence>

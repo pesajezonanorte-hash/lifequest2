@@ -6,6 +6,7 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import type { ShopItem, InventoryItem } from '@lifequest/shared';
 import * as shopService from '../../services/shop.service';
+import { E } from '@/components/ui/glyphs';
 
 const THEME_PREVIEW_COLORS: Record<string, { bg: string; card: string; accent: string }> = {
   aurora:  { bg: '#131316', card: '#1a1a1e', accent: '#d9b44a' },
@@ -27,14 +28,14 @@ const THEME_NAME_TO_ID: Record<string, string> = {
 };
 
 const TYPE_TABS = [
-  { key: '', label: '🛒 Todo' },
-  { key: 'HAT', label: '🎩 Sombreros' },
-  { key: 'AURA', label: '✨ Auras' },
-  { key: 'FRAME', label: '🖼️ Marcos' },
-  { key: 'THEME', label: '🎨 Temas' },
-  { key: 'POWERUP', label: '⚡ Power-ups' },
-  { key: 'PASS', label: '🎭 Pases' },
-  { key: 'COSMETIC', label: '👗 Cosméticos' },
+  { key: '', label: ' Todo' },
+  { key: 'HAT', label: ' Sombreros' },
+  { key: 'AURA', label: ' Auras' },
+  { key: 'FRAME', label: ' Marcos' },
+  { key: 'THEME', label: ' Temas' },
+  { key: 'POWERUP', label: ' Power-ups' },
+  { key: 'PASS', label: ' Pases' },
+  { key: 'COSMETIC', label: ' Cosméticos' },
 ] as const;
 
 const TYPE_LABELS: Record<string, string> = {
@@ -53,15 +54,15 @@ function ConfirmPurchaseModal({ item, userGold, onConfirm, onClose }: { item: Sh
         <div className="text-center space-y-2">
           <p className="font-vt text-text-primary text-2xl">{item.name}</p>
           <p className="font-vt text-text-secondary text-base">{item.description}</p>
-          <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>TIPO: {TYPE_LABELS[item.type]}</p>
+          <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>TIPO: <E e={TYPE_LABELS[item.type]} /></p>
         </div>
         <PixelPanel className="p-3 flex justify-between items-center">
           <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>TU GOLD</p>
-          <p className={`font-pixel ${canAfford ? 'text-accent-gold' : 'text-accent-red'}`} style={{ fontSize: '12px' }}>🪙 {userGold}</p>
+          <p className={`font-pixel ${canAfford ? 'text-accent-gold' : 'text-accent-red'}`} style={{ fontSize: '12px' }}><E e="🪙" /> {userGold}</p>
         </PixelPanel>
         <PixelPanel className="p-3 flex justify-between items-center">
           <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>PRECIO</p>
-          <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>🪙 {item.cost}</p>
+          <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}><E e="🪙" /> {item.cost}</p>
         </PixelPanel>
         {!canAfford && <p className="font-pixel text-accent-red text-center" style={{ fontSize: '8px' }}>GOLD INSUFICIENTE</p>}
         <div className="flex gap-2">
@@ -127,7 +128,7 @@ export default function ShopPage() {
       updateUser(result.user as never);
       setInventory(prev => [...prev, result.inventoryItem]);
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, owned: true } : i));
-      toast.success(`¡${item.name} comprado! 🎉`);
+      toast.success(`¡${item.name} comprado! `);
     } catch (err) {
       if (user) updateUser({ ...user, gold: user.gold + item.cost }); // rollback
       toast.error(err instanceof Error ? err.message : 'Error al comprar');
@@ -156,7 +157,7 @@ export default function ShopPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>🛒 EL MERCADO</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="🛒" /> EL MERCADO</h1>
           <p className="font-vt text-text-secondary text-base">Gasta tu Gold sabiamente, héroe</p>
         </div>
         <div className="flex items-center gap-2 bg-bg-panel border-2 border-border-pixel px-3 py-2">
@@ -168,14 +169,14 @@ export default function ShopPage() {
             className="font-pixel text-accent-gold"
             style={{ fontSize: '14px' }}
           >
-            🪙 {user?.gold ?? 0}
+            <E e="🪙" /> {user?.gold ?? 0}
           </motion.span>
         </div>
       </div>
 
       {/* Shop / Inventory tabs */}
       <div className="flex gap-1">
-        {[['shop', '🛒 Tienda'], ['inventory', '🎒 Inventario']].map(([key, label]) => (
+        {[['shop', ' Tienda'], ['inventory', ' Inventario']].map(([key, label]) => (
           <button key={key} onClick={() => setShopTab(key as 'shop' | 'inventory')} className={`px-4 py-2 border-2 font-pixel transition-all ${shopTab === key ? 'border-accent-gold bg-accent-gold text-bg-deep' : 'border-border-pixel text-text-secondary'}`} style={{ fontSize: '8px' }}>
             {label}
           </button>
@@ -220,20 +221,20 @@ export default function ShopPage() {
                               })()}
                               <p className="font-vt text-text-primary text-xl">{item.name}</p>
                             </div>
-                            <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>{TYPE_LABELS[item.type]}</p>
+                            <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}><E e={TYPE_LABELS[item.type]} /></p>
                           </div>
                           {isLocked ? (
                             <div className="text-right">
-                              <p className="text-2xl">🔒</p>
+                              <p className="text-2xl"><E e="🔒" /></p>
                               <p className="font-pixel text-text-secondary" style={{ fontSize: '6px' }}>Lv.{item.levelRequired}</p>
                             </div>
                           ) : isOwned ? (
-                            <span className="font-pixel text-accent-green" style={{ fontSize: '8px' }}>✓ OWNED</span>
+                            <span className="font-pixel text-accent-green" style={{ fontSize: '8px' }}><E e="✓" /> OWNED</span>
                           ) : null}
                         </div>
                         {item.description && <p className="font-vt text-text-secondary text-base">{item.description}</p>}
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>🪙 {item.cost}</p>
+                          <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}><E e="🪙" /> {item.cost}</p>
                           <div className="flex gap-1">
                             {item.type === 'THEME' && !isLocked && (() => {
                               const tid = THEME_NAME_TO_ID[item.name] ?? item.name.toLowerCase();
@@ -245,7 +246,7 @@ export default function ShopPage() {
                                   className={`font-pixel border-2 px-2 py-1.5 transition-colors ${isPreviewing ? 'border-accent-green text-accent-green' : 'border-border-pixel text-text-secondary hover:border-text-secondary'}`}
                                   style={{ fontSize: '7px' }}
                                 >
-                                  {isPreviewing ? '↩ Restaurar' : '👁 Preview'}
+                                  {isPreviewing ? <><E e="↩" s={11} /> Restaurar</> : <><E e="👁" s={11} /> Preview</>}
                                 </motion.button>
                               );
                             })()}
@@ -276,7 +277,7 @@ export default function ShopPage() {
         <div className="space-y-3">
           {inventory.length === 0 ? (
             <PixelPanel className="p-8 text-center">
-              <p className="text-4xl mb-2">🎒</p>
+              <p className="text-4xl mb-2"><E e="🎒" /></p>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>INVENTARIO VACÍO</p>
               <p className="font-vt text-text-secondary text-base mt-1">Ve a la tienda y consigue algo genial</p>
             </PixelPanel>
@@ -287,7 +288,7 @@ export default function ShopPage() {
                   <PixelPanel className="p-3 flex items-center justify-between gap-3">
                     <div className="flex-1">
                       <p className="font-vt text-text-primary text-xl">{inv.shopItem.name}</p>
-                      <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>{TYPE_LABELS[inv.shopItem.type]}</p>
+                      <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}><E e={TYPE_LABELS[inv.shopItem.type]} /></p>
                       {inv.expiresAt && (
                         <p className="font-pixel text-accent-gold" style={{ fontSize: '7px' }}>
                           Expira: {new Date(inv.expiresAt).toLocaleString('es-CO')}

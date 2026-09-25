@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   sleepAvg7d: number;
@@ -16,7 +17,7 @@ export function QuickStatsWidget({ sleepAvg7d, monthBalance, lastWorkoutDaysAgo 
       label: 'Último entrenamiento',
       value: lastWorkoutDaysAgo === null
         ? 'Sin entrenar'
-        : lastWorkoutDaysAgo === 0 ? '¡Hoy! 💪'
+        : lastWorkoutDaysAgo === 0 ? '¡Hoy! '
         : lastWorkoutDaysAgo === 1 ? 'Ayer'
         : `hace ${lastWorkoutDaysAgo} días`,
       color: lastWorkoutDaysAgo !== null && lastWorkoutDaysAgo <= 2 ? 'text-accent-green' : 'text-accent-red',
@@ -51,7 +52,7 @@ export function QuickStatsWidget({ sleepAvg7d, monthBalance, lastWorkoutDaysAgo 
           <span className="absolute bottom-0 left-0 w-1.5 h-1.5 bg-border-pixel" />
           <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-border-pixel" />
 
-          <div className="text-2xl mb-1">{stat.icon}</div>
+          <div className="text-2xl mb-1"><E e={stat.icon} /></div>
           <p className={`font-vt ${stat.color} text-xl leading-tight`}>{stat.value}</p>
           <p className="font-pixel text-text-secondary mt-1" style={{ fontSize: '6px', lineHeight: 1.5 }}>
             {stat.label}

@@ -6,6 +6,7 @@ import {
 } from '../../services/social.service';
 import { useAuthStore } from '../../store/authStore';
 import { AvatarDisplay } from '../../components/character/AvatarDisplay';
+import { E } from '@/components/ui/glyphs';
 
 interface GuildMemberUser {
   id: string;
@@ -193,7 +194,7 @@ export default function GuildPage() {
                     form.emblem === e ? 'border-accent-gold bg-bg-panel' : 'border-border-pixel hover:border-text-dim'
                   }`}
                 >
-                  {EMBLEM_ICONS[e]}
+                  <E e={EMBLEM_ICONS[e]} />
                 </button>
               ))}
             </div>
@@ -243,7 +244,7 @@ export default function GuildPage() {
       {/* Guild header */}
       <div className="bg-bg-panel border-4 border-border-pixel p-4 mb-4">
         <div className="flex items-center gap-4">
-          <div className="text-4xl">{EMBLEM_ICONS[guild.emblem] ?? '🛡️'}</div>
+          <div className="text-4xl"><E e={EMBLEM_ICONS[guild.emblem] ?? '🛡️'} /></div>
           <div className="flex-1">
             <div className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>{guild.name}</div>
             {guild.description && <div className="font-vt text-text-dim text-sm mt-1">{guild.description}</div>}
@@ -288,9 +289,9 @@ export default function GuildPage() {
                 <div className="flex-1 min-w-0">
                   <div className={`font-pixel truncate ${m.userId === user?.id ? 'text-accent-gold' : 'text-text-primary'}`} style={{ fontSize: '8px' }}>
                     {m.user.displayName}
-                    {m.role === 'LEADER' && ' 👑'}
+                    {m.role === 'LEADER' && <E e="👑" s={11} />}
                   </div>
-                  <div className="font-vt text-text-dim" style={{ fontSize: '10px' }}>Nv.{m.user.level} · 🔥{m.user.currentStreak}</div>
+                  <div className="font-vt text-text-dim" style={{ fontSize: '10px' }}>Nv.{m.user.level} · <E e="🔥" />{m.user.currentStreak}</div>
                 </div>
               </div>
             ))}

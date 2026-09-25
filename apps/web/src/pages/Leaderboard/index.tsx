@@ -4,6 +4,7 @@ import { Trophy, Flame, Dumbbell, PiggyBank, Users, Globe, UserPlus, Check, X } 
 import { getLeaderboard, sendFriendRequest, getFriends, getPendingRequests, respondFriendRequest, removeFriend } from '../../services/social.service';
 import { useAuthStore } from '../../store/authStore';
 import { AvatarDisplay } from '../../components/character/AvatarDisplay';
+import { E } from '@/components/ui/glyphs';
 
 type Category = 'xp' | 'streak' | 'gym' | 'savings';
 
@@ -243,7 +244,7 @@ export default function LeaderboardPage() {
                       <AvatarDisplay avatarConfig={f.friend.avatarConfig} size={32} animate="idle" />
                       <div className="flex-1 min-w-0">
                         <p className="font-pixel text-text-primary truncate" style={{ fontSize: '9px' }}>{f.friend.displayName}</p>
-                        <p className="font-vt text-text-dim text-xs">@{f.friend.username} · Nv.{f.friend.level} · 🔥{f.friend.currentStreak}</p>
+                        <p className="font-vt text-text-dim text-xs">@{f.friend.username} · Nv.{f.friend.level} · <E e="🔥" />{f.friend.currentStreak}</p>
                       </div>
                       <button
                         onClick={() => handleRemove(f.friendshipId)}
@@ -322,7 +323,7 @@ export default function LeaderboardPage() {
                   {/* Rank */}
                   <div className="w-8 text-center">
                     {i < 3 ? (
-                      <span style={{ fontSize: '18px' }}>{RANK_EMOJI[i]}</span>
+                      <span style={{ fontSize: '18px' }}><E e={RANK_EMOJI[i]} /></span>
                     ) : (
                       <span
                         className="font-pixel"

@@ -8,6 +8,7 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import { xpProgressPercent } from '../../lib/xp';
 import { getLevelTitle } from '../../lib/gameProgress';
+import { E } from '@/components/ui/glyphs';
 
 const EQUIPMENT_SLOTS = [
   { key: 'hat', icon: '🎩', label: 'Sombrero', userField: 'equippedHat' },
@@ -42,7 +43,7 @@ export default function CharacterPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-xl font-bold text-[var(--text-primary)]">
-          🧙 Ficha del héroe
+          <E e="🧙" /> Ficha del héroe
         </h1>
       </motion.div>
 
@@ -130,12 +131,12 @@ export default function CharacterPage() {
 
           {/* Racha */}
           <div className="flex items-center gap-2 bg-[var(--bg-panel-light)] border border-[var(--border)] rounded-lg px-3 py-2 w-full justify-center">
-            <span className="text-xl">🔥</span>
+            <span className="text-xl"><E e="🔥" /></span>
             <span className="text-sm font-medium text-[var(--text-primary)]">{user.currentStreak} días de racha</span>
           </div>
 
           <PixelButton variant="secondary" onClick={() => setCustomizerOpen(true)} className="w-full text-xs">
-            ✏️ Cambiar apariencia
+            <E e="✏" /> Cambiar apariencia
           </PixelButton>
         </PixelPanel>
 
@@ -176,7 +177,7 @@ export default function CharacterPage() {
 
           <div className="border-t border-[var(--border)] pt-3">
             <div className="flex items-center justify-center gap-2 bg-[var(--bg-panel-light)] border border-[var(--border)] rounded-lg px-4 py-2">
-              <span className="text-[var(--accent-gold)] text-2xl">💰</span>
+              <span className="text-[var(--accent-gold)] text-2xl"><E e="💰" /></span>
               <span className="text-xl font-bold text-[var(--accent-gold)]">{user.gold.toLocaleString()}</span>
               <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">GOLD</span>
             </div>
@@ -199,7 +200,7 @@ export default function CharacterPage() {
                   whileHover={{ x: 3 }}
                   className={`flex items-center gap-3 border rounded-lg bg-[var(--bg-panel-light)] p-2 cursor-pointer transition-colors group ${isEquipped ? 'border-[var(--accent-gold)]' : 'border-[var(--border)] hover:border-[var(--accent-gold)]'}`}
                 >
-                  <span className="text-xl w-8 text-center">{slot.icon}</span>
+                  <span className="text-xl w-8 text-center"><E e={slot.icon} /></span>
                   <div className="flex-1">
                     <p className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                       {slot.label}
@@ -208,14 +209,14 @@ export default function CharacterPage() {
                       {isEquipped ? equippedKey!.replace(/_/g, ' ') : '— vacío —'}
                     </p>
                   </div>
-                  {isEquipped && <span className="text-xs text-[var(--accent-green)]">✓</span>}
+                  {isEquipped && <span className="text-xs text-[var(--accent-green)]"><E e="✓" /></span>}
                 </motion.div>
               );
             })}
           </div>
 
           <p className="text-xs text-[var(--text-secondary)] text-center mt-4">
-            Compra items en el mercado para equiparlos 🛒
+            Compra items en el mercado para equiparlos <E e="🛒" />
           </p>
 
           {/* Logros recientes */}
@@ -228,7 +229,7 @@ export default function CharacterPage() {
                 { icon: '⚔️', title: 'Primera Misión', desc: 'Completaste tu primera misión' },
               ].map((ach) => (
                 <div key={ach.title} className="flex items-center gap-2 bg-[var(--bg-panel-light)] border border-[var(--border)] rounded-lg px-2 py-1.5">
-                  <span>{ach.icon}</span>
+                  <span><E e={ach.icon} /></span>
                   <div>
                     <p className="text-xs font-semibold text-[var(--accent-gold)]">{ach.title}</p>
                     <p className="text-xs text-[var(--text-secondary)]">{ach.desc}</p>

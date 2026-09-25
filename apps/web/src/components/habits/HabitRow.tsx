@@ -5,6 +5,7 @@ import { StreakFlame } from './StreakFlame';
 import { HabitHeatmap } from './HabitHeatmap';
 import { HabitCompleteButton } from './HabitCompleteButton';
 import { fetchHabitHeatmap } from '../../services/habit.service';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   habit: Habit;
@@ -47,7 +48,7 @@ export const HabitRow = memo(function HabitRow({ habit, onLog, onEdit, onDelete 
           className="text-2xl flex-shrink-0 w-10 h-10 flex items-center justify-center hover:scale-110 transition-transform"
           title="Ver detalles"
         >
-          {habit.icon}
+          <E e={habit.icon} />
         </button>
 
         {/* Info */}
@@ -78,13 +79,13 @@ export const HabitRow = memo(function HabitRow({ habit, onLog, onEdit, onDelete 
             onClick={() => onEdit(habit)}
             className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-gold)] px-1 transition-colors"
           >
-            ✏️
+            <E e="✏" />
           </button>
           <button
             onClick={() => onDelete(habit)}
             className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-red)] px-1 transition-colors"
           >
-            🗑️
+            <E e="🗑" />
           </button>
         </div>
       </div>

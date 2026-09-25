@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { PixelPanel } from '../../components/ui/PixelPanel';
+import { E } from '@/components/ui/glyphs';
 
 interface QA { q: string; a: string }
 
@@ -44,7 +45,7 @@ const FAQ: QA[] = [
   },
   {
     q: '¿Cómo reporto un bug o sugiero algo?',
-    a: 'Usa el botón "💬 Feedback" en la esquina inferior derecha o en Settings. Tu mensaje llega directo al equipo de LifeQuest.',
+    a: 'Usa el botón " Feedback" en la esquina inferior derecha o en Settings. Tu mensaje llega directo al equipo de LifeQuest.',
   },
 ];
 
@@ -80,7 +81,7 @@ export default function FAQPage() {
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
       <div>
-        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>❓ AYUDA Y PREGUNTAS</h1>
+        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="❓" /> AYUDA Y PREGUNTAS</h1>
         <p className="font-vt text-text-secondary text-base">Todo lo que necesitas saber para empezar</p>
       </div>
 
@@ -92,7 +93,7 @@ export default function FAQPage() {
 
       <PixelPanel className="p-4 text-center mt-6">
         <p className="font-vt text-[var(--text-secondary)] text-base">
-          ¿Algo que no resolví? Usa el botón <span className="text-[var(--accent-gold)]">💬 Feedback</span> para escribirnos.
+          ¿Algo que no resolví? Usa el botón <span className="text-[var(--accent-gold)]"><E e="💬" /> Feedback</span> para escribirnos.
         </p>
       </PixelPanel>
     </div>

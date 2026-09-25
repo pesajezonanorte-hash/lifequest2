@@ -8,6 +8,7 @@ import { updateAvatar, updateProfile } from '../../services/user.service';
 import { useAuthStore } from '../../store/authStore';
 import { useToast } from '../../hooks/useToast';
 import type { AvatarConfig, HairStyle, Accessory, Expression } from '@lifequest/shared';
+import { E } from '@/components/ui/glyphs';
 
 const HAIR_COLORS  = ['#2c1810','#4a3728','#8b4513','#d4a017','#c8a2c8','#708090','#1a1a1a','#ff6b6b','#e8c090','#ffffff','#3d5a80','#c0392b'];
 const SKIN_COLORS  = [
@@ -129,7 +130,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
     try {
       const updatedUser = await updateAvatar(config);
       updateUser(updatedUser);
-      toast.success('¡Avatar pixel guardado! ✨');
+      toast.success('¡Avatar pixel guardado! ');
       onClose();
     } catch {
       toast.error('Error al guardar el avatar. Intenta de nuevo.');
@@ -150,7 +151,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
     try {
       const compressedBase64 = await compressAndResizeImage(file);
       setPhotoUrl(compressedBase64);
-      toast.success('Imagen seleccionada correctamente 📷');
+      toast.success('Imagen seleccionada correctamente ');
     } catch {
       toast.error('Error al procesar la imagen.');
     }
@@ -160,7 +161,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
     if (!urlInput.trim()) return;
     setPhotoUrl(urlInput.trim());
     setUrlInput('');
-    toast.success('Vista previa actualizada 🌐');
+    toast.success('Vista previa actualizada ');
   };
 
   const handleSavePhotoProfile = async () => {
@@ -168,7 +169,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
     try {
       const updatedUser = await updateProfile({ avatarUrl: photoUrl.trim() || null });
       updateUser(updatedUser);
-      toast.success(photoUrl ? '¡Foto de perfil actualizada! 📷' : 'Foto de perfil eliminada.');
+      toast.success(photoUrl ? '¡Foto de perfil actualizada! ' : 'Foto de perfil eliminada.');
       onClose();
     } catch {
       toast.error('Error al actualizar foto de perfil.');
@@ -183,7 +184,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
       setPhotoUrl('');
       const updatedUser = await updateProfile({ avatarUrl: null });
       updateUser(updatedUser);
-      toast.success('Foto eliminada, se usará tu avatar pixel ✨');
+      toast.success('Foto eliminada, se usará tu avatar pixel ');
     } catch {
       toast.error('Error al quitar foto.');
     } finally {
@@ -212,7 +213,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
               {/* Header */}
               <motion.div className="flex items-center justify-between p-4 border-b-2 border-[var(--accent-gold)]/30 bg-gradient-to-r from-[var(--accent-gold)]/10 to-transparent">
                 <h2 className="font-pixel text-[var(--accent-gold)] tracking-widest text-xs flex items-center gap-2">
-                  <span>✨ APARIENCIA & FOTO ✨</span>
+                  <span><E e="✨" /> APARIENCIA & FOTO <E e="✨" /></span>
                 </h2>
                 <motion.button
                   onClick={onClose}
@@ -349,7 +350,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
                         disabled={saving}
                         className="w-full text-xs py-2"
                       >
-                        {saving ? 'Guardando...' : '💾 Guardar Foto de Perfil'}
+                        {saving ? 'Guardando...' : <><E e="💾" s={11} /> Guardar Foto de Perfil</>}
                       </PixelButton>
 
                       {user?.avatarUrl && (
@@ -396,7 +397,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
                                 : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
                             }`}
                           >
-                            {gender === 'male' ? '♂️ Masculino' : '♀️ Femenino'}
+                            {gender === 'male' ? <><E e="♂" s={11} /> Masculino</> : <><E e="♀" s={11} /> Femenino</>}
                           </motion.button>
                         ))}
                       </div>
@@ -505,7 +506,7 @@ export function AvatarCustomizer({ isOpen, onClose }: Props) {
                         CANCELAR
                       </PixelButton>
                       <PixelButton variant="primary" onClick={handleSavePixelAvatar} disabled={saving} className="flex-1 text-xs">
-                        {saving ? 'GUARDANDO...' : 'GUARDAR ✨'}
+                        {saving ? 'GUARDANDO...' : <><E e="✨" s={11} /> GUARDAR</>}
                       </PixelButton>
                     </div>
                   </div>

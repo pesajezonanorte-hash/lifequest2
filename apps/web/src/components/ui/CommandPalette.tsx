@@ -7,6 +7,7 @@ import { useUIStore } from '../../store/uiStore';
 import { logHabit } from '../../services/habit.service';
 import { refreshUser } from '../../hooks/useAuth';
 import { logBodyWeight } from '../../services/gym2.service';
+import { E } from '@/components/ui/glyphs';
 
 interface Cmd {
   id: string;
@@ -185,7 +186,7 @@ export function CommandPalette() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.03 }}
                     >
-                      <span className="text-xl w-7 flex-shrink-0">{cmd.icon}</span>
+                      <span className="text-xl w-7 flex-shrink-0"><E e={cmd.icon} /></span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-[var(--text-primary)] font-mono">{cmd.label}</p>
                         {cmd.sublabel && <p className="text-xs text-[var(--text-secondary)]">{cmd.sublabel}</p>}

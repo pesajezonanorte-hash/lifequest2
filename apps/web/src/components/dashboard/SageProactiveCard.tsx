@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 interface ProactiveNote {
   id: string;
@@ -63,7 +64,7 @@ export function SageProactiveCard() {
         </span>
       )}
       <div className="flex items-start gap-3 pr-10">
-        <span className="text-2xl flex-shrink-0 mt-0.5">{note.icon}</span>
+        <span className="text-2xl flex-shrink-0 mt-0.5"><E e={note.icon} /></span>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: style.badge }}>
             El Sabio dice
@@ -78,7 +79,7 @@ export function SageProactiveCard() {
         className="mt-3 text-xs font-medium"
         style={{ color: 'var(--text-muted)' }}
       >
-        ✓ Entendido
+        <E e="✓" /> Entendido
       </button>
     </motion.div>
   );

@@ -3,16 +3,17 @@ import { motion } from 'framer-motion';
 import { PixelButton } from '../ui/PixelButton';
 import { PixelInput } from '../ui/PixelInput';
 import { PixelPanel } from '../ui/PixelPanel';
+import { E } from '@/components/ui/glyphs';
 
 const CATEGORIES = [
-  { id: 'FITNESS', label: '💪 Fitness' },
-  { id: 'FINANCE', label: '💰 Finanzas' },
-  { id: 'LEARNING', label: '📚 Aprendizaje' },
-  { id: 'HEALTH', label: '🍎 Salud' },
-  { id: 'LOVE', label: '💖 Relaciones' },
-  { id: 'PERSONAL', label: '🧘 Personal' },
-  { id: 'CREATIVE', label: '🎨 Creativo' },
-  { id: 'SOCIAL', label: '🤝 Social' },
+  { id: 'FITNESS', label: ' Fitness' },
+  { id: 'FINANCE', label: ' Finanzas' },
+  { id: 'LEARNING', label: ' Aprendizaje' },
+  { id: 'HEALTH', label: ' Salud' },
+  { id: 'LOVE', label: ' Relaciones' },
+  { id: 'PERSONAL', label: ' Personal' },
+  { id: 'CREATIVE', label: ' Creativo' },
+  { id: 'SOCIAL', label: ' Social' },
 ];
 
 interface Props {
@@ -56,7 +57,7 @@ export function FirstQuestStep({ onNext, onBack }: Props) {
             maxLength={120}
           />
           <p className="font-vt text-text-secondary text-sm mt-1">
-            Esta será tu Misión Principal (500 XP de recompensa 🏆)
+            Esta será tu Misión Principal (500 XP de recompensa <E e="🏆" />)
           </p>
         </div>
 
@@ -103,7 +104,7 @@ export function FirstQuestStep({ onNext, onBack }: Props) {
           disabled={!canContinue}
           className="flex-1"
         >
-          ¡FORJAR MISIÓN! ⚔️
+          ¡FORJAR MISIÓN! <E e="⚔" />
         </PixelButton>
       </div>
     </motion.div>

@@ -8,6 +8,7 @@ import { DifficultyBadge } from './DifficultyBadge';
 import { DeadlineBadge } from './DeadlineBadge';
 import { PixelButton } from '../ui/PixelButton';
 import { toggleSubObjective } from '../../services/quest.service';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   quest: Quest | null;
@@ -70,7 +71,7 @@ export function QuestModal({ quest, onClose, onComplete, onEdit, onArchive, onFa
                 onClick={onClose}
                 className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xl leading-none flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--bg-panel-light)] transition-colors"
               >
-                ✕
+                <E e="✕" />
               </button>
             </div>
           </div>
@@ -142,17 +143,17 @@ export function QuestModal({ quest, onClose, onComplete, onEdit, onArchive, onFa
                 className="w-full"
                 onClick={() => { onComplete(quest); onClose(); }}
               >
-                ⚔️ Completar misión
+                <E e="⚔" /> Completar misión
               </PixelButton>
               <div className="flex gap-2">
                 <PixelButton variant="secondary" className="flex-1" onClick={() => { onEdit(quest); onClose(); }}>
-                  ✏️ Editar
+                  <E e="✏" /> Editar
                 </PixelButton>
                 <PixelButton variant="danger" className="flex-1" onClick={() => { onFail(quest); onClose(); }}>
-                  💀 Fallar
+                  <E e="💀" /> Fallar
                 </PixelButton>
                 <PixelButton variant="ghost" className="flex-1" onClick={() => { onArchive(quest); onClose(); }}>
-                  📦 Archivar
+                  <E e="📦" /> Archivar
                 </PixelButton>
               </div>
             </div>

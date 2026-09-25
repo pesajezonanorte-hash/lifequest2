@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../lib/api';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { Skull, Trophy, Swords } from 'lucide-react';
+import { E } from '@/components/ui/glyphs';
 
 interface SeasonParticipant {
   userId: string;
@@ -284,7 +285,7 @@ export default function SeasonPage() {
                 className={`flex items-center gap-3 px-4 py-3 border-b border-border-pixel last:border-0 ${i === 0 ? 'bg-accent-gold/10' : ''}`}
               >
                 <span className="font-pixel text-accent-gold w-6 text-right" style={{ fontSize: '9px' }}>
-                  {i === 0 ? '👑' : `#${i + 1}`}
+                  {i === 0 ? <E e="👑" s={12} /> : `#${i + 1}`}
                 </span>
                 <Swords size={16} className={i === 0 ? 'text-[var(--accent-gold)]' : 'text-[var(--text-secondary)]'} />
                 <div className="flex-1">

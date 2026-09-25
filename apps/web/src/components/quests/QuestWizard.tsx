@@ -5,6 +5,7 @@ import { getOpenOrigin } from '@/lib/origin';
 import { PixelButton } from '../ui/PixelButton';
 import { PixelInput } from '../ui/PixelInput';
 import { CATEGORY_ICONS, CATEGORY_LABELS } from './CategoryIcon';
+import { E } from '@/components/ui/glyphs';
 
 const QUEST_TYPES = [
   { key: 'MAIN',   icon: '⚔️', label: 'Misión Principal',  desc: 'Tu gran aventura. Metas a largo plazo.', multiplier: 10 },
@@ -108,7 +109,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
               ))}
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xl w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--bg-panel)] transition-colors">✕</button>
+          <button onClick={onClose} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xl w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--bg-panel)] transition-colors"><E e="✕" /></button>
         </div>
 
         <div className="flex flex-col md:flex-row">
@@ -131,7 +132,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                           : 'border-[var(--border)] hover:border-[var(--text-secondary)]'
                       }`}
                     >
-                      <div className="text-2xl mb-1">{qt.icon}</div>
+                      <div className="text-2xl mb-1"><E e={qt.icon} /></div>
                       <p className="text-sm font-medium text-[var(--text-primary)]">{qt.label}</p>
                       <p className="text-xs text-[var(--text-secondary)] mt-1">{qt.desc}</p>
                     </button>
@@ -177,9 +178,9 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                             form.category === cat ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'
                           }`}
                         >
-                          <div>{CATEGORY_ICONS[cat]}</div>
+                          <div><E e={CATEGORY_ICONS[cat]} /></div>
                           <div className="text-xs text-[var(--text-secondary)] mt-0.5">
-                            {CATEGORY_LABELS[cat]}
+                            <E e={CATEGORY_LABELS[cat]} />
                           </div>
                         </button>
                       ))}
@@ -244,7 +245,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                             onClick={() => setForm((f) => ({ ...f, subObjectives: f.subObjectives.filter((_, j) => j !== i) }))}
                             className="px-2 text-[var(--accent-red)] border border-[var(--accent-red)] rounded-lg hover:bg-[var(--accent-red)] hover:text-white transition-colors"
                           >
-                            ✕
+                            <E e="✕" />
                           </button>
                         </div>
                       ))}
@@ -259,7 +260,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                     </>
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-3xl mb-3">☀️</p>
+                      <p className="text-3xl mb-3"><E e="☀" /></p>
                       <p className="text-sm text-[var(--text-secondary)]">
                         Las misiones {form.type === 'DAILY' ? 'diarias' : 'semanales'} no necesitan sub-objetivos.
                         <br />¡Simplemente complétala cuando la logres!
@@ -275,11 +276,11 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
           <div className="md:w-52 border-t md:border-t-0 md:border-l border-[var(--border)] p-4 bg-[var(--bg-panel-light)]">
             <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">Vista previa</p>
             <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-xl p-3 space-y-2">
-              <div className="text-xl">{CATEGORY_ICONS[form.category]}</div>
+              <div className="text-xl"><E e={CATEGORY_ICONS[form.category]} /></div>
               <p className="text-sm text-[var(--text-primary)]">{form.title || 'Tu misión...'}</p>
               <div className="flex gap-1 flex-wrap">
                 <span className="text-xs font-medium text-[var(--accent-gold)]">+{xp}XP</span>
-                <span className="text-xs font-medium text-yellow-400">💰{gold}</span>
+                <span className="text-xs font-medium text-yellow-400"><E e="💰" />{gold}</span>
               </div>
               <div className="text-xs text-[var(--text-secondary)]">
                 {QUEST_TYPES.find(t => t.key === form.type)?.icon} {QUEST_TYPES.find(t => t.key === form.type)?.label}
@@ -304,7 +305,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
             </PixelButton>
           ) : (
             <PixelButton variant="primary" onClick={handleSubmit} disabled={loading || !form.title.trim()}>
-              {loading ? 'Creando...' : '⚔️ Crear misión'}
+              {loading ? 'Creando...' : <><E e="⚔️" s={11} /> Crear misión</>}
             </PixelButton>
           )}
         </div>

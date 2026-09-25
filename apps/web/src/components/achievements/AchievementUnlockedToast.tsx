@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/uiStore';
+import { E } from '@/components/ui/glyphs';
 
 export function AchievementUnlockedToast() {
   const { achievementToasts, removeAchievementToast } = useUIStore();
@@ -21,7 +22,7 @@ export function AchievementUnlockedToast() {
             {/* Gold header bar */}
             <div className="bg-accent-gold px-3 py-1">
               <p className="font-pixel text-bg-deep" style={{ fontSize: '8px' }}>
-                🏆 ¡LOGRO DESBLOQUEADO!
+                <E e="🏆" /> ¡LOGRO DESBLOQUEADO!
               </p>
             </div>
 
@@ -31,7 +32,7 @@ export function AchievementUnlockedToast() {
                 animate={{ rotate: [0, -10, 10, -10, 10, 0], scale: [1, 1.2, 1] }}
                 transition={{ duration: 0.6 }}
               >
-                {toast.icon}
+                <E e={toast.icon} />
               </motion.div>
               <div>
                 <p className="font-vt text-text-primary text-base">{toast.title}</p>

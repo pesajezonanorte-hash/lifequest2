@@ -1,3 +1,4 @@
+import { E } from '@/components/ui/glyphs';
 const CATEGORY_ICONS: Record<string, string> = {
   HEALTH: '💚',
   FITNESS: '⚔️',
@@ -33,7 +34,7 @@ export function CategoryIcon({ category, showLabel = false, size = 'md' }: Props
 
   return (
     <span className={`inline-flex items-center gap-1 ${textSize}`}>
-      <span>{icon}</span>
+      <span><E e={icon} /></span>
       {showLabel && <span className="font-vt text-text-secondary text-sm">{label}</span>}
     </span>
   );

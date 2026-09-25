@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X } from 'lucide-react';
 import { requestPermissionAndSubscribe } from '../../services/notification.service';
+import { E } from '@/components/ui/glyphs';
 
 const PREF_KEY = 'notif-perm-asked';
 
@@ -87,7 +88,7 @@ export function NotificationPermissionModal({ onClose }: Props) {
               whileTap={{ scale: 0.96 }}
               className="flex-1 py-2.5 border-2 border-[var(--accent-gold)] bg-[var(--accent-gold)] text-[var(--bg-deep)] rounded-xl font-vt text-base font-semibold disabled:opacity-60"
             >
-              {loading ? 'Activando…' : 'Sí, activar 🔔'}
+              {loading ? 'Activando…' : 'Sí, activar '}
             </motion.button>
           </div>
         </motion.div>

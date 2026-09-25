@@ -4,6 +4,7 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { AchievementCard } from '../../components/achievements/AchievementCard';
 import { fetchAchievements } from '../../services/achievement.service';
 import type { Achievement } from '../../services/achievement.service';
+import { E } from '@/components/ui/glyphs';
 
 const CATEGORY_TABS = [
   { key: '',        label: 'Todos',    icon: '🏆' },
@@ -38,7 +39,7 @@ export default function AchievementsPage() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>🏆 SALA DE LOGROS</h1>
+        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="🏆" /> SALA DE LOGROS</h1>
         <p className="font-vt text-text-secondary text-base">
           {unlockedCount}/{achievements.length} desbloqueados · {totalXp.toLocaleString()} XP ganados
         </p>
@@ -73,7 +74,7 @@ export default function AchievementsPage() {
             }`}
             style={{ fontSize: '7px' }}
           >
-            {tab.icon} {tab.label}
+            <E e={tab.icon} /> {tab.label}
           </button>
         ))}
       </div>
@@ -123,7 +124,7 @@ export default function AchievementsPage() {
                 animate={selectedAch.unlocked ? { scale: [1, 1.1, 1] } : {}}
                 transition={{ duration: 1.5, repeat: Infinity }}
               >
-                {selectedAch.icon}
+                <E e={selectedAch.icon} />
               </motion.div>
               <h3 className={`font-pixel mb-2 ${selectedAch.unlocked ? 'text-accent-gold' : 'text-text-secondary'}`} style={{ fontSize: '11px' }}>
                 {selectedAch.title}
@@ -132,7 +133,7 @@ export default function AchievementsPage() {
 
               {selectedAch.unlocked ? (
                 <div className="space-y-1">
-                  <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}>✓ DESBLOQUEADO</p>
+                  <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}><E e="✓" /> DESBLOQUEADO</p>
                   {selectedAch.unlockedAt && (
                     <p className="font-vt text-text-secondary text-sm">
                       {new Date(selectedAch.unlockedAt).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -144,7 +145,7 @@ export default function AchievementsPage() {
                 </div>
               ) : (
                 <div>
-                  <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>🔒 BLOQUEADO</p>
+                  <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}><E e="🔒" /> BLOQUEADO</p>
                   {selectedAch.progress !== null && selectedAch.target && (
                     <p className="font-vt text-text-secondary text-sm mt-1">
                       {selectedAch.progress}/{selectedAch.target}

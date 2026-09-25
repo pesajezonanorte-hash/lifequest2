@@ -5,6 +5,7 @@ import { PixelPanel } from '../../components/ui/PixelPanel';
 import { ProgressRings } from '../../components/ui/ProgressRings';
 import { fetchLifeScore, fetchCorrelations, fetchYearInReview } from '../../services/lifescore.service';
 import type { LifeScore, YearInReview } from '../../services/lifescore.service';
+import { E } from '@/components/ui/glyphs';
 
 const AREA_LABELS: Record<string, string> = {
   habits: 'Hábitos', finances: 'Finanzas', fitness: 'Fitness',
@@ -92,13 +93,13 @@ export default function LifePage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>⭐ LIFE SCORE</h1>
+        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="⭐" /> LIFE SCORE</h1>
         <p className="font-vt text-text-secondary text-base">Tu puntuación de vida en tiempo real</p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1">
-        {([['score', '⭐ Score'], ['correlations', '🔗 Correlaciones'], ['year', '🏆 Año en Revisión']] as const).map(([key, label]) => (
+        {([['score', ' Score'], ['correlations', ' Correlaciones'], ['year', ' Año en Revisión']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -121,7 +122,7 @@ export default function LifePage() {
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#a8871e' }} /><span className="text-[var(--text-secondary)]">Finanzas</span></span>
             </div>
             <p className="text-center font-vt text-text-secondary text-base">
-              {lifeScore.total >= 75 ? '🌟 ¡Héroe legendario!' : lifeScore.total >= 50 ? '⚔️ Aventurero en progreso' : '🌱 Comenzando la aventura'}
+              {lifeScore.total >= 75 ? '¡Héroe legendario!' : lifeScore.total >= 50 ? 'Aventurero en progreso' : ' Comenzando la aventura'}
             </p>
           </PixelPanel>
 
@@ -172,7 +173,7 @@ export default function LifePage() {
           <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>PATRONES DETECTADOS EN TUS DATOS</p>
           {correlations.length === 0 ? (
             <PixelPanel className="p-8 text-center">
-              <p className="text-4xl mb-2">🔍</p>
+              <p className="text-4xl mb-2"><E e="🔍" /></p>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>SIN SUFICIENTES DATOS</p>
               <p className="font-vt text-text-secondary text-base mt-1">Registra más datos para ver correlaciones</p>
             </PixelPanel>
@@ -181,7 +182,7 @@ export default function LifePage() {
               <motion.div key={i} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <PixelPanel className="p-4">
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl flex-shrink-0">📊</span>
+                    <span className="text-2xl flex-shrink-0"><E e="📊" /></span>
                     <p className="font-vt text-text-primary text-lg">{c}</p>
                   </div>
                 </PixelPanel>
@@ -195,7 +196,7 @@ export default function LifePage() {
       {tab === 'year' && yearReview && (
         <div className="space-y-4">
           <PixelPanel className="p-5 text-center">
-            <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>🏆 {yearReview.year} EN REVISIÓN</p>
+            <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}><E e="🏆" /> {yearReview.year} EN REVISIÓN</p>
             {yearReview.bestMonth && (
               <p className="font-vt text-text-secondary text-base mt-1">Mejor mes: {yearReview.bestMonth.month}</p>
             )}
@@ -211,7 +212,7 @@ export default function LifePage() {
               { label: 'LIBROS/CURSOS', value: yearReview.totalBooksCompleted, icon: '📚' },
             ].map(s => (
               <PixelPanel key={s.label} className="p-3 text-center">
-                <p className="text-2xl">{s.icon}</p>
+                <p className="text-2xl"><E e={s.icon} /></p>
                 <p className="font-pixel text-accent-gold mt-1" style={{ fontSize: '16px' }}>{s.value}</p>
                 <p className="font-pixel text-text-secondary" style={{ fontSize: '6px' }}>{s.label}</p>
               </PixelPanel>

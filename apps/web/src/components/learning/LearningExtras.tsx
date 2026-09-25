@@ -5,6 +5,7 @@ import { PixelButton } from '../ui/PixelButton';
 import { useUIStore } from '../../store/uiStore';
 import { refreshUser } from '../../hooks/useAuth';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 // ─── Pomodoro Timer ────────────────────────────────────────────────────────────
 
@@ -74,7 +75,7 @@ export function PomodoroTimer() {
 
   return (
     <PixelPanel className="p-5 text-center space-y-4">
-      <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}>🍅 POMODORO +15 XP</p>
+      <p className="font-pixel text-accent-gold" style={{ fontSize: '9px' }}><E e="🍅" /> POMODORO +15 XP</p>
 
       <div className="flex justify-center">
         <div className="relative w-32 h-32">
@@ -176,7 +177,7 @@ export function NotesPanel({ itemId }: { itemId: string }) {
                   {new Date(n.createdAt).toLocaleDateString('es-CO')}
                 </p>
               </div>
-              <button onClick={() => deleteNote(n.id)} className="font-pixel text-accent-red hover:opacity-70 mt-1" style={{ fontSize: '8px' }}>✕</button>
+              <button onClick={() => deleteNote(n.id)} className="font-pixel text-accent-red hover:opacity-70 mt-1" style={{ fontSize: '8px' }}><E e="✕" /></button>
             </div>
           ))}
         </div>
@@ -241,7 +242,7 @@ export function VocabPanel({ itemId }: { itemId: string }) {
           {dueCards.length > 0 && !reviewing && (
             <PixelButton variant="primary" onClick={startReview}>▶ REPASAR ({dueCards.length})</PixelButton>
           )}
-          <PixelButton variant="secondary" onClick={() => setShowForm(f => !f)}>{showForm ? '✕' : '+ TARJETA'}</PixelButton>
+          <PixelButton variant="secondary" onClick={() => setShowForm(f => !f)}>{showForm ? <E e="✕" s={11} /> : '+ TARJETA'}</PixelButton>
         </div>
       </div>
 
@@ -273,9 +274,9 @@ export function VocabPanel({ itemId }: { itemId: string }) {
                   <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>¿QUÉ TAN BIEN LO RECORDASTE?</p>
                   <div className="grid grid-cols-3 gap-2">
                     {([
-                      [0, '😭 Nada', 'var(--accent-red)'],
-                      [2, '😐 Difícil', 'var(--accent-gold)'],
-                      [4, '😊 Fácil', 'var(--accent-green)'],
+                      [0, ' Nada', 'var(--accent-red)'],
+                      [2, ' Difícil', 'var(--accent-gold)'],
+                      [4, ' Fácil', 'var(--accent-green)'],
                     ] as [0 | 2 | 4, string, string][]).map(([q, label, color]) => (
                       <button
                         key={q}
@@ -291,7 +292,7 @@ export function VocabPanel({ itemId }: { itemId: string }) {
               )}
 
               <button onClick={() => setReviewing(null)} className="font-pixel text-text-secondary hover:text-accent-red transition-colors" style={{ fontSize: '7px' }}>
-                ✕ SALIR DE REVISIÓN
+                <E e="✕" /> SALIR DE REVISIÓN
               </button>
             </PixelPanel>
           </motion.div>
@@ -307,7 +308,7 @@ export function VocabPanel({ itemId }: { itemId: string }) {
                 <p className="font-vt text-text-primary text-base">{c.front} → <span className="text-text-secondary">{c.back}</span></p>
               </div>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '6px' }}>
-                {c.nextReview <= today ? '⚡ HOY' : `en ${Math.ceil((new Date(c.nextReview).getTime() - Date.now()) / 86400000)}d`}
+                {c.nextReview <= today ? ' HOY' : `en ${Math.ceil((new Date(c.nextReview).getTime() - Date.now()) / 86400000)}d`}
               </p>
             </div>
           ))}
@@ -316,7 +317,7 @@ export function VocabPanel({ itemId }: { itemId: string }) {
 
       {cards.length === 0 && !showForm && (
         <PixelPanel className="p-6 text-center">
-          <p className="text-3xl mb-2">🃏</p>
+          <p className="text-3xl mb-2"><E e="🃏" /></p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>SIN TARJETAS AÚN</p>
         </PixelPanel>
       )}

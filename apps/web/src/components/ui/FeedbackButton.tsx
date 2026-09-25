@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, X } from 'lucide-react';
 import api from '../../lib/api';
 import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
+import { E } from '@/components/ui/glyphs';
 
 type Kind = 'bug' | 'idea' | 'other';
 
@@ -97,7 +98,7 @@ export function FeedbackButton({ variant = 'desktop', className = '' }: Feedback
             >
               <div className="flex items-center justify-between">
                 <h2 className="font-pixel text-[var(--accent-gold)]" style={{ fontSize: '11px' }}>
-                  💬 ENVIAR FEEDBACK
+                  <E e="💬" /> ENVIAR FEEDBACK
                 </h2>
                 <button onClick={() => setOpen(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                   <X size={18} />
@@ -105,11 +106,11 @@ export function FeedbackButton({ variant = 'desktop', className = '' }: Feedback
               </div>
 
               {sent ? (
-                <p className="font-vt text-[var(--accent-green)] text-lg text-center py-4">¡Gracias! Recibido. 🙏</p>
+                <p className="font-vt text-[var(--accent-green)] text-lg text-center py-4">¡Gracias! Recibido. <E e="🙏" /></p>
               ) : (
                 <>
                   <div className="flex gap-2">
-                    {([['bug', '🐛 Bug'], ['idea', '💡 Idea'], ['other', '🗨️ Otro']] as [Kind, string][]).map(([k, label]) => (
+                    {([['bug', ' Bug'], ['idea', ' Idea'], ['other', ' Otro']] as [Kind, string][]).map(([k, label]) => (
                       <button
                         key={k}
                         onClick={() => setKind(k)}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { E } from '@/components/ui/glyphs';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -55,7 +56,7 @@ export function PWAInstallBanner() {
           transition={{ type: 'spring', stiffness: 260, damping: 22 }}
         >
           <div className="bg-bg-panel border-2 border-accent-gold shadow-pixel-gold px-4 py-3 flex items-center gap-3">
-            <span className="text-2xl">⚔️</span>
+            <span className="text-2xl"><E e="⚔" /></span>
             <div className="flex-1 min-w-0">
               <p className="font-pixel text-accent-gold" style={{ fontSize: '8px' }}>
                 ¡Instala LifeQuest!
@@ -76,7 +77,7 @@ export function PWAInstallBanner() {
               className="font-pixel text-text-secondary hover:text-text-primary flex-shrink-0"
               style={{ fontSize: '10px' }}
             >
-              ✕
+              <E e="✕" />
             </button>
           </div>
         </motion.div>

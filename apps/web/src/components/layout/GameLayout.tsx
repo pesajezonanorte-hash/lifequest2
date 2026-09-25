@@ -29,6 +29,7 @@ import { QuickActionsFAB } from '../ui/QuickActionsFAB';
 import { MusicPlayer } from '../ui/MusicPlayer';
 import { getLevelTitle, ZONE_TOOLTIPS } from '../../lib/gameProgress';
 import { refreshUser } from '../../hooks/useAuth';
+import { E } from '@/components/ui/glyphs';
 
 interface NavItem {
   to: string;
@@ -405,7 +406,7 @@ export function GameLayout({ children }: Props) {
                       fontSize: 22,
                     }}
                   >
-                    🧙
+                    <E e="🧙" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
@@ -478,7 +479,7 @@ export function GameLayout({ children }: Props) {
             <div className="md:hidden flex items-center justify-between px-4 pt-3 pb-2 gap-2">
               <div className="min-w-0">
                 <h1 className="m-0 text-[19px] font-extrabold tracking-[-0.025em] leading-tight truncate" style={{ color: 'var(--text)' }}>
-                  {user.displayName.split(' ')[0]} <span style={{ color: 'var(--primary)' }}>⚔️</span>
+                  {user.displayName.split(' ')[0]} <span style={{ color: 'var(--primary)' }}><E e="⚔" /></span>
                 </h1>
                 <div className="text-[11px] tabular-nums" style={{ color: 'var(--text-3)' }}>
                   Nv {user.level} · {user.currentStreak} días de racha

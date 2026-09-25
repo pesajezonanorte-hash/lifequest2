@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   streak: number;
@@ -30,7 +31,7 @@ export function StreakFlame({ streak, size = 'md' }: Props) {
         }}
         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
       >
-        {cfg.emoji}
+        <E e={cfg.emoji} />
 
         {/* Particles for 30+ day streaks */}
         {cfg.particles && [0, 1, 2].map((i) => (

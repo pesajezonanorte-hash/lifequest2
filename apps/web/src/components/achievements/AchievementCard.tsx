@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import type { Achievement } from '../../services/achievement.service';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   achievement: Achievement;
@@ -28,7 +29,7 @@ export function AchievementCard({ achievement, onClick }: Props) {
           animate={unlocked ? { filter: ['brightness(1)', 'brightness(1.4)', 'brightness(1)'] } : {}}
           transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
         >
-          {achievement.icon}
+          <E e={achievement.icon} />
         </motion.div>
         <div className="flex-1 min-w-0">
           <p className={`font-pixel text-left leading-tight ${unlocked ? 'text-accent-gold' : 'text-text-secondary'}`} style={{ fontSize: '8px' }}>
@@ -49,7 +50,7 @@ export function AchievementCard({ achievement, onClick }: Props) {
           )}
         </div>
         {unlocked && (
-          <div className="flex-shrink-0 text-accent-green">✓</div>
+          <div className="flex-shrink-0 text-accent-green"><E e="✓" /></div>
         )}
       </div>
 

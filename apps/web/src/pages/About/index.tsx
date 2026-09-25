@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Heart, Star, Zap, Target, Trophy, Calendar } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 const PHASES = [
   { num: 1, title: 'Los Cimientos', desc: 'Auth, perfil de héroe, sistema de XP/nivel/stats, onboarding RPG' },
@@ -57,7 +58,7 @@ export default function AboutPage() {
         className="rounded-2xl p-8 text-center relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, var(--accent-gold)12, var(--accent-cyan)08)', border: '1px solid var(--accent-gold)33' }}
       >
-        <div className="text-6xl mb-4">🏆</div>
+        <div className="text-6xl mb-4"><E e="🏆" /></div>
         <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">LifeQuest</h1>
         <p className="text-[var(--text-secondary)] text-sm">RPG de Vida Real · Versión 10.0.0</p>
         <p className="text-[var(--text-muted)] text-xs mt-4 leading-relaxed max-w-md mx-auto">
@@ -122,7 +123,7 @@ export default function AboutPage() {
 
       {/* Stack técnico */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4">⚙️ Stack Técnico</h2>
+        <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4"><E e="⚙" /> Stack Técnico</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {TECH_STACK.map((group) => (
             <div key={group.category} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-4">

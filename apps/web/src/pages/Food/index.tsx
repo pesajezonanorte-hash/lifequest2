@@ -7,6 +7,7 @@ import type { Meal } from '@lifequest/shared';
 import * as mealService from '../../services/meal.service';
 import { MacroGoalsWidget, AIQuickLog, SavedMealsPanel } from '../../components/food/NutritionExtras';
 import { SageContextButton } from '../../components/sage/SageContextButton';
+import { E } from '@/components/ui/glyphs';
 
 const MEAL_TYPES = [
   { key: 'BREAKFAST', label: 'Desayuno', icon: '🌅' },
@@ -44,7 +45,7 @@ function MealModal({ onClose, onSave }: { onClose: () => void; onSave: (m: Meal)
         waterMl: waterMl ? Number(waterMl) : isWater ? 250 : undefined,
       });
       onSave(m);
-      toast.success(isWater ? '💧 ¡Hidratación registrada!' : '🍽️ Comida registrada!');
+      toast.success(isWater ? '¡Hidratación registrada!' : 'Comida registrada!');
     } catch {
       toast.error('Error al registrar');
     } finally { setSaving(false); }
@@ -58,7 +59,7 @@ function MealModal({ onClose, onSave }: { onClose: () => void; onSave: (m: Meal)
         <div className="flex gap-1 overflow-x-auto pb-1">
           {MEAL_TYPES.map(t => (
             <button key={t.key} onClick={() => setMealType(t.key)} className={`flex-shrink-0 flex flex-col items-center px-3 py-2 border-2 transition-all ${mealType === t.key ? 'border-accent-gold bg-accent-gold/10' : 'border-border-pixel'}`}>
-              <span className="text-xl">{t.icon}</span>
+              <span className="text-xl"><E e={t.icon} /></span>
               <span className="font-pixel text-text-secondary mt-0.5" style={{ fontSize: '6px' }}>{t.label}</span>
             </button>
           ))}
@@ -166,7 +167,7 @@ export default function FoodPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>🍖 LA POSADA</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="🍖" /> LA POSADA</h1>
           <p className="font-vt text-text-secondary text-base">Alimenta al héroe — {new Date().toLocaleDateString('es-CO')}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -177,7 +178,7 @@ export default function FoodPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto pb-1">
-        {([['log', '🍽️ Registro'], ['macros', '📊 Macros'], ['saved', '⭐ Guardadas']] as const).map(([key, label]) => (
+        {([['log', ' Registro'], ['macros', ' Macros'], ['saved', ' Guardadas']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -209,7 +210,7 @@ export default function FoodPage() {
       {/* Water tracker */}
       <PixelPanel className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <p className="font-pixel text-accent-cyan" style={{ fontSize: '9px' }}>💧 HIDRATACIÓN HOY</p>
+          <p className="font-pixel text-accent-cyan" style={{ fontSize: '9px' }}><E e="💧" /> HIDRATACIÓN HOY</p>
           <p className="font-vt text-accent-cyan text-lg">{(totalWater / 1000).toFixed(1)}L / {waterGoal / 1000}L</p>
         </div>
         <div className="stat-bar h-5">
@@ -221,7 +222,7 @@ export default function FoodPage() {
               const m = await mealService.createMeal({ name: 'Agua', mealType: 'WATER', waterMl: ml, date: today });
               setMeals(prev => [...prev, m]);
             }}>
-              + {ml}ml 💧
+              + {ml}ml <E e="💧" />
             </PixelButton>
           ))}
         </div>
@@ -244,7 +245,7 @@ export default function FoodPage() {
         <div className="space-y-3">
           {mealsByType.map(group => (
             <PixelPanel key={group.key} className="p-3">
-              <p className="font-pixel text-text-secondary mb-2" style={{ fontSize: '8px' }}>{group.icon} {group.label.toUpperCase()}</p>
+              <p className="font-pixel text-text-secondary mb-2" style={{ fontSize: '8px' }}><E e={group.icon} /> {group.label.toUpperCase()}</p>
               {group.items.length === 0 ? (
                 <p className="font-vt text-text-secondary text-base italic">— sin registros —</p>
               ) : (
@@ -254,7 +255,7 @@ export default function FoodPage() {
                       <p className="font-vt text-text-primary text-lg">{m.name}</p>
                       <div className="flex items-center gap-3">
                         {m.calories && <p className="font-pixel text-accent-gold" style={{ fontSize: '8px' }}>{m.calories} kcal</p>}
-                        <button onClick={() => handleDelete(m.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}>✕</button>
+                        <button onClick={() => handleDelete(m.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}><E e="✕" /></button>
                       </div>
                     </motion.div>
                   ))}

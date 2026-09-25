@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { BookOpen, Lock, Sparkles } from 'lucide-react';
 import * as wisdomService from '../../services/wisdom.service';
 import type { WisdomCard } from '../../services/wisdom.service';
+import { E } from '@/components/ui/glyphs';
 
 const CATEGORY_CONFIG: Record<string, { label: string; color: string; emoji: string }> = {
   discipline:    { label: 'Disciplina',  color: 'var(--accent-red)',   emoji: '⚔️' },
@@ -25,7 +26,7 @@ function WisdomCardUI({ card, delay = 0 }: { card: WisdomCard; delay?: number })
       style={{ borderColor: cfg.color + '33' }}
     >
       <div className="flex items-center gap-2">
-        <span className="text-lg">{cfg.emoji}</span>
+        <span className="text-lg"><E e={cfg.emoji} /></span>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: cfg.color + '22', color: cfg.color }}>
           {cfg.label}
         </span>
@@ -156,7 +157,7 @@ export default function WisdomPage() {
               return (
                 <div key={card.id} className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-4 flex flex-col items-center gap-2 opacity-40">
                   <Lock size={20} className="text-[var(--text-muted)]" />
-                  <span className="text-xs text-[var(--text-muted)]">{cfg?.emoji ?? '📖'} {cfg?.label ?? card.category}</span>
+                  <span className="text-xs text-[var(--text-muted)]"><E e={cfg?.emoji ?? '📖'} /> {cfg?.label ?? card.category}</span>
                   <span className="text-[10px] text-[var(--text-muted)]">Nivel {card.levelRequired}</span>
                 </div>
               );

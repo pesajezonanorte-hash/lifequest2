@@ -7,6 +7,7 @@ import type { Relationship, LoveDashboard, ImportantDate } from '@lifequest/shar
 import * as loveService from '../../services/love.service';
 import api from '../../lib/api';
 import { SageContextButton } from '../../components/sage/SageContextButton';
+import { E } from '@/components/ui/glyphs';
 
 interface GiftIdea { id: string; title: string; description?: string; estimatedPrice?: number; isPurchased: boolean; forPerson?: string }
 
@@ -50,7 +51,7 @@ function GiftWishlist({ relationshipId }: { relationshipId?: string }) {
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
-        <PixelButton variant="secondary" onClick={() => setShowForm(f => !f)}>{showForm ? '✕ CERRAR' : '+ IDEA'}</PixelButton>
+        <PixelButton variant="secondary" onClick={() => setShowForm(f => !f)}>{showForm ? <><E e="✕" s={11} /> CERRAR</> : '+ IDEA'}</PixelButton>
       </div>
 
       {showForm && (
@@ -73,7 +74,7 @@ function GiftWishlist({ relationshipId }: { relationshipId?: string }) {
 
       {gifts.length === 0 ? (
         <PixelPanel className="p-8 text-center">
-          <p className="text-4xl mb-2">🎁</p>
+          <p className="text-4xl mb-2"><E e="🎁" /></p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>SIN IDEAS DE REGALOS</p>
         </PixelPanel>
       ) : (
@@ -94,7 +95,7 @@ function GiftWishlist({ relationshipId }: { relationshipId?: string }) {
                     </div>
                   </div>
                 </div>
-                <button onClick={() => handleDelete(g.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}>✕</button>
+                <button onClick={() => handleDelete(g.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}><E e="✕" /></button>
               </div>
             </PixelPanel>
           ))}
@@ -128,7 +129,7 @@ function AddDateModal({ relationshipId, onClose, onSave }: { relationshipId: str
     try {
       const r = await loveService.addImportantDate(relationshipId, { label, date, isRecurring, emoji });
       onSave(r);
-      toast.success('Fecha agregada 💝');
+      toast.success('Fecha agregada ');
     } catch { toast.error('Error al agregar'); }
     finally { setSaving(false); }
   }
@@ -167,7 +168,7 @@ function SetupModal({ onClose, onSave, existing }: { onClose: () => void; onSave
     try {
       const r = await loveService.createRelationship({ name: name.trim(), type: 'romantic', isPartner: true, notes: startDate ? `startDate:${startDate}` : undefined });
       onSave(r);
-      toast.success(name.trim() ? '¡Relación configurada! 💝' : 'Nombre eliminado');
+      toast.success(name.trim() ? '¡Relación configurada! ' : 'Nombre eliminado');
     } catch { toast.error('Error al configurar'); }
     finally { setSaving(false); }
   }
@@ -242,7 +243,7 @@ export default function LovePage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>💖 JARDÍN DEL CORAZÓN</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="💖" /> JARDÍN DEL CORAZÓN</h1>
           <p className="font-vt text-text-secondary text-base">Lo que importa en tu vida</p>
         </div>
         <div className="flex items-center gap-2">
@@ -253,7 +254,7 @@ export default function LovePage() {
 
       {/* Tabs */}
       <div className="flex gap-1">
-        {([['jardín', '💖 Jardín'], ['regalos', '🎁 Regalos']] as const).map(([key, label]) => (
+        {([['jardín', ' Jardín'], ['regalos', ' Regalos']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -269,7 +270,7 @@ export default function LovePage() {
 
       {tab === 'jardín' && !rel && (
         <PixelPanel className="p-8 text-center space-y-3">
-          <p className="text-5xl">💖</p>
+          <p className="text-5xl"><E e="💖" /></p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>EL JARDÍN ESPERA</p>
           <p className="font-vt text-text-secondary text-base">Configura esta zona para comenzar a cultivar tus relaciones</p>
           <PixelButton variant="primary" onClick={() => setShowSetup(true)}>CONFIGURAR JARDÍN</PixelButton>
@@ -286,9 +287,9 @@ export default function LovePage() {
               style={{ fontSize: '9px' }}
               title="Editar jardín"
             >
-              ✏️
+              <E e="✏" />
             </button>
-            <p className="text-5xl">💑</p>
+            <p className="text-5xl"><E e="💑" /></p>
             {rel.name && <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>{rel.name}</p>}
             {startDate && <p className="font-vt text-text-secondary text-lg">{timeTogetherText(startDate + 'T00:00:00')}</p>}
           </PixelPanel>
@@ -299,7 +300,7 @@ export default function LovePage() {
               <p className="font-pixel text-text-secondary mb-2" style={{ fontSize: '8px' }}>PRÓXIMA FECHA ESPECIAL</p>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{dashboard.nextImportantDate.emoji ?? '💝'}</span>
+                  <span className="text-2xl"><E e={dashboard.nextImportantDate.emoji ?? '💝'} /></span>
                   <div>
                     <p className="font-vt text-text-primary text-xl">{dashboard.nextImportantDate.label}</p>
                     <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>
@@ -332,7 +333,7 @@ export default function LovePage() {
                   return (
                     <div key={d.id} className="flex items-center justify-between py-1 border-b border-border-pixel/30 last:border-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl">{d.emoji ?? '💝'}</span>
+                        <span className="text-xl"><E e={d.emoji ?? '💝'} /></span>
                         <div>
                           <p className="font-vt text-text-primary text-lg">{d.label}</p>
                           <p className="font-pixel text-text-secondary" style={{ fontSize: '7px' }}>
@@ -343,7 +344,7 @@ export default function LovePage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <p className="font-vt text-accent-gold text-base">{days >= 0 ? `en ${days}d` : `hace ${-days}d`}</p>
-                        <button onClick={() => handleDeleteDate(d.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}>✕</button>
+                        <button onClick={() => handleDeleteDate(d.id)} className="font-pixel text-accent-red hover:opacity-70" style={{ fontSize: '8px' }}><E e="✕" /></button>
                       </div>
                     </div>
                   );

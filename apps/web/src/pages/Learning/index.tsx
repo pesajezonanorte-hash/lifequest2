@@ -10,6 +10,7 @@ import type { LearningItem, LearningStats } from '@lifequest/shared';
 import * as learningService from '../../services/learning.service';
 import { PomodoroTimer, NotesPanel, VocabPanel } from '../../components/learning/LearningExtras';
 import { SageContextButton } from '../../components/sage/SageContextButton';
+import { E } from '@/components/ui/glyphs';
 
 const TYPE_ICONS: Record<string, string> = { BOOK: '📖', COURSE: '💻', PODCAST: '🎙️', VIDEO: '🎥', LANGUAGE: '🗣️' };
 const STATUS_LABELS: Record<string, string> = { NOT_STARTED: 'Por empezar', IN_PROGRESS: 'En progreso', COMPLETED: 'Completado', ABANDONED: 'Abandonado' };
@@ -143,7 +144,7 @@ export default function LearningPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>📚 LA BIBLIOTECA</h1>
+          <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="📚" /> LA BIBLIOTECA</h1>
           <p className="font-vt text-text-secondary text-base">Conocimiento es poder</p>
         </div>
         <div className="flex items-center gap-2">
@@ -154,7 +155,7 @@ export default function LearningPage() {
 
       {/* Main tabs */}
       <div className="flex gap-1">
-        {([['biblioteca', '📚 Biblioteca'], ['pomodoro', '🍅 Pomodoro']] as const).map(([key, label]) => (
+        {([['biblioteca', ' Biblioteca'], ['pomodoro', ' Pomodoro']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => { setTab(key); setSelectedItem(null); }}
@@ -170,7 +171,7 @@ export default function LearningPage() {
             className={`flex-shrink-0 px-3 py-1.5 border-2 font-pixel transition-all ${tab === 'detalle' ? 'border-accent-gold bg-accent-gold text-bg-deep' : 'border-border-pixel text-text-secondary'}`}
             style={{ fontSize: '8px' }}
           >
-            📖 {selectedItem.title.slice(0, 15)}...
+            <E e="📖" /> {selectedItem.title.slice(0, 15)}...
           </button>
         )}
       </div>
@@ -191,7 +192,7 @@ export default function LearningPage() {
                 className={`px-3 py-1.5 border-2 font-pixel transition-all ${detailTab === dt ? 'border-accent-gold bg-accent-gold text-bg-deep' : 'border-border-pixel text-text-secondary'}`}
                 style={{ fontSize: '8px' }}
               >
-                {dt === 'notas' ? '📝 Notas' : '🃏 Vocabulario'}
+                {dt === 'notas' ? ' Notas' : ' Vocabulario'}
               </button>
             ))}
           </div>
@@ -210,7 +211,7 @@ export default function LearningPage() {
             { label: 'PÁGINAS', value: stats.totalPages, icon: '📄' },
           ].map(s => (
             <PixelPanel key={s.label} className="p-3 text-center">
-              <p className="text-2xl">{s.icon}</p>
+              <p className="text-2xl"><E e={s.icon} /></p>
               <p className="font-pixel text-accent-gold mt-1" style={{ fontSize: '14px' }}>{s.value}</p>
               <p className="font-pixel text-text-secondary" style={{ fontSize: '6px' }}>{s.label}</p>
             </PixelPanel>
@@ -219,7 +220,7 @@ export default function LearningPage() {
       )}
 
       <div className="flex gap-1 overflow-x-auto pb-1">
-        {[['', '📚 Todos'], ['IN_PROGRESS', '📖 En progreso'], ['NOT_STARTED', '⏳ Por empezar'], ['COMPLETED', '✅ Completados']].map(([key, label]) => (
+        {[['', ' Todos'], ['IN_PROGRESS', ' En progreso'], ['NOT_STARTED', '⏳ Por empezar'], ['COMPLETED', ' Completados']].map(([key, label]) => (
           <button key={key} onClick={() => setFilter(key)} className={`flex-shrink-0 px-3 py-1.5 border-2 font-pixel transition-all ${filter === key ? 'border-accent-gold bg-accent-gold text-bg-deep' : 'border-border-pixel text-text-secondary'}`} style={{ fontSize: '8px' }}>
             {label}
           </button>
@@ -230,7 +231,7 @@ export default function LearningPage() {
         <div className="text-center py-8"><motion.p className="font-vt text-text-secondary text-xl" animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }}>Cargando...</motion.p></div>
       ) : filtered.length === 0 ? (
         <PixelPanel className="p-8 text-center">
-          <p className="text-4xl mb-2">📚</p>
+          <p className="text-4xl mb-2"><E e="📚" /></p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>LA BIBLIOTECA ESTÁ VACÍA</p>
         </PixelPanel>
       ) : (
@@ -247,20 +248,20 @@ export default function LearningPage() {
                         className="font-pixel text-text-secondary hover:text-accent-gold transition-colors"
                         style={{ fontSize: '7px' }}
                       >
-                        📝 NOTAS/VOCAB
+                        <E e="📝" /> NOTAS/VOCAB
                       </button>
                     </div>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">{TYPE_ICONS[item.type]}</span>
+                          <span className="text-xl"><E e={TYPE_ICONS[item.type]} /></span>
                           <p className="font-vt text-text-primary text-lg">{item.title}</p>
                         </div>
                         {item.author && <p className="font-pixel text-text-secondary ml-8" style={{ fontSize: '7px' }}>{item.author}</p>}
-                        <p className={`font-pixel ml-8 mt-1 ${STATUS_COLORS[item.status]}`} style={{ fontSize: '7px' }}>{STATUS_LABELS[item.status]}</p>
+                        <p className={`font-pixel ml-8 mt-1 ${STATUS_COLORS[item.status]}`} style={{ fontSize: '7px' }}><E e={STATUS_LABELS[item.status]} /></p>
                       </div>
                       {item.rating && (
-                        <p className="font-vt text-accent-gold text-base">{'⭐'.repeat(item.rating)}</p>
+                        <p className="font-vt text-accent-gold text-base">{Array.from({ length: item.rating }).map((_, i) => <E key={i} e="⭐" s={14} className="inline-block" />)}</p>
                       )}
                     </div>
                     {item.totalProgress > 0 && (

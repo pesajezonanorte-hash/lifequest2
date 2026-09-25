@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/uiStore';
 import { MiguelSprite } from '../character/MiguelSprite';
+import { E } from '@/components/ui/glyphs';
 
 const PARTICLE_COLORS = ['#d9b44a', '#f0e6c8', '#c0c0c8', '#8a8a92', '#ffffff', '#a8871e', '#5c5c64'];
 
@@ -314,7 +315,7 @@ export function LevelUpOverlay() {
 
                 {/* Estrellas */}
                 <div className="flex gap-3 z-10">
-                  {['★', '★', '★'].map((s, i) => (
+                  {[0, 1, 2].map((i) => (
                     <motion.span
                       key={i}
                       className="text-accent-gold"
@@ -323,7 +324,7 @@ export function LevelUpOverlay() {
                       animate={{ opacity: 1, scale: 1, rotate: 0 }}
                       transition={{ delay: 0.55 + i * 0.14, type: 'spring' }}
                     >
-                      {s}
+                      <E e="★" s={12} className="inline-block" />
                     </motion.span>
                   ))}
                 </div>

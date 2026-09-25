@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   status: 'completed' | 'failed' | 'skipped' | null;
@@ -76,7 +77,7 @@ export function HabitCompleteButton({ status, onLog, disabled }: Props) {
                     try { await onLog(s); } finally { setLoading(false); }
                   }}
                 >
-                  {s === 'completed' ? '✓ Completado' : s === 'failed' ? '✗ Fallé' : '~ No aplica'}
+                  {s === 'completed' ? ' Completado' : s === 'failed' ? ' Fallé' : '~ No aplica'}
                 </button>
               ))}
             </motion.div>

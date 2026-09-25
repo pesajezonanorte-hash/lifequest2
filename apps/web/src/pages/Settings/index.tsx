@@ -9,6 +9,7 @@ import { PixelButton } from '../../components/ui/PixelButton';
 import * as userService from '../../services/user.service';
 import { requestPermissionAndSubscribe, sendTestNotification } from '../../services/notification.service';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 const THEMES = [
   { id: 'aurora', name: 'Aurora', cost: 0, description: 'B&N clásico profundo', emoji: '🌌', preview: '#111113' },
@@ -95,14 +96,14 @@ export default function SettingsPage() {
   async function handleEnableNotifications() {
     setNotifStatus(null);
     const ok = await requestPermissionAndSubscribe();
-    setNotifStatus(ok ? '✓ Notificaciones activadas' : '✗ Permiso denegado');
+    setNotifStatus(ok ? ' Notificaciones activadas' : ' Permiso denegado');
   }
 
   async function handleTestNotification() {
     setTestingNotif(true);
     try {
       await sendTestNotification();
-      toast.success('Notificación de prueba enviada 🔔');
+      toast.success('Notificación de prueba enviada');
     } catch {
       toast.error('Error al enviar notificación de prueba');
     } finally {
@@ -186,12 +187,12 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>⚙️ CONFIGURACIÓN</h1>
+        <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}><E e="⚙" /> CONFIGURACIÓN</h1>
         <p className="font-vt text-text-secondary text-base">Ajusta tu aventura, héroe</p>
       </div>
 
       <div className="flex gap-1 overflow-x-auto pb-1">
-        {[['profile', '👤 Perfil'], ['game', '🎮 Juego'], ['datos', '💾 Tus Datos'], ['about', 'ℹ️ Acerca de']].map(([key, label]) => (
+        {[['profile', ' Perfil'], ['game', ' Juego'], ['datos', ' Tus Datos'], ['about', 'ℹ️ Acerca de']].map(([key, label]) => (
           <button key={key} onClick={() => setSection(key as typeof section)} className={`flex-shrink-0 px-3 py-1.5 border-2 font-pixel transition-all ${section === key ? 'border-accent-gold bg-accent-gold text-bg-deep' : 'border-border-pixel text-text-secondary'}`} style={{ fontSize: '8px' }}>
             {label}
           </button>
@@ -243,7 +244,7 @@ export default function SettingsPage() {
           </div>
           {/* Theme picker */}
           <div className="space-y-3 border-b border-border-pixel pb-4">
-            <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>🎨 TEMA VISUAL</p>
+            <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}><E e="🎨" /> TEMA VISUAL</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {THEMES.map(theme => (
                 <motion.button
@@ -256,7 +257,7 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-4 h-4 rounded-full border border-border-pixel" style={{ background: theme.preview }} />
                     <span className="font-pixel" style={{ fontSize: '8px', color: activeTheme === theme.id ? 'var(--accent-gold)' : 'var(--text-primary)' }}>
-                      {theme.emoji} {theme.name}
+                      <E e={theme.emoji} /> {theme.name}
                     </span>
                   </div>
                   <p className="font-vt text-text-secondary text-xs">{theme.description}</p>
@@ -268,12 +269,12 @@ export default function SettingsPage() {
                         className={`font-pixel border rounded px-1.5 py-0.5 transition-colors ${previewingTheme === theme.id ? 'border-accent-green text-accent-green' : 'border-border-pixel text-text-muted hover:text-text-secondary'}`}
                         style={{ fontSize: '6px' }}
                       >
-                        {previewingTheme === theme.id ? '↩' : '👁'}
+                        {previewingTheme === theme.id ? <E e="↩" s={11} /> : <E e="👁" s={11} />}
                       </button>
                     </div>
                   )}
                   {activeTheme === theme.id && (
-                    <p className="font-pixel text-accent-green mt-1" style={{ fontSize: '7px' }}>✓ ACTIVO</p>
+                    <p className="font-pixel text-accent-green mt-1" style={{ fontSize: '7px' }}><E e="✓" /> ACTIVO</p>
                   )}
                 </motion.button>
               ))}
@@ -286,9 +287,9 @@ export default function SettingsPage() {
             <p className="font-pixel text-text-secondary mb-1" style={{ fontSize: '8px' }}>APARIENCIA</p>
             <div className="flex gap-2 mt-2">
               {([
-                { value: 'dark',   label: '🌙 Oscuro',    desc: 'Por defecto' },
-                { value: 'light',  label: '☀️ Claro',     desc: '' },
-                { value: 'system', label: '💻 Automático', desc: 'Según el SO' },
+                { value: 'dark',   label: ' Oscuro',    desc: 'Por defecto' },
+                { value: 'light',  label: ' Claro',     desc: '' },
+                { value: 'system', label: ' Automático', desc: 'Según el SO' },
               ] as { value: ThemeMode; label: string; desc: string }[]).map(opt => (
                 <button
                   key={opt.value}
@@ -340,7 +341,7 @@ export default function SettingsPage() {
 
           {/* Notifications */}
           <div className="py-2 border-b border-border-pixel space-y-2">
-            <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>🔔 NOTIFICACIONES</p>
+            <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}><E e="🔔" /> NOTIFICACIONES</p>
             <p className="font-vt text-text-secondary text-sm">Recibe alertas de rachas, misiones y logros.</p>
             <div className="flex flex-wrap gap-2">
               {notifPermission !== 'granted' && (
@@ -350,12 +351,12 @@ export default function SettingsPage() {
               )}
               {notifPermission === 'granted' && (
                 <PixelButton variant="secondary" onClick={handleTestNotification} disabled={testingNotif}>
-                  {testingNotif ? 'Enviando...' : '📲 Enviar notificación de prueba'}
+                  {testingNotif ? 'Enviando...' : <><E e="📲" s={11} /> Enviar notificación de prueba</>}
                 </PixelButton>
               )}
             </div>
             {notifStatus && (
-              <p className={`font-vt text-sm ${notifStatus.startsWith('✓') ? 'text-accent-green' : 'text-accent-red'}`}>
+              <p className={`font-vt text-sm ${notifStatus.startsWith('') ? 'text-accent-green' : 'text-accent-red'}`}>
                 {notifStatus}
               </p>
             )}
@@ -383,7 +384,7 @@ export default function SettingsPage() {
           </div>
           {/* Spotify */}
           <div className="space-y-2 border-t-2 border-border-pixel pt-4">
-            <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>🎵 PLAYLIST DE ENTRENAMIENTO</p>
+            <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}><E e="🎵" /> PLAYLIST DE ENTRENAMIENTO</p>
             <p className="font-vt text-text-secondary text-sm">Pega el link de tu playlist de Spotify para abrirla rápido desde el Coliseo</p>
             <div className="flex gap-2">
               <input
@@ -423,23 +424,23 @@ export default function SettingsPage() {
 
       {section === 'datos' && (
         <PixelPanel className="p-5 space-y-5">
-          <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>💾 TUS DATOS</p>
+          <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}><E e="💾" /> TUS DATOS</p>
           <p className="font-vt text-text-secondary text-sm">Exporta y respalda toda tu información. Tus datos son tuyos.</p>
 
           <div className="space-y-3">
             <div className="border-2 border-border-pixel p-4 space-y-2">
-              <p className="font-pixel text-text-primary" style={{ fontSize: '9px' }}>📦 BACKUP COMPLETO (JSON)</p>
+              <p className="font-pixel text-text-primary" style={{ fontSize: '9px' }}><E e="📦" /> BACKUP COMPLETO (JSON)</p>
               <p className="font-vt text-text-secondary text-sm">Misiones, hábitos, finanzas, entrenamientos, diario, metas y más. Úsalo para restaurar o analizar tu progreso.</p>
               <PixelButton variant="primary" onClick={handleExportJSON} disabled={exporting === 'json'}>
-                {exporting === 'json' ? 'Exportando...' : '⬇ DESCARGAR JSON'}
+                {exporting === 'json' ? 'Exportando...' : <><E e="⬇" s={11} /> DESCARGAR JSON</>}
               </PixelButton>
             </div>
 
             <div className="border-2 border-border-pixel p-4 space-y-2">
-              <p className="font-pixel text-text-primary" style={{ fontSize: '9px' }}>📊 TRANSACCIONES (CSV)</p>
+              <p className="font-pixel text-text-primary" style={{ fontSize: '9px' }}><E e="📊" /> TRANSACCIONES (CSV)</p>
               <p className="font-vt text-text-secondary text-sm">Todas tus transacciones en formato CSV. Compatible con Excel, Google Sheets y otras apps de finanzas.</p>
               <PixelButton variant="secondary" onClick={handleExportCSV} disabled={exporting === 'csv'}>
-                {exporting === 'csv' ? 'Exportando...' : '⬇ DESCARGAR CSV'}
+                {exporting === 'csv' ? 'Exportando...' : <><E e="⬇" s={11} /> DESCARGAR CSV</>}
               </PixelButton>
             </div>
           </div>
@@ -448,7 +449,7 @@ export default function SettingsPage() {
 
       {section === 'about' && (
         <PixelPanel className="p-5 space-y-4 text-center">
-          <p className="text-5xl">🏆</p>
+          <p className="text-5xl"><E e="🏆" /></p>
           <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>LIFEQUEST</p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '8px' }}>v10.0.0 — FASE FINAL</p>
           <p className="font-vt text-text-secondary text-base leading-relaxed">

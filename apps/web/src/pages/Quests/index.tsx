@@ -14,6 +14,7 @@ import { useToastStore } from '../../hooks/useToast';
 import { useDebounce } from '../../hooks/useDebounce';
 import * as questService from '../../services/quest.service';
 import { SageContextButton } from '../../components/sage/SageContextButton';
+import { E } from '@/components/ui/glyphs';
 
 const TABS = [
   { key: '',        label: 'Todas',        icon: '📜' },
@@ -212,7 +213,7 @@ export default function QuestsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-pixel text-accent-gold" style={{ fontSize: '14px' }}>
-            📜 PERGAMINO DE MISIONES
+            <E e="📜" /> PERGAMINO DE MISIONES
           </h1>
           <p className="font-vt text-text-secondary text-base">
             Tus aventuras pendientes, {user?.displayName?.split(' ')[0]}
@@ -239,7 +240,7 @@ export default function QuestsPage() {
             }`}
             style={{ fontSize: '8px' }}
           >
-            {tab.icon} {tab.label}
+            <E e={tab.icon} /> {tab.label}
           </button>
         ))}
       </div>
@@ -259,7 +260,7 @@ export default function QuestsPage() {
             onChange={(e) => setFilterCategory(e.target.value)}
             className="bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-2 py-1 focus:border-accent-gold outline-none"
           >
-            <option value="">📋 Categoría</option>
+            <option value=""><E e="📋" /> Categoría</option>
             {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
@@ -269,7 +270,7 @@ export default function QuestsPage() {
             onChange={(e) => setFilterDifficulty(e.target.value)}
             className="bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-2 py-1 focus:border-accent-gold outline-none"
           >
-            <option value="">⚡ Dificultad</option>
+            <option value=""><E e="⚡" /> Dificultad</option>
             <option value="EASY">Fácil</option>
             <option value="NORMAL">Normal</option>
             <option value="HARD">Difícil</option>
@@ -280,7 +281,7 @@ export default function QuestsPage() {
             onChange={(e) => setSortBy(e.target.value)}
             className="bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-2 py-1 focus:border-accent-gold outline-none"
           >
-            <option value="">📊 Ordenar</option>
+            <option value=""><E e="📊" /> Ordenar</option>
             <option value="xp">Por XP</option>
             <option value="deadline">Por Deadline</option>
             <option value="difficulty">Por Dificultad</option>
@@ -293,7 +294,7 @@ export default function QuestsPage() {
         <SkeletonList count={4} />
       ) : displayQuests.length === 0 ? (
         <PixelPanel className="p-8 text-center">
-          <p className="text-4xl mb-3">📜</p>
+          <p className="text-4xl mb-3"><E e="📜" /></p>
           <p className="font-pixel text-text-secondary" style={{ fontSize: '9px' }}>EL PERGAMINO ESTÁ VACÍO</p>
           <p className="font-vt text-text-secondary text-base mt-1">Crea tu primera misión para comenzar la aventura</p>
           <div className="mt-4">

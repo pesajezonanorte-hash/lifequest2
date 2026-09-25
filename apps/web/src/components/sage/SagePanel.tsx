@@ -9,6 +9,7 @@ import {
   sagePlanWorkout,
 } from '../../services/sage.service';
 import { useUIStore } from '../../store/uiStore';
+import { E } from '@/components/ui/glyphs';
 
 interface Props {
   onClose: () => void;

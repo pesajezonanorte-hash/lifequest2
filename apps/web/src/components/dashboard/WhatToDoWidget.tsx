@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
+import { E } from '@/components/ui/glyphs';
 
 interface Priority {
   id: string;
@@ -45,7 +46,7 @@ export function WhatToDoWidget() {
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🎯</span>
+          <span className="text-lg"><E e="🎯" /></span>
           <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
             ¿Qué hago ahora?
           </span>
@@ -70,7 +71,7 @@ export function WhatToDoWidget() {
               border: `1px solid ${p.urgent ? 'color-mix(in oklab, var(--accent-gold) 35%, transparent)' : 'var(--border)'}`,
             }}
           >
-            <span className="text-xl flex-shrink-0">{p.icon}</span>
+            <span className="text-xl flex-shrink-0"><E e={p.icon} /></span>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                 {p.title}

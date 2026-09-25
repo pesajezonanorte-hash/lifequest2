@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { PixelPanel } from '../ui/PixelPanel';
 import * as f2 from '../../services/finance2.service';
+import { E } from '@/components/ui/glyphs';
 
 // ─── Debts Panel ───────────────────────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ export function DebtsPanel() {
   return (
     <PixelPanel className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="pixel-text text-sm text-[var(--accent-gold)]">💳 DEUDAS Y PRÉSTAMOS</h3>
+        <h3 className="pixel-text text-sm text-[var(--accent-gold)]"><E e="💳" /> DEUDAS Y PRÉSTAMOS</h3>
         <button onClick={() => setShowForm(s => !s)} className="pixel-button px-3 py-1 text-xs">+ Nueva</button>
       </div>
 
@@ -127,22 +128,22 @@ export function DebtsPanel() {
                 <div className="flex gap-2">
                   <input value={payAmount} onChange={e => setPayAmount(e.target.value)} placeholder="Monto pago" type="number"
                     className="flex-1 bg-[var(--bg-deep)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text-primary)] outline-none" />
-                  <button onClick={() => handlePayment(debt.id)} className="pixel-button px-3 py-1 text-xs">✓</button>
-                  <button onClick={() => setPayingId(null)} className="text-[var(--text-secondary)] text-sm px-2">✕</button>
+                  <button onClick={() => handlePayment(debt.id)} className="pixel-button px-3 py-1 text-xs"><E e="✓" /></button>
+                  <button onClick={() => setPayingId(null)} className="text-[var(--text-secondary)] text-sm px-2"><E e="✕" /></button>
                 </div>
               ) : (
                 <div className="flex gap-2">
                   <button onClick={() => setPayingId(debt.id)} className="text-xs border border-[var(--accent-green)] text-[var(--accent-green)] rounded px-3 py-1 hover:bg-[var(--accent-green)] hover:text-white transition-colors">
-                    💸 Registrar pago
+                    <E e="💸" /> Registrar pago
                   </button>
-                  <button onClick={() => handleDelete(debt.id)} className="text-xs text-red-400 hover:text-red-300 ml-auto">✕</button>
+                  <button onClick={() => handleDelete(debt.id)} className="text-xs text-red-400 hover:text-red-300 ml-auto"><E e="✕" /></button>
                 </div>
               )}
             </div>
           );
         })}
         {debts.filter(d => d.isPaid).length > 0 && (
-          <p className="text-xs text-[var(--text-secondary)] text-center">✅ {debts.filter(d => d.isPaid).length} deuda(s) pagada(s)</p>
+          <p className="text-xs text-[var(--text-secondary)] text-center"><E e="✅" /> {debts.filter(d => d.isPaid).length} deuda(s) pagada(s)</p>
         )}
       </div>
     </PixelPanel>
@@ -178,7 +179,7 @@ export function RecurringPanel() {
   return (
     <PixelPanel className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="pixel-text text-sm text-[var(--accent-gold)]">🔄 RECURRENTES</h3>
+        <h3 className="pixel-text text-sm text-[var(--accent-gold)]"><E e="🔄" /> RECURRENTES</h3>
         <button onClick={() => setShowForm(s => !s)} className="pixel-button px-3 py-1 text-xs">+ Nueva</button>
       </div>
 
@@ -236,7 +237,7 @@ export function RecurringPanel() {
               <span className={`font-bold text-sm ${item.type === 'INCOME' ? 'text-green-400' : 'text-red-400'}`}>
                 {item.type === 'INCOME' ? '+' : '-'}${Number(item.amount).toLocaleString('es-CO')}
               </span>
-              <button onClick={() => handleDelete(item.id)} className="text-red-400 hover:text-red-300 text-xs">✕</button>
+              <button onClick={() => handleDelete(item.id)} className="text-red-400 hover:text-red-300 text-xs"><E e="✕" /></button>
             </div>
           </div>
         ))}
@@ -268,7 +269,7 @@ export function ProjectionPanel() {
   return (
     <PixelPanel className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="pixel-text text-sm text-[var(--accent-gold)]">📈 PROYECCIÓN FINANCIERA</h3>
+        <h3 className="pixel-text text-sm text-[var(--accent-gold)]"><E e="📈" /> PROYECCIÓN FINANCIERA</h3>
         <div className="flex gap-1">
           {[3, 6, 12].map(m => (
             <button key={m} onClick={() => setMonths(m)}
@@ -337,7 +338,7 @@ export function PaydayModal({ onClose }: { onClose: () => void }) {
       <motion.div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
         <motion.div className="pixel-panel p-6 w-full max-w-sm" initial={{ scale: 0.8, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}>
           <div className="text-center mb-5">
-            <p className="text-4xl mb-2">💰</p>
+            <p className="text-4xl mb-2"><E e="💰" /></p>
             <h2 className="pixel-text text-lg text-[var(--accent-gold)]">¡Día de Pago!</h2>
             <p className="text-sm text-[var(--text-secondary)] mt-1">Es hora de distribuir tus ingresos sabiamente</p>
           </div>
@@ -348,7 +349,7 @@ export function PaydayModal({ onClose }: { onClose: () => void }) {
               { icon: '🛒', label: 'Asignar presupuestos', hint: 'Comida, transporte, etc.' },
             ].map(({ icon, label, hint }) => (
               <div key={label} className="flex items-center gap-3 p-3 bg-[var(--bg-deep)] rounded border border-[var(--border)]">
-                <span className="text-2xl">{icon}</span>
+                <span className="text-2xl"><E e={icon} /></span>
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">{label}</p>
                   <p className="text-xs text-[var(--text-secondary)]">{hint}</p>
@@ -356,7 +357,7 @@ export function PaydayModal({ onClose }: { onClose: () => void }) {
               </div>
             ))}
           </div>
-          <button onClick={onClose} className="w-full pixel-button py-2 text-sm">✓ Entendido, ¡a distribuir!</button>
+          <button onClick={onClose} className="w-full pixel-button py-2 text-sm"><E e="✓" /> Entendido, ¡a distribuir!</button>
         </motion.div>
       </motion.div>
     </AnimatePresence>
