@@ -20,14 +20,15 @@ export default {
         // ── Borders ────────────────────────────────────────────────────────
         'border-pixel':   'var(--border)',
 
-        // ── Accents (unchanged — preserve game soul) ───────────────────────
-        'accent-gold':    '#f59e0b',
-        'accent-cyan':    '#06b6d4',
-        'accent-pink':    '#ec4899',
-        'accent-green':   '#10b981',
-        'accent-red':     '#ef4444',
-        'accent-blue':    '#3b82f6',
-        'accent-purple':  '#8b5cf6',
+        // ── Accents B&N: dorado XP sutil + semánticos tenues + grises ───────
+        // Tonos medios para que los modificadores /15 /50 funcionen en ambos modos.
+        'accent-gold':    '#a8871e',
+        'accent-cyan':    '#7c7c85',
+        'accent-pink':    '#8f8f98',
+        'accent-green':   '#4a825f',
+        'accent-red':     '#b5453a',
+        'accent-blue':    '#71717a',
+        'accent-purple':  '#6b6b73',
 
         // ── Tokens semánticos shadcn (para componentes tipo shadcn: LiquidButton, etc.) ──
         // Mapeados a las CSS vars del tema LifeQuest (globals.css). No colisionan

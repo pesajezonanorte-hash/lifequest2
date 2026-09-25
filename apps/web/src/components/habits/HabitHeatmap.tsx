@@ -7,11 +7,11 @@ interface Props {
 }
 
 function getColor(entry: HeatmapEntry | undefined): string {
-  if (!entry) return '#1a1033';
-  if (entry.status === 'completed') return '#6bcf7f';
-  if (entry.status === 'skipped') return '#ffd23f44';
-  if (entry.status === 'failed') return '#ff4757';
-  return '#1a1033';
+  if (!entry) return 'var(--bg-muted)';
+  if (entry.status === 'completed') return 'var(--accent-green)';
+  if (entry.status === 'skipped') return 'color-mix(in oklab, var(--accent-gold) 28%, transparent)';
+  if (entry.status === 'failed') return 'var(--accent-red)';
+  return 'var(--bg-muted)';
 }
 
 export function HabitHeatmap({ entries, days = 30 }: Props) {
@@ -38,7 +38,7 @@ export function HabitHeatmap({ entries, days = 30 }: Props) {
           className="w-3.5 h-3.5 border border-border-pixel/30 cursor-help"
           style={{
             backgroundColor: isFuture ? 'transparent' : getColor(entry),
-            borderColor: isToday ? '#ffd23f' : undefined,
+            borderColor: isToday ? 'var(--accent-gold)' : undefined,
             borderWidth: isToday ? '2px' : undefined,
           }}
           initial={{ scale: 0 }}

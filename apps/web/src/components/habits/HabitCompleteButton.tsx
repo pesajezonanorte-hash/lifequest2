@@ -22,10 +22,10 @@ export function HabitCompleteButton({ status, onLog, disabled }: Props) {
   }
 
   function getButtonStyle() {
-    if (status === 'completed') return { bg: '#6bcf7f', label: '✓', pulse: false };
-    if (status === 'failed') return { bg: '#ff4757', label: '✗', pulse: false };
-    if (status === 'skipped') return { bg: '#ffd23f44', label: '~', pulse: false };
-    return { bg: '#3d2a5e', label: '?', pulse: true };
+    if (status === 'completed') return { bg: 'var(--accent-green)', label: '✓', pulse: false };
+    if (status === 'failed') return { bg: 'var(--accent-red)', label: '✗', pulse: false };
+    if (status === 'skipped') return { bg: 'color-mix(in oklab, var(--accent-gold) 28%, transparent)', label: '~', pulse: false };
+    return { bg: 'var(--bg-muted)', label: '?', pulse: true };
   }
 
   const btn = getButtonStyle();

@@ -62,7 +62,7 @@ export function RestTimer({ onClose }: { onClose: () => void }) {
   const radius = 54;
   const circ = 2 * Math.PI * radius;
   const strokeDash = (pct / 100) * circ;
-  const color = remaining !== null && remaining <= 10 ? '#ef4444' : remaining !== null && remaining <= 30 ? '#f59e0b' : '#22c55e';
+  const color = remaining !== null && remaining <= 10 ? 'var(--accent-red)' : remaining !== null && remaining <= 30 ? 'var(--accent-gold)' : 'var(--accent-green)';
 
   return (
     <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>

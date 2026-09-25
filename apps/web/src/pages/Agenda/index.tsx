@@ -10,17 +10,17 @@ import type { AgendaEvent } from '../../services/agenda.service';
 type ViewMode = 'day' | 'week' | 'month';
 
 const CATEGORIES = [
-  { key: 'personal',   label: 'Personal',   emoji: '🏠', color: '#8b5cf6' },
-  { key: 'work',       label: 'Trabajo',    emoji: '💼', color: '#3b82f6' },
-  { key: 'health',     label: 'Salud',      emoji: '🏥', color: '#10b981' },
-  { key: 'social',     label: 'Social',     emoji: '🎉', color: '#f59e0b' },
-  { key: 'romantic',   label: 'Romántico',  emoji: '💖', color: '#ec4899' },
-  { key: 'finance',    label: 'Finanzas',   emoji: '💰', color: '#fbbf24' },
-  { key: 'tarea',      label: 'Tarea',      emoji: '📚', color: '#ef4444' },
-  { key: 'examen',     label: 'Examen',     emoji: '📝', color: '#dc2626' },
-  { key: 'exposicion', label: 'Exposición', emoji: '🗣️', color: '#c026d3' },
-  { key: 'clase',      label: 'Clase',      emoji: '🎒', color: '#0ea5e9' },
-  { key: 'other',      label: 'Otro',       emoji: '📦', color: '#6b7280' },
+  { key: 'personal',   label: 'Personal',   emoji: '🏠', color: '#5c5c64' },
+  { key: 'work',       label: 'Trabajo',    emoji: '💼', color: '#2a2a2e' },
+  { key: 'health',     label: 'Salud',      emoji: '🏥', color: 'var(--accent-green)' },
+  { key: 'social',     label: 'Social',     emoji: '🎉', color: '#8a8a92' },
+  { key: 'romantic',   label: 'Romántico',  emoji: '💖', color: 'var(--accent-red)' },
+  { key: 'finance',    label: 'Finanzas',   emoji: '💰', color: 'var(--accent-gold)' },
+  { key: 'tarea',      label: 'Tarea',      emoji: '📚', color: '#a1a1aa' },
+  { key: 'examen',     label: 'Examen',     emoji: '📝', color: '#3a3a40' },
+  { key: 'exposicion', label: 'Exposición', emoji: '🗣️', color: '#6b6b73' },
+  { key: 'clase',      label: 'Clase',      emoji: '🎒', color: '#c0c0c8' },
+  { key: 'other',      label: 'Otro',       emoji: '📦', color: '#8f8f98' },
 ];
 
 const REMINDERS = [

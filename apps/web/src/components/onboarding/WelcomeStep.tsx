@@ -52,7 +52,7 @@ export function WelcomeStep({ gender, avatarConfig, onNext }: Props) {
         >
           <h1
             className="font-pixel leading-relaxed text-accent-gold"
-            style={{ fontSize: '14px', textShadow: '3px 3px 0 #0d0620' }}
+            style={{ fontSize: '14px', textShadow: '3px 3px 0 rgba(0,0,0,0.55)' }}
           >
             {getWelcomeLabel(gender).toUpperCase()},
             <br />

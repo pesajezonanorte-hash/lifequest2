@@ -53,12 +53,12 @@ interface AISuggestion {
 }
 
 const COLOR_PALETTE = [
-  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
-  '#f59e0b', '#10b981', '#06b6d4', '#3b82f6',
+  '#2a2a2e', '#5c5c64', '#8a8a92', '#c0c0c8',
+  '#a8871e', '#4a825f', '#b5453a', '#d9b44a',
 ];
 
 const DIFFICULTY_LABELS: Record<string, string> = { EASY: 'Fácil', NORMAL: 'Normal', HARD: 'Difícil' };
-const DIFFICULTY_COLORS: Record<string, string> = { EASY: '#10b981', NORMAL: '#f59e0b', HARD: '#ef4444' };
+const DIFFICULTY_COLORS: Record<string, string> = { EASY: 'var(--text-muted)', NORMAL: 'var(--text-secondary)', HARD: 'var(--text-primary)' };
 
 // Detect if an action type creates a habit or quest
 function actionCreatesHabit(type: string) {
@@ -384,7 +384,7 @@ function ZoneCard({ zone: initialZone, onDelete }: { zone: CustomZone; onDelete:
                           {h.currentStreak > 0 && (
                             <span
                               className="text-[10px] font-bold flex-shrink-0 px-1.5 py-0.5 rounded"
-                              style={{ background: 'rgba(245,158,11,0.15)', color: 'var(--accent-gold)' }}
+                              style={{ background: 'color-mix(in oklab, var(--accent-gold) 15%, transparent)', color: 'var(--accent-gold)' }}
                             >
                               🔥 {h.currentStreak}d
                             </span>
@@ -421,7 +421,7 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
-  const [editedColor, setEditedColor] = useState('#6366f1');
+  const [editedColor, setEditedColor] = useState('#5c5c64');
   const [editedIcon, setEditedIcon] = useState('📍');
   const [isMeasurable, setIsMeasurable] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -432,7 +432,7 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
     try {
       const { data } = await api.post('/custom-zones/suggest', { description });
       setSuggestion(data);
-      setEditedColor(data.color ?? '#6366f1');
+      setEditedColor(data.color ?? '#5c5c64');
       setEditedIcon(data.icon ?? '📍');
       setIsMeasurable(data.isMeasurable ?? false);
       setStep(2);

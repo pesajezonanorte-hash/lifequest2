@@ -16,7 +16,7 @@ const ICON_OPTIONS = ['💧', '🌙', '🧘', '📚', '🏋️', '🍎', '💊',
   '🎵', '🎮', '🌿', '☀️', '🏃', '🚴', '💻', '📝', '🎯', '⭐',
   '💪', '🧠', '💰', '🎨', '🤸', '🥗', '😴', '🧘', '📖', '🌊'];
 
-const COLOR_OPTIONS = ['#ffd23f', '#4d96ff', '#6bcf7f', '#ff6b9d', '#9d4edd', '#ff6b6b', '#4ecdc4', '#ff9f43'];
+const COLOR_OPTIONS = ['#17171a', '#52525b', '#8a8a92', '#c0c0c8', '#a8871e', '#b0332a', '#3f7a55', '#d9b44a'];
 
 interface Props {
   onSubmit: (data: CreateHabitPayload) => Promise<void>;
@@ -34,7 +34,7 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
     description: initial?.description ?? '',
     category: initial?.category ?? 'HEALTH',
     icon: initial?.icon ?? '⭐',
-    color: initial?.color ?? '#ffd23f',
+    color: initial?.color ?? '#a8871e',
     xpReward: initial?.xpReward ?? 20,
     goldReward: initial?.goldReward ?? 5,
     reminderTime: initial?.reminderTime ?? '',
@@ -144,10 +144,10 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
                       onClick={() => setForm((f) => ({ ...f, color }))}
                       aria-label={`Seleccionar color ${color}`}
                       aria-pressed={selected}
-                      className={`relative flex h-8 w-8 items-center justify-center rounded-full transition-all hover:scale-110 ${selected ? 'scale-110 ring-2 ring-white ring-offset-2 ring-offset-[var(--bg-panel)]' : 'ring-1 ring-white/20'}`}
+                      className={`relative flex h-8 w-8 items-center justify-center rounded-full transition-all hover:scale-110 ${selected ? 'scale-110 ring-2 ring-[var(--text-primary)] ring-offset-2 ring-offset-[var(--bg-panel)]' : 'ring-1 ring-[var(--border-strong)]'}`}
                       style={{ backgroundColor: color }}
                     >
-                      {selected && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-[10px] font-bold leading-none text-white">✓</span>}
+                      {selected && <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-panel)] text-[10px] font-bold leading-none text-[var(--text-primary)]">✓</span>}
                     </button>
                   );
                 })}
@@ -165,10 +165,10 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
                       onClick={() => setForm((f) => ({ ...f, category: cat }))}
                       aria-label={`Seleccionar categoría ${cat.toLowerCase()}`}
                       aria-pressed={selected}
-                      className={`relative rounded-lg border-2 p-2 text-center text-xl transition-all ${selected ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 shadow-[0_0_10px_rgba(255,210,63,0.35)]' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'}`}
+                      className={`relative rounded-lg border-2 p-2 text-center text-xl transition-all ${selected ? 'border-[var(--text-primary)] bg-[var(--bg-muted)] shadow-[0_0_10px_rgba(0,0,0,0.18)]' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'}`}
                     >
                       {CATEGORY_ICONS[cat]}
-                      {selected && <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent-gold)] text-[10px] font-bold leading-none text-black">✓</span>}
+                      {selected && <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--text-primary)] text-[10px] font-bold leading-none text-[var(--text-inv)]">✓</span>}
                     </button>
                   );
                 })}

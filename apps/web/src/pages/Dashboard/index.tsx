@@ -136,9 +136,9 @@ function LifeScoreWidget({ score }: { score: LifeScore }) {
   const habits = Math.round(score.breakdown.habits ?? 0);
   const finances = Math.round(score.breakdown.finances ?? 0);
   const rows = [
-    { label: 'Misiones', value: quests, color: '#ec4899' },
-    { label: 'Hábitos', value: habits, color: '#3b82f6' },
-    { label: 'Finanzas', value: finances, color: '#f59e0b' },
+    { label: 'Misiones', value: quests, color: '#2a2a2e' },
+    { label: 'Hábitos', value: habits, color: '#8a8a92' },
+    { label: 'Finanzas', value: finances, color: '#a8871e' },
   ];
 
   return (
@@ -190,7 +190,7 @@ function WeeklySummaryCard({ summary }: { summary: WeeklySummaryCardData }) {
           <p className="text-xs font-semibold uppercase tracking-wide text-[var(--accent-gold)]">📊 Resumen semanal</p>
           <p className="text-xs text-[var(--text-secondary)]">{weekLabel}</p>
         </div>
-        <div className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'rgba(245,158,11,0.12)', color: 'var(--accent-gold)' }}>
+        <div className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'rgba(217,180,74,0.12)', color: 'var(--accent-gold)' }}>
           {summary.lifeScore}/100
         </div>
       </div>
@@ -207,9 +207,9 @@ function RecoveryChallengeCard({ challenge }: { challenge: RecoveryChallengeData
     <PixelPanel
       className="p-4"
       style={{
-        border: '1px solid rgba(245,158,11,0.5)',
-        boxShadow: '0 0 0 1px rgba(245,158,11,0.15), 0 16px 36px rgba(245,158,11,0.12)',
-        background: 'linear-gradient(145deg, rgba(245,158,11,0.12), rgba(15,17,23,0.02))',
+        border: '1px solid rgba(217,180,74,0.5)',
+        boxShadow: '0 0 0 1px rgba(217,180,74,0.15), 0 16px 36px rgba(217,180,74,0.12)',
+        background: 'linear-gradient(145deg, rgba(217,180,74,0.12), rgba(15,17,23,0.02))',
       }}
     >
       <div className="flex items-start gap-3">
@@ -302,7 +302,7 @@ function RecoveryOverlay({ open, bonusXp }: { open: boolean; bonusXp: number }) 
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.94, y: 10 }}
             className="relative overflow-hidden rounded-3xl border px-8 py-10 text-center"
-            style={{ borderColor: 'rgba(245,158,11,0.5)', background: 'linear-gradient(180deg, rgba(245,158,11,0.16), rgba(0,0,0,0.45))' }}
+            style={{ borderColor: 'rgba(217,180,74,0.5)', background: 'linear-gradient(180deg, rgba(217,180,74,0.16), rgba(0,0,0,0.45))' }}
           >
             <div className="absolute inset-0 pointer-events-none">
               {Array.from({ length: 8 }, (_, index) => (
@@ -413,7 +413,7 @@ export default function DashboardPage() {
     try {
       const result = await logHabit(habitId, 'completed');
       addFloatingXP(result.rewards?.xpEarned ?? 0, window.innerWidth / 2, 200);
-      flashScreen('#6bcf7f');
+      flashScreen('#4a825f');
       if (result.rewards?.leveledUp && result.rewards.newLevel) {
         triggerLevelUp({
           oldLevel: Math.max(1, result.rewards.newLevel - 1),

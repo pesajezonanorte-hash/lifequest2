@@ -44,7 +44,7 @@ export function QuickStatsWidget({ sleepAvg7d, monthBalance, lastWorkoutDaysAgo 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
-          whileHover={{ y: -2, borderColor: '#ffd23f' }}
+          whileHover={{ y: -2, borderColor: '#a8871e' }}
         >
           <span className="absolute top-0 left-0 w-1.5 h-1.5 bg-border-pixel" />
           <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-border-pixel" />

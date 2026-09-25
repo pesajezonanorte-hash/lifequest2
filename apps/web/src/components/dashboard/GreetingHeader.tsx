@@ -75,11 +75,11 @@ export function GreetingHeader({ displayName, currentStreak, createdAt, gender =
       style={{
         borderRadius: 18,
         background: `
-          radial-gradient(circle at 85% 20%, color-mix(in oklab, #ec4899 28%, transparent), transparent 50%),
-          radial-gradient(circle at 15% 80%, color-mix(in oklab, #6366f1 32%, transparent), transparent 55%),
-          linear-gradient(135deg, color-mix(in oklab, var(--primary) 14%, var(--surface)), var(--surface))
+          radial-gradient(circle at 85% 20%, color-mix(in oklab, var(--text-primary) 4%, transparent), transparent 50%),
+          radial-gradient(circle at 15% 80%, color-mix(in oklab, var(--text-primary) 5%, transparent), transparent 55%),
+          linear-gradient(135deg, color-mix(in oklab, var(--text-primary) 3%, var(--surface)), var(--surface))
         `,
-        border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
+        border: '1px solid color-mix(in oklab, var(--text-primary) 10%, var(--border))',
         boxShadow: '0 18px 50px rgba(0,0,0,.18), 0 2px 4px rgba(0,0,0,.04)',
       }}
     >

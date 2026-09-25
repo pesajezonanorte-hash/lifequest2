@@ -66,8 +66,8 @@ export function WhatToDoWidget() {
             onClick={() => navigate(TYPE_ROUTES[p.type] ?? '/')}
             className="w-full flex items-center gap-3 text-left rounded-xl px-3 py-2.5 transition-colors"
             style={{
-              background: p.urgent ? 'rgba(251,191,36,0.08)' : 'var(--bg-panel-light)',
-              border: `1px solid ${p.urgent ? 'rgba(251,191,36,0.3)' : 'var(--border)'}`,
+              background: p.urgent ? 'color-mix(in oklab, var(--accent-gold) 10%, transparent)' : 'var(--bg-panel-light)',
+              border: `1px solid ${p.urgent ? 'color-mix(in oklab, var(--accent-gold) 35%, transparent)' : 'var(--border)'}`,
             }}
           >
             <span className="text-xl flex-shrink-0">{p.icon}</span>

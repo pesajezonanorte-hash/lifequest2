@@ -96,8 +96,8 @@ export function StarCanvas({ zone }: Props) {
 
       // Corner nebula gradients
       const corners = [
-        { cx: w * 0.05, cy: h * 0.05, r: w * 0.45, color: 'rgba(70,15,110,0.045)' },
-        { cx: w * 0.95, cy: h * 0.85, r: w * 0.4, color: 'rgba(15,35,90,0.04)' },
+        { cx: w * 0.05, cy: h * 0.05, r: w * 0.45, color: 'rgba(120,120,128,0.045)' },
+        { cx: w * 0.95, cy: h * 0.85, r: w * 0.4, color: 'rgba(90,90,98,0.04)' },
       ];
       for (const c of corners) {
         const g = ctx.createRadialGradient(c.cx, c.cy, 0, c.cx, c.cy, c.r);
@@ -107,22 +107,22 @@ export function StarCanvas({ zone }: Props) {
         ctx.fillRect(0, 0, w, h);
       }
 
-      // Zone-specific tint
+      // Zone-specific tint (neutros B&N; susurro dorado en finanzas)
       if (zone === 'gym') {
         const g = ctx.createRadialGradient(w / 2, h, 0, w / 2, h, h * 0.6);
-        g.addColorStop(0, 'rgba(255,71,87,0.025)');
+        g.addColorStop(0, 'rgba(120,120,128,0.025)');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, w, h);
       } else if (zone === 'sleep') {
         const g = ctx.createRadialGradient(w * 0.8, 0, 0, w * 0.8, 0, h * 0.8);
-        g.addColorStop(0, 'rgba(78,205,196,0.04)');
+        g.addColorStop(0, 'rgba(120,120,128,0.035)');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, w, h);
       } else if (zone === 'finances') {
         const g = ctx.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, w * 0.5);
-        g.addColorStop(0, 'rgba(255,210,63,0.02)');
+        g.addColorStop(0, 'rgba(217,180,74,0.025)');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, w, h);
@@ -159,9 +159,9 @@ export function StarCanvas({ zone }: Props) {
           if (s.x > w + 2) s.x = -2;
           if (s.y < -2) s.y = h + 2;
           if (s.y > h + 2) s.y = -2;
-          ctx.fillStyle = `rgba(180,210,255,${alpha})`;
+          ctx.fillStyle = `rgba(232,232,238,${alpha})`;
         } else {
-          ctx.fillStyle = `rgba(255,248,210,${alpha})`;
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
         }
         ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.size, s.size);
       }
@@ -190,8 +190,8 @@ export function StarCanvas({ zone }: Props) {
         const alpha = p < 0.75 ? 1 : (1 - p) / 0.25;
 
         const grad = ctx.createLinearGradient(tx, ty, cx, cy);
-        grad.addColorStop(0, 'rgba(255,255,220,0)');
-        grad.addColorStop(1, `rgba(255,255,220,${alpha})`);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(1, `rgba(255,255,255,${alpha})`);
         ctx.strokeStyle = grad;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -211,7 +211,7 @@ export function StarCanvas({ zone }: Props) {
           d.x = Math.random() * w;
         }
         const glow = Math.sin(timestamp * 0.002 + d.x) * 0.12 + 0.88;
-        ctx.fillStyle = `rgba(255,210,63,${d.opacity * glow})`;
+        ctx.fillStyle = `rgba(217,180,74,${d.opacity * glow})`;
         ctx.fillRect(Math.floor(d.x), Math.floor(d.y), 1, 1);
       }
 

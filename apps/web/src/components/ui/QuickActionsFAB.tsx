@@ -14,11 +14,11 @@ import type { Habit } from '../../services/habit.service';
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
 
 const ACTIONS: { icon: React.ReactNode; label: string; color: string; modal: ModalType; emoji: string }[] = [
-  { icon: <Swords size={16} />, label: 'Nueva Quest',   color: '#ffd23f', modal: 'quest',   emoji: '⚔️' },
-  { icon: <Wallet size={16} />, label: 'Gasto rápido',  color: '#4ade80', modal: 'expense', emoji: '💸' },
-  { icon: <Flame size={16} />,  label: 'Marcar hábito', color: '#f87171', modal: 'habit',   emoji: '🔥' },
-  { icon: <NotebookPen size={16} />, label: 'Nota rápida', color: '#22d3ee', modal: 'note', emoji: '✍️' },
-  { icon: <Zap size={16} />,    label: 'Check-in',      color: '#a78bfa', modal: 'checkin', emoji: '⚡' },
+  { icon: <Swords size={16} />, label: 'Nueva Quest',   color: '#a8871e', modal: 'quest',   emoji: '⚔️' },
+  { icon: <Wallet size={16} />, label: 'Gasto rápido',  color: '#5c5c64', modal: 'expense', emoji: '💸' },
+  { icon: <Flame size={16} />,  label: 'Marcar hábito', color: '#b5453a', modal: 'habit',   emoji: '🔥' },
+  { icon: <NotebookPen size={16} />, label: 'Nota rápida', color: '#8f8f98', modal: 'note', emoji: '✍️' },
+  { icon: <Zap size={16} />,    label: 'Check-in',      color: '#6b6b73', modal: 'checkin', emoji: '⚡' },
 ];
 
 // ── Quest Modal ──────────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ function QuestModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
       <div className="flex gap-1.5 mt-2">
         {(['DAILY', 'SIDE', 'MAIN'] as const).map(t => (
           <button key={t} onClick={() => setType(t)} className="flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all"
-            style={{ border: `1px solid ${type === t ? 'var(--accent-gold)' : 'var(--border)'}`, background: type === t ? 'rgba(255,210,63,0.12)' : 'transparent', color: type === t ? 'var(--accent-gold)' : 'var(--text-muted)' }}>
+            style={{ border: `1px solid ${type === t ? 'var(--accent-gold)' : 'var(--border)'}`, background: type === t ? 'color-mix(in oklab, var(--accent-gold) 12%, transparent)' : 'transparent', color: type === t ? 'var(--accent-gold)' : 'var(--text-muted)' }}>
             {t === 'DAILY' ? '📅 Diaria' : t === 'SIDE' ? '📜 Side' : '⚔️ Main'}
           </button>
         ))}
@@ -396,12 +396,12 @@ export function QuickActionsFAB() {
           className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl relative z-10"
           style={{
             background: open
-              ? 'linear-gradient(135deg, #f87171, #ffd23f)'
+              ? 'linear-gradient(135deg, #2a2a2e, #0a0a0a)'
               : 'linear-gradient(135deg, var(--accent-gold), var(--accent-cyan))',
             border: 'none',
             color: '#fff',
             boxShadow: open
-              ? '0 8px 28px rgba(248,113,113,0.4)'
+              ? '0 8px 28px rgba(0,0,0,0.35)'
               : '0 8px 28px rgba(0,0,0,0.35), 0 0 0 3px rgba(255,210,63,0.15)',
             transition: 'background 0.3s ease, box-shadow 0.3s ease',
           }}

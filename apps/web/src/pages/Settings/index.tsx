@@ -11,12 +11,12 @@ import { requestPermissionAndSubscribe, sendTestNotification } from '../../servi
 import api from '../../lib/api';
 
 const THEMES = [
-  { id: 'aurora', name: 'Aurora', cost: 0, description: 'RPG clásico oscuro', emoji: '🌌', preview: '#1a0d2e' },
-  { id: 'cyber', name: 'Cyber', cost: 200, description: 'Neon cyberpunk', emoji: '🤖', preview: '#001a33' },
-  { id: 'forest', name: 'Forest', cost: 200, description: 'Bosque encantado', emoji: '🌲', preview: '#122214' },
-  { id: 'ocean', name: 'Ocean', cost: 200, description: 'Profundidades marinas', emoji: '🌊', preview: '#041e33' },
-  { id: 'sunset', name: 'Sunset', cost: 300, description: 'Atardecer dorado', emoji: '🌅', preview: '#2d1300' },
-  { id: 'retro', name: 'Retro SNES', cost: 500, description: '16-bit clásico', emoji: '🕹️', preview: '#16213e' },
+  { id: 'aurora', name: 'Aurora', cost: 0, description: 'B&N clásico profundo', emoji: '🌌', preview: '#111113' },
+  { id: 'cyber', name: 'Cyber', cost: 200, description: 'B&N alto contraste', emoji: '🤖', preview: '#000000' },
+  { id: 'forest', name: 'Forest', cost: 200, description: 'Neutros cálidos', emoji: '🌲', preview: '#151411' },
+  { id: 'ocean', name: 'Ocean', cost: 200, description: 'Neutros fríos', emoji: '🌊', preview: '#121316' },
+  { id: 'sunset', name: 'Sunset', cost: 300, description: 'Contraste suave', emoji: '🌅', preview: '#1a1a1a' },
+  { id: 'retro', name: 'Retro SNES', cost: 500, description: '16-bit blanco y negro', emoji: '🕹️', preview: '#141414' },
 ];
 
 type ThemeMode = 'dark' | 'light' | 'system';
@@ -37,7 +37,7 @@ function useThemeMode() {
   const [mode, setMode] = useState<ThemeMode>(() => {
     const stored = localStorage.getItem('theme');
     if (stored === 'light' || stored === 'system') return stored;
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => { applyTheme(mode); }, [mode]);

@@ -87,7 +87,7 @@ export default function QuestsPage() {
 
     // Optimistic update
     setQuests(prev => prev.map(q => q.id === quest.id ? { ...q, status: 'COMPLETED' as const } : q));
-    flashScreen('#ffd23f');
+    flashScreen('#a8871e');
 
     try {
       const result = await questService.completeQuest(quest.id);

@@ -28,7 +28,7 @@ export function BossWidget() {
 
   const { season, userDamage } = data;
   const pct = Math.max(0, (season.currentHp / season.bossHp) * 100);
-  const color = pct > 60 ? '#6bcf7f' : pct > 30 ? '#ffd23f' : '#ff6b35';
+  const color = pct > 60 ? 'var(--accent-green)' : pct > 30 ? 'var(--accent-gold)' : 'var(--accent-red)';
   const daysLeft = Math.max(0, Math.ceil((new Date(season.endDate).getTime() - Date.now()) / 86400000));
 
   return (
@@ -46,7 +46,7 @@ export function BossWidget() {
           animate={{ y: [0, -3, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <Skull size={32} className="text-[#e53e3e]" />
+          <Skull size={32} className="text-accent-red" />
         </motion.div>
 
         <div className="flex-1 min-w-0">

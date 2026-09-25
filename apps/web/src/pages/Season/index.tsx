@@ -42,7 +42,7 @@ interface SeasonData {
 
 function BossHealthBar({ current, max }: { current: number; max: number }) {
   const pct = Math.max(0, (current / max) * 100);
-  const color = pct > 60 ? '#6bcf7f' : pct > 30 ? '#ffd23f' : '#ff6b35';
+  const color = pct > 60 ? 'var(--accent-green)' : pct > 30 ? 'var(--accent-gold)' : 'var(--accent-red)';
 
   return (
     <div className="w-full">
@@ -96,7 +96,7 @@ function BossSprite({ defeated }: { defeated: boolean }) {
       transition={defeated ? {} : { duration: 3, repeat: Infinity, ease: 'easeInOut' }}
       className="flex flex-col items-center"
     >
-      <Skull size={80} className={defeated ? 'text-[#555]' : 'text-[#e53e3e]'} />
+      <Skull size={80} className={defeated ? 'text-[#555]' : 'text-accent-red'} />
       {!defeated && (
         <motion.div
           className="w-20 h-1 bg-accent-red/30 rounded-full mt-2"
@@ -163,7 +163,7 @@ export default function SeasonPage() {
     <div className="space-y-6">
       {/* Header épico */}
       <div className="text-center space-y-1">
-        <h1 className="font-pixel text-accent-red" style={{ fontSize: '14px', textShadow: '3px 3px 0 #0d0620, 0 0 20px rgba(229,62,62,0.5)' }}>
+        <h1 className="font-pixel text-accent-red" style={{ fontSize: '14px', textShadow: '3px 3px 0 rgba(0,0,0,0.55), 0 0 20px color-mix(in oklab, var(--accent-red) 50%, transparent)' }}>
           {season.name}
         </h1>
         <p className="font-vt text-text-secondary text-xl">{season.description}</p>

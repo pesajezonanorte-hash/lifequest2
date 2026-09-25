@@ -36,7 +36,7 @@ export function TodayQuestsWidget({ quests, onQuestCompleted }: Props) {
       updateUser(result.user);
       setCompletedIds((prev) => new Set([...prev, quest.id]));
 
-      flashScreen('#ffd23f');
+      flashScreen('#a8871e');
       addFloatingXP(result.rewards.xpEarned, rect.x + rect.width / 2, rect.y);
 
       if (result.rewards.leveledUp && result.rewards.newLevel) {

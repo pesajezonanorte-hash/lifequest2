@@ -73,7 +73,7 @@ function ActivityHeatmap({ data }: { data: { date: string; count: number }[] }) 
 
 // ─── Mood Heatmap ──────────────────────────────────────────────────────────
 
-const MOOD_COLORS = ['', '#ef4444', '#fb923c', '#fbbf24', '#86efac', '#34d399'];
+const MOOD_COLORS = ['', '#b5453a', '#a8a8b0', '#8a8a92', '#6cb98a', '#3f7a55'];
 
 function MoodHeatmap({ checkins }: { checkins: DailyCheckin[] }) {
   const now = new Date();
@@ -165,8 +165,8 @@ function ShareButton({ user, score }: { user: any; score: LifeScore | null }) {
 
     // Background
     const grad = ctx.createLinearGradient(0, 0, 600, 380);
-    grad.addColorStop(0, '#0d0a1a');
-    grad.addColorStop(1, '#110e2b');
+    grad.addColorStop(0, '#141416');
+    grad.addColorStop(1, '#0c0c0e');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 600, 380);
 
@@ -177,7 +177,7 @@ function ShareButton({ user, score }: { user: any; score: LifeScore | null }) {
     ctx.stroke();
 
     // Title
-    ctx.fillStyle = '#ffd23f';
+    ctx.fillStyle = '#d9b44a';
     ctx.font = 'bold 28px system-ui';
     ctx.fillText('LifeQuest', 32, 56);
 
@@ -189,7 +189,7 @@ function ShareButton({ user, score }: { user: any; score: LifeScore | null }) {
     ctx.fillStyle = '#ffd23f22';
     ctx.roundRect(32, 104, 110, 36, 8);
     ctx.fill();
-    ctx.fillStyle = '#ffd23f';
+    ctx.fillStyle = '#d9b44a';
     ctx.font = 'bold 18px system-ui';
     ctx.fillText(`Nivel ${user?.level ?? 1}`, 50, 128);
 

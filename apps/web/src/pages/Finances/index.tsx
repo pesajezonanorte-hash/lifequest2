@@ -23,7 +23,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   SAVINGS: 'Ahorro', INVESTMENT: 'Inversión', SUBSCRIPTIONS: 'Suscripciones', OTHER: 'Otros',
 };
 
-const COP_COLORS = ['#ffd23f', '#6bcf7f', '#4d96ff', '#ff6b6b', '#c77dff', '#ff9f43', '#48dbfb', '#ff9ff3', '#1dd1a1', '#feca57', '#54a0ff', '#5f27cd'];
+const COP_COLORS = ['#a8871e', '#2a2a2e', '#4a4a52', '#6b6b73', '#8a8a92', '#a1a1aa', '#c0c0c8', '#5c5c64', '#bdbdc5', '#7a7a82', '#d4d4dc', '#3a3a40'];
 
 function formatCOP(amount: number) {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);

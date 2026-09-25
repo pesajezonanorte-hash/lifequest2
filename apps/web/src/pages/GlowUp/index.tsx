@@ -252,7 +252,7 @@ function StyleSection() {
           {[
             { key: 'name', label: 'Nombre', placeholder: 'Camiseta azul...' },
             { key: 'brand', label: 'Marca', placeholder: 'Zara, Nike...' },
-            { key: 'color', label: 'Color', placeholder: '#3b82f6' },
+            { key: 'color', label: 'Color', placeholder: '#8a8a92' },
             { key: 'cost', label: 'Precio (COP)', placeholder: '50000' },
           ].map(f => (
             <input key={f.key}

@@ -149,7 +149,7 @@ export const QuestCard = memo(function QuestCard({ quest, onComplete, onClick }:
       {quest.difficulty === 'EPIC' && !isInactive && (
         <motion.div
           className="absolute inset-0 pointer-events-none rounded-xl border-2"
-          style={{ borderColor: '#ffd23f' }}
+          style={{ borderColor: 'var(--accent-gold)' }}
           animate={{ opacity: [0.35, 0.85, 0.35] }}
           transition={{ duration: 2, repeat: Infinity }}
         />

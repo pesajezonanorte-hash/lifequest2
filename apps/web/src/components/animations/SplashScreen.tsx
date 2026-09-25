@@ -99,7 +99,7 @@ export function SplashScreen({ onDone }: Props) {
       {!exiting && (
         <motion.div
           className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden"
-          style={{ background: 'radial-gradient(ellipse at 50% 40%, #221045 0%, #0d0620 100%)', zIndex: 300 }}
+          style={{ background: 'radial-gradient(ellipse at 50% 40%, #1c1c1f 0%, #0a0a0a 100%)', zIndex: 300 }}
           exit={{ opacity: 0, scale: 1.04 }}
           transition={{ duration: 0.45 }}
         >
@@ -135,8 +135,8 @@ export function SplashScreen({ onDone }: Props) {
               style={{
                 fontSize: 'clamp(14px, 4vw, 24px)',
                 letterSpacing: '3px',
-                color: '#ffd23f',
-                textShadow: '3px 3px 0 #0d0620, 0 0 24px rgba(255,210,63,0.45)',
+                color: '#d9b44a',
+                textShadow: '3px 3px 0 rgba(0,0,0,0.55), 0 0 24px rgba(217,180,74,0.4)',
               }}
               initial={{ opacity: 0, y: 8 }}
               animate={lettersShown > 2 ? { opacity: 1, y: 0 } : {}}

@@ -54,7 +54,7 @@ const CATEGORIES: Array<{ id: Category; label: string; icon: React.ReactNode; un
   { id: 'savings', label: 'Ahorro',       icon: <PiggyBank size={16} />, unit: '%' },
 ];
 
-const RANK_COLORS = ['#ffd700', '#c0c0c0', '#cd7f32'];
+const RANK_COLORS = ['#a8871e', '#bdbdc5', '#8a8a92'];
 const RANK_EMOJI  = ['👑', '🥈', '🥉'];
 
 export default function LeaderboardPage() {
@@ -326,7 +326,7 @@ export default function LeaderboardPage() {
                     ) : (
                       <span
                         className="font-pixel"
-                        style={{ fontSize: '10px', color: rankColor || '#6b7280' }}
+                        style={{ fontSize: '10px', color: rankColor || '#8a8a92' }}
                       >
                         #{entry.rank}
                       </span>

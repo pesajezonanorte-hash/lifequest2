@@ -6,11 +6,11 @@ interface Props {
 }
 
 function getFlameConfig(streak: number) {
-  if (streak >= 30) return { emoji: '🔥', label: `${streak}d`, color: '#ffd23f', glow: '#ffd23f', scale: 1.4, particles: true };
-  if (streak >= 7)  return { emoji: '🔥', label: `${streak}d`, color: '#ff6b35', glow: '#ff6b35', scale: 1.2, particles: false };
-  if (streak >= 3)  return { emoji: '🔥', label: `${streak}d`, color: '#ff4757', glow: '#ff4757', scale: 1.0, particles: false };
-  if (streak >= 1)  return { emoji: '🔥', label: `${streak}d`, color: '#ff6b6b', glow: '#ff4757', scale: 0.85, particles: false };
-  return { emoji: '💨', label: '0d', color: '#666', glow: 'transparent', scale: 0.7, particles: false };
+  if (streak >= 30) return { emoji: '🔥', label: `${streak}d`, color: 'var(--accent-gold)', glow: 'var(--accent-gold)', scale: 1.4, particles: true };
+  if (streak >= 7)  return { emoji: '🔥', label: `${streak}d`, color: 'color-mix(in oklab, var(--accent-gold) 85%, var(--text-primary))', glow: 'var(--accent-gold)', scale: 1.2, particles: false };
+  if (streak >= 3)  return { emoji: '🔥', label: `${streak}d`, color: 'color-mix(in oklab, var(--accent-gold) 65%, var(--text-muted))', glow: 'transparent', scale: 1.0, particles: false };
+  if (streak >= 1)  return { emoji: '🔥', label: `${streak}d`, color: 'color-mix(in oklab, var(--accent-gold) 45%, var(--text-muted))', glow: 'transparent', scale: 0.85, particles: false };
+  return { emoji: '💨', label: '0d', color: 'var(--text-muted)', glow: 'transparent', scale: 0.7, particles: false };
 }
 
 export function StreakFlame({ streak, size = 'md' }: Props) {

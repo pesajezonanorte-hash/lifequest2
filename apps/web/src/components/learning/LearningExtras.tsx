@@ -46,7 +46,7 @@ export function PomodoroTimer() {
             api.post('/learning/pomodoro').then((r: any) => {
               const xp = r.data?.xp ?? 15;
               addFloatingXP(xp, window.innerWidth / 2, 200);
-              flashScreen('#4d96ff');
+              flashScreen('#8f8f98');
               void refreshUser();
             }).catch(() => null);
             setSessions(n => n + 1);

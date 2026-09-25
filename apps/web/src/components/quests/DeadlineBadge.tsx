@@ -30,7 +30,7 @@ export function DeadlineBadge({ deadline }: Props) {
     );
   }
 
-  const color = daysLeft <= 3 ? '#ff6b6b' : daysLeft <= 7 ? '#ffd23f' : '#6bcf7f';
+  const color = daysLeft <= 3 ? 'var(--accent-red)' : daysLeft <= 7 ? 'var(--accent-gold)' : 'var(--accent-green)';
 
   return (
     <span

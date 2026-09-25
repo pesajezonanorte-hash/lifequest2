@@ -14,7 +14,7 @@ export function OnboardingProgress({ currentStep, totalSteps }: Props) {
           className="h-2 border-2 border-border-pixel"
           animate={{
             width: i < currentStep ? 32 : i === currentStep ? 24 : 16,
-            backgroundColor: i < currentStep ? '#ffd23f' : i === currentStep ? '#ffd23f' : '#2d1b4e',
+            backgroundColor: i < currentStep ? 'var(--accent-gold)' : i === currentStep ? 'var(--accent-gold)' : 'var(--border-strong)',
             opacity: i === currentStep ? 1 : i < currentStep ? 0.8 : 0.4,
           }}
           transition={{ duration: 0.3 }}

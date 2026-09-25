@@ -16,7 +16,7 @@ export function AchievementUnlockedToast() {
             exit={{ x: 320, opacity: 0 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             onClick={() => removeAchievementToast(toast.id)}
-            style={{ boxShadow: '0 0 20px #ffd23f44' }}
+            style={{ boxShadow: '0 0 20px color-mix(in oklab, var(--accent-gold) 30%, transparent)' }}
           >
             {/* Gold header bar */}
             <div className="bg-accent-gold px-3 py-1">

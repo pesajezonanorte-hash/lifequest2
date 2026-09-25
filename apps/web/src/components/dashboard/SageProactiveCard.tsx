@@ -13,9 +13,9 @@ interface ProactiveNote {
 }
 
 const TONE_STYLES: Record<string, { border: string; bg: string; badge: string }> = {
-  positive:    { border: 'var(--accent-green)', bg: 'rgba(34,197,94,0.07)',  badge: '#22c55e' },
-  warning:     { border: 'var(--accent-gold)',  bg: 'rgba(251,191,36,0.07)', badge: '#fbbf24' },
-  motivational:{ border: 'var(--accent-cyan)',  bg: 'rgba(34,211,238,0.07)', badge: '#22d3ee' },
+  positive:    { border: 'var(--accent-green)', bg: 'color-mix(in oklab, var(--accent-green) 8%, transparent)', badge: 'var(--accent-green)' },
+  warning:     { border: 'var(--accent-gold)',  bg: 'color-mix(in oklab, var(--accent-gold) 8%, transparent)',  badge: 'var(--accent-gold)' },
+  motivational:{ border: 'var(--accent-cyan)',  bg: 'color-mix(in oklab, var(--accent-cyan) 8%, transparent)',  badge: 'var(--accent-cyan)' },
   neutral:     { border: 'var(--border)',       bg: 'transparent',           badge: 'var(--text-muted)' },
 };
 
@@ -57,7 +57,7 @@ export function SageProactiveCard() {
       {note.isNew && (
         <span
           className="absolute top-3 right-3 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full"
-          style={{ background: style.badge, color: '#fff' }}
+          style={{ background: style.badge, color: 'var(--text-inv)' }}
         >
           Nuevo
         </span>

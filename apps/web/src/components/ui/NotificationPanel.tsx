@@ -91,7 +91,7 @@ export function NotificationBell() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full text-[10px] font-bold flex items-center justify-center"
-            style={{ background: 'var(--accent-red)', color: 'white' }}
+            style={{ background: 'var(--accent-red)', color: 'var(--text-inv)' }}
           >
             {unread > 9 ? '9+' : unread}
           </motion.span>

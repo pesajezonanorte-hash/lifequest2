@@ -26,11 +26,11 @@ export const PixelInput = forwardRef<HTMLInputElement, Props>(
           : 'border-[var(--border)]';
 
     const glowColor = error
-      ? 'rgba(255,71,87,0.25)'
+      ? 'rgba(181,69,58,0.28)'
       : success
-        ? 'rgba(107,207,127,0.25)'
+        ? 'rgba(74,130,95,0.28)'
         : focused
-          ? 'rgba(59,130,246,0.2)'
+          ? 'rgba(122,122,133,0.28)'
           : 'transparent';
 
     return (

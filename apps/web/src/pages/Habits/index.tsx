@@ -50,14 +50,14 @@ export default function HabitsPage() {
     setHabits(prev => prev.map(h =>
       h.id === habitId ? { ...h, todayStatus: status, todayCompleted: status === 'completed' } : h
     ));
-    if (status === 'completed') flashScreen('#6bcf7f');
+    if (status === 'completed') flashScreen('#4a825f');
 
     try {
       const result = await habitService.logHabit(habitId, status);
 
       if (result.rewards) {
         addFloatingXP(result.rewards.xpEarned, window.innerWidth / 2, window.innerHeight / 3);
-        flashScreen('#6bcf7f');
+        flashScreen('#4a825f');
 
         if (result.rewards.leveledUp && result.rewards.newLevel) {
           triggerLevelUp({

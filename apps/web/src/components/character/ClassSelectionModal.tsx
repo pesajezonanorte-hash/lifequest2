@@ -8,7 +8,7 @@ const CLASSES = [
     id: 'warrior',
     emoji: '⚔️',
     name: 'Guerrero',
-    color: '#ef4444',
+    color: '#2a2a2e',
     description: 'Maestro del fitness y la disciplina',
     bonus: '+20% XP en quests de Gym',
     statBonus: 'STR +2 por nivel',
@@ -17,7 +17,7 @@ const CLASSES = [
     id: 'mage',
     emoji: '🧙',
     name: 'Mago',
-    color: '#8b5cf6',
+    color: '#5c5c64',
     description: 'Sabio del conocimiento y la inteligencia',
     bonus: '+20% XP en quests de Aprendizaje',
     statBonus: 'INT +2 por nivel',
@@ -26,7 +26,7 @@ const CLASSES = [
     id: 'merchant',
     emoji: '💰',
     name: 'Mercader',
-    color: '#f59e0b',
+    color: '#a8871e',
     description: 'Maestro de las finanzas y el ahorro',
     bonus: '+20% GOLD en todas las quests',
     statBonus: 'Acumula riqueza más rápido',
@@ -35,7 +35,7 @@ const CLASSES = [
     id: 'paladin',
     emoji: '❤️',
     name: 'Paladín',
-    color: '#ec4899',
+    color: '#c0c0c8',
     description: 'Guardián de las relaciones y el bienestar',
     bonus: '+20% XP en quests de Love & Health',
     statBonus: 'CHA +2 por nivel',
@@ -80,13 +80,13 @@ export function ClassSelectionModal({ onClose }: Props) {
         exit={{ scale: 0.9 }}
         transition={{ type: 'spring', damping: 18 }}
       >
-        <div className="pixel-panel p-6" style={{ background: 'linear-gradient(135deg, #1a0a2e 0%, #0d1b4b 100%)' }}>
+        <div className="pixel-panel p-6" style={{ background: 'linear-gradient(135deg, var(--bg-panel-light) 0%, var(--bg-panel) 100%)' }}>
           {confirmed ? (
             <motion.div className="text-center py-8" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 12 }}>
               <p className="text-6xl mb-4">{cls?.emoji}</p>
-              <h2 className="pixel-text text-2xl text-yellow-300 mb-2">¡Clase Elegida!</h2>
-              <p className="text-purple-200 font-mono">Ahora eres un {cls?.name}</p>
-              <p className="text-sm text-purple-300 mt-2">{cls?.bonus}</p>
+              <h2 className="pixel-text text-2xl text-accent-gold mb-2">¡Clase Elegida!</h2>
+              <p className="text-[var(--text-primary)] font-mono">Ahora eres un {cls?.name}</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-2">{cls?.bonus}</p>
             </motion.div>
           ) : (
             <>

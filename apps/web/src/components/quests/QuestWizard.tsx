@@ -15,10 +15,10 @@ const QUEST_TYPES = [
 ] as const;
 
 const DIFFICULTIES = [
-  { key: 'EASY',   label: 'Fácil',  color: '#6bcf7f', baseXp: 25 },
-  { key: 'NORMAL', label: 'Normal', color: '#4d96ff', baseXp: 50 },
-  { key: 'HARD',   label: 'Difícil', color: '#9d4edd', baseXp: 100 },
-  { key: 'EPIC',   label: 'ÉPICA',  color: '#ffd23f', baseXp: 250 },
+  { key: 'EASY',   label: 'Fácil',  color: 'var(--text-muted)', baseXp: 25 },
+  { key: 'NORMAL', label: 'Normal', color: 'var(--text-secondary)', baseXp: 50 },
+  { key: 'HARD',   label: 'Difícil', color: 'var(--text-primary)', baseXp: 100 },
+  { key: 'EPIC',   label: 'ÉPICA',  color: 'var(--accent-gold)', baseXp: 250 },
 ] as const;
 
 const CATEGORIES = ['HEALTH', 'FITNESS', 'FINANCE', 'LEARNING', 'LOVE', 'SOCIAL', 'PERSONAL', 'CREATIVE'] as const;

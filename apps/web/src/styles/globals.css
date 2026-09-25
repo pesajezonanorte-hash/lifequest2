@@ -7,6 +7,7 @@
 :root {
   color-scheme: light;
 
+  /* ── B&N minimalista: blancos, negros y grises derivados ── */
   --bg-deep: #ffffff;
   --bg-panel: #ffffff;
   --bg-panel-light: #fafafa;
@@ -21,18 +22,18 @@
   --surface: #ffffff;
   --surface-2: #fafafa;
 
-  --text-primary: #0f1117;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
-  --text: #0f1117;
-  --text-2: #6b7280;
-  --text-3: #9ca3af;
+  --text-primary: #0a0a0a;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --text: #0a0a0a;
+  --text-2: #52525b;
+  --text-3: #a1a1aa;
   --text-inv: #ffffff;
 
-  --border: #e5e7eb;
-  --border-soft: #f1f3f5;
-  --border-strong: #d1d5db;
-  --border-focus: #3b82f6;
+  --border: #e5e5e5;
+  --border-soft: #f0f0f0;
+  --border-strong: #d4d4d8;
+  --border-focus: #0a0a0a;
 
   --shadow-sm: 0 1px 2px rgba(15, 17, 23, 0.04);
   --shadow-md: 0 2px 8px rgba(15, 17, 23, 0.06);
@@ -41,78 +42,120 @@
   --shadow-hover: var(--shadow-md);
   --shadow-pop: var(--shadow-lg);
 
-  --accent-gold: #f59e0b;
-  --accent-blue: #3b82f6;
-  --accent-green: #10b981;
-  --accent-red: #ef4444;
-  --accent-pink: #ec4899;
-  --accent-purple: #8b5cf6;
-  --accent-cyan: #06b6d4;
+  /* ── Semánticos mínimos (rojo peligro, verde éxito) + dorado XP sutil ── */
+  --accent-gold: #9a7b1c;
+  --accent-blue: #52525b;
+  --accent-green: #3f7a55;
+  --accent-red: #b0332a;
+  --accent-pink: #8a8a92;
+  --accent-purple: #52525b;
+  --accent-cyan: #6b6b73;
 
   /* primary + game stat tokens */
-  --primary: #8b5cf6;
+  --primary: #0a0a0a;
   --primary-soft: color-mix(in oklab, var(--primary) 12%, transparent);
   --ring-track: rgba(15, 17, 23, 0.06);
   --scrim: rgba(15, 17, 23, 0.45);
 
-  --c-hp:   #ef4444;
-  --c-mp:   #3b82f6;
-  --c-xp:   #8b5cf6;
-  --c-gold: #f59e0b;
-  --c-amber:#f59e0b;
-  --c-red:  #ef4444;
-  --c-green:#10b981;
-  --c-pink: #ec4899;
+  --c-hp:   #b0332a;
+  --c-mp:   #a1a1aa;
+  --c-xp:   #9a7b1c;
+  --c-gold: #9a7b1c;
+  --c-amber:#9a7b1c;
+  --c-red:  #b0332a;
+  --c-green:#3f7a55;
+  --c-pink: #8a8a92;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     color-scheme: dark;
-    --bg-deep: #0f1117;
-    --bg-panel: #151922;
-    --bg-panel-light: #1b2330;
-    --bg-card: #151922;
-    --bg-muted: #101620;
-    --bg-overlay: rgba(15, 17, 23, 0.65);
+    /* ── B&N minimalista oscuro ── */
+    --bg-deep: #0a0a0a;
+    --bg-panel: #111113;
+    --bg-panel-light: #17171a;
+    --bg-card: #111113;
+    --bg-muted: #0e0e10;
+    --bg-overlay: rgba(0, 0, 0, 0.6);
 
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --bg: #0a0a0a;
+    --bg-elev: #141416;
+    --bg-soft: #17171a;
+    --surface: #111113;
+    --surface-2: #17171a;
 
-    --border: #273244;
-    --border-strong: #334155;
+    --text-primary: #f5f5f5;
+    --text-secondary: #b0b0b8;
+    --text-muted: #6f6f78;
+    --text: #f5f5f5;
+    --text-2: #b0b0b8;
+    --text-3: #6f6f78;
+    --text-inv: #0a0a0a;
+
+    --border: #26262a;
+    --border-soft: #1c1c20;
+    --border-strong: #3a3a40;
+    --border-focus: #f5f5f5;
+
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-rest: var(--shadow-sm);
+    --shadow-hover: var(--shadow-md);
+    --shadow-pop: var(--shadow-lg);
+
+    --accent-gold: #d9b44a;
+    --accent-blue: #8a8a92;
+    --accent-green: #6cb98a;
+    --accent-red: #d25446;
+    --accent-pink: #9a9aa3;
+    --accent-purple: #8a8a92;
+    --accent-cyan: #9a9aa3;
+
+    --primary: #fafafa;
+    --primary-soft: color-mix(in oklab, var(--primary) 14%, transparent);
+    --ring-track: rgba(255, 255, 255, 0.06);
+    --scrim: rgba(0, 0, 0, 0.62);
+
+    --c-hp:   #d25446;
+    --c-mp:   #6f6f78;
+    --c-xp:   #d9b44a;
+    --c-gold: #d9b44a;
+    --c-amber:#d9b44a;
+    --c-red:  #d25446;
+    --c-green:#6cb98a;
+    --c-pink: #9a9aa3;
   }
 }
 
 html.dark {
   color-scheme: dark;
-  --bg-deep: #0f1117;
-  --bg-panel: #161b22;
-  --bg-panel-light: #1c2230;
-  --bg-card: #161b22;
-  --bg-muted: #131720;
-  --bg-overlay: rgba(15, 17, 23, 0.65);
+  /* ── B&N minimalista oscuro ── */
+  --bg-deep: #0a0a0a;
+  --bg-panel: #111113;
+  --bg-panel-light: #17171a;
+  --bg-card: #111113;
+  --bg-muted: #0e0e10;
+  --bg-overlay: rgba(0, 0, 0, 0.6);
 
-  --bg: #0f1117;
-  --bg-elev: #131720;
-  --bg-soft: #161b22;
-  --surface: #161b22;
-  --surface-2: #1c2230;
+  --bg: #0a0a0a;
+  --bg-elev: #141416;
+  --bg-soft: #17171a;
+  --surface: #111113;
+  --surface-2: #17171a;
 
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-  --text: #f3f4f6;
-  --text-2: #9ca3af;
-  --text-3: #6b7280;
-  --text-inv: #0f1117;
+  --text-primary: #f5f5f5;
+  --text-secondary: #b0b0b8;
+  --text-muted: #6f6f78;
+  --text: #f5f5f5;
+  --text-2: #b0b0b8;
+  --text-3: #6f6f78;
+  --text-inv: #0a0a0a;
 
-  --border: #262d3a;
-  --border-soft: #1f2632;
-  --border-strong: #334155;
+  --border: #26262a;
+  --border-soft: #1c1c20;
+  --border-strong: #3a3a40;
+  --border-focus: #f5f5f5;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
@@ -121,19 +164,27 @@ html.dark {
   --shadow-hover: var(--shadow-md);
   --shadow-pop: var(--shadow-lg);
 
-  --primary: #a78bfa;
-  --primary-soft: color-mix(in oklab, var(--primary) 18%, transparent);
+  --accent-gold: #d9b44a;
+  --accent-blue: #8a8a92;
+  --accent-green: #6cb98a;
+  --accent-red: #d25446;
+  --accent-pink: #9a9aa3;
+  --accent-purple: #8a8a92;
+  --accent-cyan: #9a9aa3;
+
+  --primary: #fafafa;
+  --primary-soft: color-mix(in oklab, var(--primary) 14%, transparent);
   --ring-track: rgba(255, 255, 255, 0.06);
   --scrim: rgba(0, 0, 0, 0.62);
 
-  --c-hp:   #f87171;
-  --c-mp:   #60a5fa;
-  --c-xp:   #a78bfa;
-  --c-gold: #fbbf24;
-  --c-amber:#fbbf24;
-  --c-red:  #f87171;
-  --c-green:#34d399;
-  --c-pink: #f472b6;
+  --c-hp:   #d25446;
+  --c-mp:   #6f6f78;
+  --c-xp:   #d9b44a;
+  --c-gold: #d9b44a;
+  --c-amber:#d9b44a;
+  --c-red:  #d25446;
+  --c-green:#6cb98a;
+  --c-pink: #9a9aa3;
 }
 
 html.light {
@@ -270,19 +321,20 @@ button {
   .pixel-btn-primary {
     @apply pixel-btn;
     background: var(--text-primary);
-    color: #ffffff;
+    color: var(--text-inv);
   }
 
   .pixel-btn-secondary {
     @apply pixel-btn;
-    background: var(--accent-blue);
-    color: #ffffff;
+    background: var(--bg-muted);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
   }
 
   .pixel-btn-danger {
     @apply pixel-btn;
     background: var(--accent-red);
-    color: #ffffff;
+    color: var(--text-inv);
   }
 
   .pixel-btn-ghost {
@@ -307,7 +359,7 @@ button {
 
   .pixel-input:focus {
     border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--border-focus) 14%, transparent);
   }
 
   .pixel-input::placeholder {
@@ -329,27 +381,27 @@ button {
   }
 
   .difficulty-easy {
-    color: #10b981;
-    border-color: rgba(16, 185, 129, 0.2);
-    background: rgba(16, 185, 129, 0.1);
+    color: var(--text-muted);
+    border-color: color-mix(in oklab, var(--text-muted) 30%, transparent);
+    background: color-mix(in oklab, var(--text-muted) 10%, transparent);
   }
 
   .difficulty-normal {
-    color: #3b82f6;
-    border-color: rgba(59, 130, 246, 0.2);
-    background: rgba(59, 130, 246, 0.1);
+    color: var(--text-secondary);
+    border-color: color-mix(in oklab, var(--text-secondary) 30%, transparent);
+    background: color-mix(in oklab, var(--text-secondary) 10%, transparent);
   }
 
   .difficulty-hard {
-    color: #f59e0b;
-    border-color: rgba(245, 158, 11, 0.2);
-    background: rgba(245, 158, 11, 0.1);
+    color: var(--text-primary);
+    border-color: color-mix(in oklab, var(--text-primary) 30%, transparent);
+    background: color-mix(in oklab, var(--text-primary) 8%, transparent);
   }
 
   .difficulty-epic {
-    color: #ec4899;
-    border-color: rgba(236, 72, 153, 0.2);
-    background: rgba(236, 72, 153, 0.1);
+    color: var(--accent-gold);
+    border-color: color-mix(in oklab, var(--accent-gold) 35%, transparent);
+    background: color-mix(in oklab, var(--accent-gold) 12%, transparent);
   }
 }
 
@@ -424,8 +476,8 @@ button {
 }
 
 @keyframes pixelGlow {
-  0%, 100% { box-shadow: 0 0 8px var(--accent-gold), 0 0 16px rgba(245, 158, 11, 0.45); }
-  50% { box-shadow: 0 0 16px var(--accent-gold), 0 0 28px rgba(245, 158, 11, 0.4); }
+  0%, 100% { box-shadow: 0 0 8px var(--accent-gold), 0 0 16px color-mix(in oklab, var(--accent-gold) 45%, transparent); }
+  50% { box-shadow: 0 0 16px var(--accent-gold), 0 0 28px color-mix(in oklab, var(--accent-gold) 40%, transparent); }
 }
 
 .pixel-glow {
@@ -449,8 +501,8 @@ button {
 .stagger-item:nth-child(6) { animation-delay: 200ms; }
 
 @keyframes chromatic {
-  0%, 100% { text-shadow: -1px 0 rgba(255, 0, 0, 0.12), 1px 0 rgba(0, 0, 255, 0.12); }
-  50% { text-shadow: 1px 0 rgba(255, 0, 0, 0.12), -1px 0 rgba(0, 0, 255, 0.12); }
+  0%, 100% { text-shadow: -1px 0 rgba(255, 255, 255, 0.10), 1px 0 rgba(0, 0, 0, 0.14); }
+  50% { text-shadow: 1px 0 rgba(255, 255, 255, 0.10), -1px 0 rgba(0, 0, 0, 0.14); }
 }
 
 .chromatic-aberration {
@@ -465,98 +517,129 @@ button {
 
 /* ─── Visual Themes (Fase 8 Bloque 13) ──────────────────────────────────────── */
 
-/* Aurora (free — default dark RPG) */
-html[data-theme="aurora"] {
-  --bg-deep: #0d0a1a;
-  --bg-panel: #1a0d2e;
-  --bg-panel-light: #231540;
-  --text-primary: #e8deff;
-  --text-secondary: #a990cc;
-  --text-muted: #6b5488;
-  --border: #3d2d5c;
-  --accent-gold: #ffd23f;
-  --accent-green: #6bcf7f;
-  --accent-red: #ff6b6b;
-  --accent-purple: #c77dff;
-  --accent-cyan: #48dbfb;
+/* Aurora — neutro clásico profundo (la piel base apenas afinada) */
+html.dark[data-theme="aurora"] {
+  --bg-deep: #0c0c0e;
+  --bg-panel: #131316;
+  --bg-panel-light: #1a1a1e;
+  --bg-card: #131316;
+  --bg-muted: #0f0f12;
+  --border: #2a2a2e;
+  --border-strong: #3a3a40;
 }
 
-/* Cyber (200G) */
-html[data-theme="cyber"] {
-  --bg-deep: #000d1a;
-  --bg-panel: #001a33;
-  --bg-panel-light: #002244;
-  --text-primary: #00ffff;
-  --text-secondary: #00b3b3;
-  --text-muted: #006666;
-  --border: #004466;
-  --accent-gold: #ff00ff;
-  --accent-green: #00ff88;
-  --accent-red: #ff0055;
-  --accent-purple: #8800ff;
-  --accent-cyan: #00ffff;
+/* Cyber — alto contraste puro */
+html.light[data-theme="cyber"] {
+  --bg-deep: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-panel-light: #f5f5f5;
+  --text-primary: #000000;
+  --text-secondary: #2a2a2a;
+  --border: #c8c8c8;
+  --border-strong: #000000;
+}
+html.dark[data-theme="cyber"] {
+  --bg-deep: #000000;
+  --bg-panel: #050505;
+  --bg-panel-light: #0d0d0d;
+  --bg-card: #050505;
+  --bg-muted: #0a0a0a;
+  --text-primary: #ffffff;
+  --text-secondary: #cfcfcf;
+  --text-muted: #7a7a7a;
+  --border: #333333;
+  --border-strong: #666666;
 }
 
-/* Forest (200G) */
-html[data-theme="forest"] {
-  --bg-deep: #0a1a0d;
-  --bg-panel: #122214;
-  --bg-panel-light: #1a3320;
-  --text-primary: #d4f5d4;
-  --text-secondary: #8bc98b;
-  --text-muted: #4a774a;
-  --border: #2a4d2a;
-  --accent-gold: #d4a827;
-  --accent-green: #4caf50;
-  --accent-red: #c62828;
-  --accent-purple: #7b1fa2;
-  --accent-cyan: #00897b;
+/* Forest — neutros cálidos */
+html.light[data-theme="forest"] {
+  --bg-deep: #faf9f6;
+  --bg-panel: #ffffff;
+  --bg-panel-light: #f4f2ec;
+  --text-primary: #14120e;
+  --text-secondary: #57534a;
+  --border: #e7e3da;
+  --border-strong: #d4cfc2;
+}
+html.dark[data-theme="forest"] {
+  --bg-deep: #0e0d0b;
+  --bg-panel: #151411;
+  --bg-panel-light: #1c1a16;
+  --bg-card: #151411;
+  --bg-muted: #12110e;
+  --text-primary: #f0ede6;
+  --text-secondary: #b0aa9c;
+  --text-muted: #706a5e;
+  --border: #2d2b26;
+  --border-strong: #3f3c35;
 }
 
-/* Ocean (200G) */
-html[data-theme="ocean"] {
-  --bg-deep: #020e1a;
-  --bg-panel: #041e33;
-  --bg-panel-light: #073352;
-  --text-primary: #cce8ff;
-  --text-secondary: #7ab8e8;
-  --text-muted: #3a6b99;
-  --border: #0d3d66;
-  --accent-gold: #ffa726;
-  --accent-green: #26c6da;
-  --accent-red: #ef5350;
-  --accent-purple: #7e57c2;
-  --accent-cyan: #00e5ff;
+/* Ocean — neutros fríos */
+html.light[data-theme="ocean"] {
+  --bg-deep: #f8f9fa;
+  --bg-panel: #ffffff;
+  --bg-panel-light: #f0f2f4;
+  --text-primary: #0d0f12;
+  --text-secondary: #50565e;
+  --border: #e2e5e9;
+  --border-strong: #c9ced4;
+}
+html.dark[data-theme="ocean"] {
+  --bg-deep: #0b0c0e;
+  --bg-panel: #121316;
+  --bg-panel-light: #181a1e;
+  --bg-card: #121316;
+  --bg-muted: #0e0f11;
+  --text-primary: #e9ecef;
+  --text-secondary: #a6adb6;
+  --text-muted: #6a7078;
+  --border: #262a30;
+  --border-strong: #3a3f47;
 }
 
-/* Sunset (300G) */
-html[data-theme="sunset"] {
-  --bg-deep: #1a0a00;
-  --bg-panel: #2d1300;
-  --bg-panel-light: #3d1f00;
-  --text-primary: #fff3e0;
-  --text-secondary: #ffb74d;
-  --text-muted: #bf8040;
-  --border: #6d3b00;
-  --accent-gold: #ff8f00;
-  --accent-green: #66bb6a;
-  --accent-red: #f44336;
-  --accent-purple: #ab47bc;
-  --accent-cyan: #ff6e40;
+/* Sunset — contraste suave */
+html.light[data-theme="sunset"] {
+  --bg-deep: #f7f7f7;
+  --bg-panel: #fdfdfd;
+  --bg-panel-light: #efefef;
+  --text-primary: #232323;
+  --text-secondary: #616161;
+  --text-muted: #9c9c9c;
+  --border: #e0e0e0;
+  --border-strong: #c6c6c6;
+}
+html.dark[data-theme="sunset"] {
+  --bg-deep: #121212;
+  --bg-panel: #1a1a1a;
+  --bg-panel-light: #212121;
+  --bg-card: #1a1a1a;
+  --bg-muted: #161616;
+  --text-primary: #dcdcdc;
+  --text-secondary: #9c9c9c;
+  --text-muted: #666666;
+  --border: #2f2f2f;
+  --border-strong: #444444;
 }
 
-/* Retro SNES (500G) */
-html[data-theme="retro"] {
-  --bg-deep: #1a1a2e;
-  --bg-panel: #16213e;
-  --bg-panel-light: #0f3460;
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --text-muted: #606060;
-  --border: #4a4a7a;
-  --accent-gold: #f5a623;
-  --accent-green: #6bff6b;
-  --accent-red: #ff4b4b;
-  --accent-purple: #b24bff;
-  --accent-cyan: #4bffd4;
+/* Retro SNES — 16-bit blanco y negro */
+html.light[data-theme="retro"] {
+  --bg-deep: #f2f2f2;
+  --bg-panel: #ffffff;
+  --bg-panel-light: #e8e8e8;
+  --text-primary: #000000;
+  --text-secondary: #3d3d3d;
+  --border: #bdbdbd;
+  --border-strong: #8a8a8a;
+}
+html.dark[data-theme="retro"] {
+  --bg-deep: #0a0a0a;
+  --bg-panel: #141414;
+  --bg-panel-light: #1c1c1c;
+  --bg-card: #141414;
+  --bg-muted: #101010;
+  --text-primary: #f0f0f0;
+  --text-secondary: #adadad;
+  --text-muted: #6f6f6f;
+  --border: #3f3f3f;
+  --border-strong: #5a5a5a;
 }

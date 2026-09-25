@@ -60,7 +60,7 @@ function useCommands(navigate: ReturnType<typeof useNavigate>) {
         try {
           const r = await logHabit(h.id, 'completed');
           addFloatingXP(r.rewards?.xpEarned ?? 0, window.innerWidth / 2, 200);
-          flashScreen('#6bcf7f');
+          flashScreen('#4a825f');
           void refreshUser();
         } catch { /* */ }
       },

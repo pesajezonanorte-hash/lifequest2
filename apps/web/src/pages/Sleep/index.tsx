@@ -9,7 +9,7 @@ import * as sleepService from '../../services/sleep.service';
 import { SageContextButton } from '../../components/sage/SageContextButton';
 
 const QUALITY_LABELS = ['', '😢 Terrible', '😔 Malo', '😐 Regular', '😊 Bueno', '😄 Excelente'];
-const QUALITY_COLORS = ['', '#ff6b6b', '#ff9f43', '#ffd23f', '#6bcf7f', '#4d96ff'];
+const QUALITY_COLORS = ['', '#b5453a', '#a8a8b0', '#8a8a92', '#6cb98a', '#3f7a55'];
 
 function SleepModal({ onClose, onSave }: { onClose: () => void; onSave: (log: SleepLog) => void }) {
   const today = new Date().toISOString().split('T')[0];
@@ -221,12 +221,12 @@ export default function SleepPage() {
           <p className="font-pixel text-text-secondary mb-3" style={{ fontSize: '8px' }}>ÚLTIMAS 2 SEMANAS</p>
           <ResponsiveContainer width="100%" height={160}>
             <BarChart data={chartData}>
-              <XAxis dataKey="date" tick={{ fontFamily: 'Montserrat', fontSize: 12, fill: '#8a7aaa' }} />
-              <YAxis domain={[0, 10]} tick={{ fontFamily: 'Montserrat', fontSize: 12, fill: '#8a7aaa' }} />
-              <Tooltip contentStyle={{ background: '#1a0d2e', border: '2px solid #3d2d5c', fontFamily: 'Montserrat', fontSize: '16px' }} formatter={(v: number) => `${v}h`} />
+              <XAxis dataKey="date" tick={{ fontFamily: 'Montserrat', fontSize: 12, fill: '#8a8a92' }} />
+              <YAxis domain={[0, 10]} tick={{ fontFamily: 'Montserrat', fontSize: 12, fill: '#8a8a92' }} />
+              <Tooltip contentStyle={{ background: 'var(--bg-panel)', border: '1px solid var(--border-strong)', fontFamily: 'Montserrat', fontSize: '16px', color: 'var(--text-primary)' }} formatter={(v: number) => `${v}h`} />
               <Bar dataKey="horas">
                 {chartData.map((d, i) => (
-                  <Cell key={i} fill={QUALITY_COLORS[d.quality] ?? '#4d96ff'} />
+                  <Cell key={i} fill={QUALITY_COLORS[d.quality] ?? '#8a8a92'} />
                 ))}
               </Bar>
             </BarChart>

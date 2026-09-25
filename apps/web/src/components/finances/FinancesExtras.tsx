@@ -263,7 +263,7 @@ export function ProjectionPanel() {
     balance: p.balance,
   }));
 
-  const netColor = data.netMonthly >= 0 ? '#22c55e' : '#ef4444';
+  const netColor = data.netMonthly >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
 
   return (
     <PixelPanel className="p-4">

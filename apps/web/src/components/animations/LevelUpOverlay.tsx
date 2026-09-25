@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/uiStore';
 import { MiguelSprite } from '../character/MiguelSprite';
 
-const PARTICLE_COLORS = ['#ffd23f', '#ff6b9d', '#4ecdc4', '#6bcf7f', '#ffffff', '#ffaa00', '#ff6600'];
+const PARTICLE_COLORS = ['#d9b44a', '#f0e6c8', '#c0c0c8', '#8a8a92', '#ffffff', '#a8871e', '#5c5c64'];
 
 interface Particle {
   id: number;
@@ -93,7 +93,7 @@ function VolumetricLight({ active }: { active: boolean }) {
             width: '300px',
             height: '80vh',
             background:
-              'linear-gradient(180deg, rgba(255,210,63,0.18) 0%, rgba(255,210,63,0.06) 60%, transparent 100%)',
+              'linear-gradient(180deg, color-mix(in oklab, var(--accent-gold) 18%, transparent) 0%, color-mix(in oklab, var(--accent-gold) 6%, transparent) 60%, transparent 100%)',
             filter: 'blur(8px)',
           }}
           initial={{ opacity: 0, scaleX: 0.3 }}
@@ -257,7 +257,7 @@ export function LevelUpOverlay() {
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     background:
-                      'radial-gradient(ellipse at 50% 0%, rgba(255,210,63,0.12) 0%, transparent 70%)',
+                      'radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--accent-gold) 12%, transparent) 0%, transparent 70%)',
                   }}
                 />
 
@@ -272,14 +272,14 @@ export function LevelUpOverlay() {
                     className="text-accent-gold mb-1"
                     style={{
                       fontSize: '11px',
-                      textShadow: '3px 3px 0 #0d0620, -1px -1px 0 #b8860b, 0 0 20px rgba(255,210,63,0.5)',
+                      textShadow: '3px 3px 0 rgba(0,0,0,0.55), -1px -1px 0 rgba(217,180,74,0.8), 0 0 20px color-mix(in oklab, var(--accent-gold) 50%, transparent)',
                     }}
                   >
                     ¡LEVEL UP!
                   </div>
                   <motion.div
                     className="text-white"
-                    style={{ fontSize: '28px', textShadow: '3px 3px 0 #0d0620' }}
+                    style={{ fontSize: '28px', textShadow: '3px 3px 0 rgba(0,0,0,0.55)' }}
                     initial={{ scale: 0 }}
                     animate={{ scale: [0, 1.4, 1] }}
                     transition={{ delay: 0.42, duration: 0.5 }}
@@ -318,7 +318,7 @@ export function LevelUpOverlay() {
                     <motion.span
                       key={i}
                       className="text-accent-gold"
-                      style={{ fontSize: '22px', textShadow: '0 0 10px rgba(255,210,63,0.6)' }}
+                      style={{ fontSize: '22px', textShadow: '0 0 10px color-mix(in oklab, var(--accent-gold) 60%, transparent)' }}
                       initial={{ opacity: 0, scale: 0, rotate: -45 }}
                       animate={{ opacity: 1, scale: 1, rotate: 0 }}
                       transition={{ delay: 0.55 + i * 0.14, type: 'spring' }}

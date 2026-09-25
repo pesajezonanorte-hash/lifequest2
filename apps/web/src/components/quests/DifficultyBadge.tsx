@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 
 const DIFFICULTY_CONFIG: Record<string, { label: string; color: string; glow: boolean }> = {
-  EASY:   { label: 'Fácil',  color: '#6bcf7f', glow: false },
-  NORMAL: { label: 'Normal', color: '#4d96ff', glow: false },
-  HARD:   { label: 'Difícil', color: '#9d4edd', glow: false },
-  EPIC:   { label: 'ÉPICA',  color: '#ffd23f', glow: true },
+  EASY:   { label: 'Fácil',  color: 'var(--text-muted)', glow: false },
+  NORMAL: { label: 'Normal', color: 'var(--text-secondary)', glow: false },
+  HARD:   { label: 'Difícil', color: 'var(--text-primary)', glow: false },
+  EPIC:   { label: 'ÉPICA',  color: 'var(--accent-gold)', glow: true },
 };
 
 interface Props {

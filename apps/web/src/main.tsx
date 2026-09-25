@@ -6,8 +6,8 @@ import { PWAInstallBanner } from './components/ui/PWAInstallBanner';
 import './styles/globals.css';
 
 // Apply saved theme preference immediately to avoid flash
-// Default is always 'dark' regardless of system preference
-const savedTheme = localStorage.getItem('theme') ?? 'dark';
+// Default is 'light' (blanco minimalista); 'dark' y 'system' siguen disponibles
+const savedTheme = localStorage.getItem('theme') ?? 'light';
 if (savedTheme === 'dark') {
   document.documentElement.classList.add('dark');
 } else if (savedTheme === 'light') {

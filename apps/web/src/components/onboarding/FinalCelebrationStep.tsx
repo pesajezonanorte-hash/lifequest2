@@ -49,7 +49,7 @@ export function FinalCelebrationStep({ displayName, avatarConfig, gender, onEnte
           key={i}
           className="fixed w-2 h-2 rounded-sm"
           style={{
-            background: ['#ffd23f', '#ff6b9d', '#4ecdc4', '#6bcf7f'][i % 4],
+            background: ['#d9b44a', '#c0c0c8', '#8a8a92', '#f0e6c8'][i % 4],
             left: `${20 + Math.random() * 60}%`,
             top: `${10 + Math.random() * 40}%`,
           }}
@@ -87,7 +87,7 @@ export function FinalCelebrationStep({ displayName, avatarConfig, gender, onEnte
       >
         <h2
           className="font-pixel text-accent-gold leading-relaxed"
-          style={{ fontSize: '12px', textShadow: '3px 3px 0 #0d0620' }}
+          style={{ fontSize: '12px', textShadow: '3px 3px 0 rgba(0,0,0,0.55)' }}
         >
           ¡{displayName}
           <br />

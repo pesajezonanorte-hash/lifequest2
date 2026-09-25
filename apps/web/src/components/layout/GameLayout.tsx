@@ -494,7 +494,7 @@ export function GameLayout({ children }: Props) {
                 <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={toggleAudio} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   {audioEnabled ? <Volume2 size={14} /> : <VolumeX size={14} className="text-red-400" />}
                 </motion.button>
-                <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={() => navigate('/wisdom')} whileTap={{ scale: 0.96 }} style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: '#fff', border: 'none' }} title="Sabiduría">
+                <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={() => navigate('/wisdom')} whileTap={{ scale: 0.96 }} style={{ background: 'var(--text-primary)', color: 'var(--text-inv)', border: 'none' }} title="Sabiduría">
                   <Sparkles size={14} />
                 </motion.button>
                 <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={() => setShowFocus(true)} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--accent-cyan)' }} title="Enfoque">
@@ -552,7 +552,7 @@ export function GameLayout({ children }: Props) {
                 <motion.button className="flex items-center justify-center" onClick={toggleAudio} whileTap={{ scale: 0.96 }} title={audioEnabled ? 'Silenciar audio' : 'Activar audio'} style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} className="text-red-400" />}
                 </motion.button>
-                <motion.button onClick={() => navigate('/wisdom')} whileTap={{ scale: 0.97 }} className="hidden lg:flex items-center gap-2" style={{ height: 38, padding: '0 14px', background: 'linear-gradient(135deg, #8b5cf6, #6366f1)', color: '#fff', borderRadius: 10, fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(139,92,246,.35)' }}>
+                <motion.button onClick={() => navigate('/wisdom')} whileTap={{ scale: 0.97 }} className="hidden lg:flex items-center gap-2" style={{ height: 38, padding: '0 14px', background: 'var(--text-primary)', color: 'var(--text-inv)', borderRadius: 10, fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(0,0,0,.15)' }}>
                   <Sparkles size={15} />Sabiduría
                 </motion.button>
                 <motion.button onClick={handleLogout} whileTap={{ scale: 0.96 }} className="text-[12px] font-semibold" style={{ padding: '0 14px', height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
@@ -599,8 +599,8 @@ export function GameLayout({ children }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-4 rounded-2xl border px-4 py-3"
                 style={{
-                  borderColor: 'rgba(245, 158, 11, 0.35)',
-                  background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(255,255,255,0.02))',
+                  borderColor: 'color-mix(in oklab, var(--accent-gold) 35%, transparent)',
+                  background: 'linear-gradient(135deg, color-mix(in oklab, var(--accent-gold) 12%, transparent), transparent)',
                 }}
               >
                 <div className="flex items-start justify-between gap-4">

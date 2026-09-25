@@ -6,8 +6,8 @@ import { fetchHistory, fetchDayDetail } from '../../services/history.service';
 import type { HistorySummary, DayDetail } from '../../services/history.service';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  FITNESS: '#ff6b6b', HEALTH: '#6bcf7f', FINANCE: '#ffd23f',
-  LEARNING: '#4d96ff', LOVE: '#ff6b9d', SOCIAL: '#4ecdc4', PERSONAL: '#9d4edd', CREATIVE: '#ff9f43',
+  FITNESS: '#5c5c64', HEALTH: '#8a8a92', FINANCE: '#a8871e',
+  LEARNING: '#4a4a52', LOVE: '#c0c0c8', SOCIAL: '#a1a1aa', PERSONAL: '#2a2a2e', CREATIVE: '#bdbdc5',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -16,10 +16,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 function getProductivityColor(score: number): string {
-  if (score >= 70) return '#6bcf7f';
-  if (score >= 40) return '#ffd23f';
-  if (score > 0)   return '#ff4757';
-  return '#1a1033';
+  if (score >= 70) return 'var(--accent-green)';
+  if (score >= 40) return 'var(--accent-gold)';
+  if (score > 0)   return 'var(--accent-red)';
+  return 'var(--border-strong)';
 }
 
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
@@ -133,13 +133,13 @@ export default function HistoryPage() {
                   className="aspect-square flex flex-col items-center justify-center border-2 text-center transition-all"
                   style={{
                     backgroundColor: getProductivityColor(score),
-                    borderColor: isSelected ? '#fff' : isToday ? '#ffd23f' : '#0d0620',
+                    borderColor: isSelected ? 'var(--text-primary)' : isToday ? 'var(--accent-gold)' : 'transparent',
                     opacity: score === 0 ? 0.4 : 1,
                   }}
                   whileHover={{ scale: 1.15 }}
                   title={`${date}: ${day ? `${score} pts, ${day.questsCompleted} misiones, ${day.habitsCompleted} hábitos` : 'Sin actividad'}`}
                 >
-                  <span className="font-vt text-bg-deep text-xs font-bold">{dayNum}</span>
+                  <span className="font-vt text-white text-xs font-bold" style={{ textShadow: '0 0 3px rgba(0,0,0,0.55)' }}>{dayNum}</span>
                 </motion.button>
               );
             })}
@@ -148,10 +148,10 @@ export default function HistoryPage() {
           {/* Legend */}
           <div className="flex gap-4 mt-3 justify-end">
             {[
-              { color: '#6bcf7f', label: 'Excelente' },
-              { color: '#ffd23f', label: 'Bien' },
-              { color: '#ff4757', label: 'Poco' },
-              { color: '#1a1033', label: 'Sin actividad' },
+              { color: 'var(--accent-green)', label: 'Excelente' },
+              { color: 'var(--accent-gold)', label: 'Bien' },
+              { color: 'var(--accent-red)', label: 'Poco' },
+              { color: 'var(--border-strong)', label: 'Sin actividad' },
             ].map(({ color, label }) => (
               <div key={label} className="flex items-center gap-1">
                 <div className="w-3 h-3 border border-border-pixel" style={{ backgroundColor: color }} />
@@ -210,10 +210,10 @@ export default function HistoryPage() {
             <p className="font-pixel text-text-secondary mb-4" style={{ fontSize: '8px' }}>XP GANADO POR DÍA</p>
             <ResponsiveContainer width="100%" height={180}>
               <LineChart data={chartData}>
-                <XAxis dataKey="date" tick={{ fill: '#b8a888', fontSize: 10, fontFamily: 'Montserrat' }} />
-                <YAxis tick={{ fill: '#b8a888', fontSize: 10, fontFamily: 'Montserrat' }} />
+                <XAxis dataKey="date" tick={{ fill: '#8a8a92', fontSize: 10, fontFamily: 'Montserrat' }} />
+                <YAxis tick={{ fill: '#8a8a92', fontSize: 10, fontFamily: 'Montserrat' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="xp" stroke="#ffd23f" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="xp" stroke="#a8871e" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </PixelPanel>
@@ -234,7 +234,7 @@ export default function HistoryPage() {
                     label={({ category, percent }) => `${CATEGORY_LABELS[category] ?? category} ${Math.round((percent ?? 0) * 100)}%`}
                   >
                     {summary.categoryDistribution.map((entry) => (
-                      <Cell key={entry.category} fill={CATEGORY_COLORS[entry.category] ?? '#888'} />
+                      <Cell key={entry.category} fill={CATEGORY_COLORS[entry.category] ?? '#8a8a92'} />
                     ))}
                   </Pie>
                   <Legend formatter={(value) => CATEGORY_LABELS[value] ?? value} />

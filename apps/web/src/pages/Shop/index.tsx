@@ -8,12 +8,12 @@ import type { ShopItem, InventoryItem } from '@lifequest/shared';
 import * as shopService from '../../services/shop.service';
 
 const THEME_PREVIEW_COLORS: Record<string, { bg: string; card: string; accent: string }> = {
-  aurora:  { bg: '#1a0d2e', card: '#251545', accent: '#d4a017' },
-  cyber:   { bg: '#001a33', card: '#002244', accent: '#00e5ff' },
-  forest:  { bg: '#122214', card: '#1a331e', accent: '#4ecdc4' },
-  ocean:   { bg: '#041e33', card: '#062d4a', accent: '#4d96ff' },
-  sunset:  { bg: '#2d1300', card: '#3d1c00', accent: '#f97316' },
-  retro:   { bg: '#16213e', card: '#0f3460', accent: '#e94560' },
+  aurora:  { bg: '#131316', card: '#1a1a1e', accent: '#d9b44a' },
+  cyber:   { bg: '#050505', card: '#0d0d0d', accent: '#f5f5f5' },
+  forest:  { bg: '#151411', card: '#1c1a16', accent: '#c9a94e' },
+  ocean:   { bg: '#121316', card: '#181a1e', accent: '#cbb45c' },
+  sunset:  { bg: '#1a1a1a', card: '#212121', accent: '#d4b45e' },
+  retro:   { bg: '#141414', card: '#1c1c1c', accent: '#e0c040' },
 };
 
 const THEME_NAME_TO_ID: Record<string, string> = {
