@@ -28,6 +28,7 @@ import { OfflineIndicator } from '../ui/OfflineIndicator';
 import { QuickActionsFAB } from '../ui/QuickActionsFAB';
 import { MusicPlayer } from '../ui/MusicPlayer';
 import { getLevelTitle, ZONE_TOOLTIPS } from '../../lib/gameProgress';
+import { refreshUser } from '../../hooks/useAuth';
 
 interface NavItem {
   to: string;
@@ -225,6 +226,27 @@ export function GameLayout({ children }: Props) {
     setZoneTooltipVisible(true);
     localStorage.setItem(key, 'seen');
   }, [location.pathname]);
+
+  // Mantener XP/gold/nivel/racha frescos al navegar entre secciones y al volver
+  // a la pestaña: el store de auth solo se cargaba al boot de la app, así que
+  // el XP ganado durante la sesión no se reflejaba en el HUD ni en el resto de
+  // pantallas (aunque el leaderboard, que lee la BD, sí lo mostraba).
+  useEffect(() => {
+    void refreshUser();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const sync = () => {
+      if (document.visibilityState === 'visible') void refreshUser();
+    };
+    window.addEventListener('focus', sync);
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      window.removeEventListener('focus', sync);
+      document.removeEventListener('visibilitychange', sync);
+    };
+  }, []);
+
   async function handleLogout() {
     try {
       await authService.logout();

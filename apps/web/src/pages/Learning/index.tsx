@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
 import { useToast } from '../../hooks/useToast';
+import { refreshUser } from '../../hooks/useAuth';
 import { PixelPanel } from '../../components/ui/PixelPanel';
 import { PixelButton } from '../../components/ui/PixelButton';
 import type { LearningItem, LearningStats } from '@lifequest/shared';
@@ -74,6 +75,7 @@ function ProgressModal({ item, onClose, onUpdate }: { item: LearningItem; onClos
       if (result.rewards && (result.rewards as { xpGained: number }).xpGained) {
         addFloatingXP((result.rewards as { xpGained: number }).xpGained, window.innerWidth / 2, 200);
         toast.success('¡Ítem completado!', `+${(result.rewards as { xpGained: number }).xpGained} XP`);
+        void refreshUser();
       }
       onClose();
     } catch { toast.error('Error al actualizar'); }

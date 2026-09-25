@@ -5,6 +5,7 @@ import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 import { logHabit } from '../../services/habit.service';
+import { refreshUser } from '../../hooks/useAuth';
 import { logBodyWeight } from '../../services/gym2.service';
 
 interface Cmd {
@@ -60,6 +61,7 @@ function useCommands(navigate: ReturnType<typeof useNavigate>) {
           const r = await logHabit(h.id, 'completed');
           addFloatingXP(r.rewards?.xpEarned ?? 0, window.innerWidth / 2, 200);
           flashScreen('#6bcf7f');
+          void refreshUser();
         } catch { /* */ }
       },
       keywords: ['completar', 'habito', h.title.toLowerCase()],

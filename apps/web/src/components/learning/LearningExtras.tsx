@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PixelPanel } from '../ui/PixelPanel';
 import { PixelButton } from '../ui/PixelButton';
 import { useUIStore } from '../../store/uiStore';
+import { refreshUser } from '../../hooks/useAuth';
 import api from '../../lib/api';
 
 // ─── Pomodoro Timer ────────────────────────────────────────────────────────────
@@ -46,6 +47,7 @@ export function PomodoroTimer() {
               const xp = r.data?.xp ?? 15;
               addFloatingXP(xp, window.innerWidth / 2, 200);
               flashScreen('#4d96ff');
+              void refreshUser();
             }).catch(() => null);
             setSessions(n => n + 1);
             setPhase('break');

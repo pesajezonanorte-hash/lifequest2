@@ -10,6 +10,7 @@ import { HabitRow } from '../../components/habits/HabitRow';
 import { HabitModal } from '../../components/habits/HabitModal';
 import { SkeletonList } from '../../components/ui/Skeleton';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { refreshUser } from '../../hooks/useAuth';
 import { useToastStore } from '../../hooks/useToast';
 import * as habitService from '../../services/habit.service';
 import type { Habit } from '../../services/habit.service';
@@ -87,12 +88,10 @@ export default function HabitsPage() {
           : h
       ));
 
-      if (result.rewards?.leveledUp) {
-        const updatedUser = useAuthStore.getState().user;
-        if (updatedUser) {
-          // Trigger a refresh of auth store in case XP changed
-        }
-      }
+      // Sincronizar XP/gold/nivel/racha con el backend: el store quedaba
+      // congelado desde el boot y "Ficha del héroe"/HUD no mostraban el XP ganado
+      // aunque el leaderboard (que lee la BD) sí lo reflejaba.
+      void refreshUser();
     } catch {
       // Rollback optimistic
       setHabits(prev => prev.map(h =>

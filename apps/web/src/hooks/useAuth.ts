@@ -25,3 +25,22 @@ export function useBootstrapAuth() {
     return () => { cancelled = true; };
   }, [setAuth, logout]);
 }
+
+/**
+ * Re-sincroniza el usuario desde el servidor (XP, gold, nivel, rachas, stats…).
+ *
+ * El store solo se poblaba al hacer boot de la app, así que cualquier XP/gold
+ * ganado durante la sesión (hábitos, misiones, gym, focus…) no se reflejaba en
+ * el HUD ni en "Ficha del héroe" aunque el leaderboard (que lee la BD) sí lo
+ * mostraba. Llamar a esto después de cualquier acción que otorgue recompensas.
+ *
+ * Falla en silencio: un error de red no debe romper la UI.
+ */
+export async function refreshUser(): Promise<void> {
+  try {
+    const user = await authService.fetchMe();
+    useAuthStore.getState().updateUser(user);
+  } catch {
+    // no-op: conservamos los datos actuales del store
+  }
+}

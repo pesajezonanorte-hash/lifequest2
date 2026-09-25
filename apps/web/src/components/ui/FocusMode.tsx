@@ -4,6 +4,7 @@ import { X, Play, Pause, RotateCcw, Zap } from 'lucide-react';
 import { logFocusSession } from '../../services/focus.service';
 import { useUIStore } from '../../store/uiStore';
 import { useToastStore } from '../../hooks/useToast';
+import { refreshUser } from '../../hooks/useAuth';
 
 const PRESETS = [
   { label: '25 min', minutes: 25, color: 'var(--accent-cyan)' },
@@ -309,6 +310,7 @@ export function FocusMode({ onClose, taskLabel, questId }: Props) {
       const result = await logFocusSession(durationMin, questId, task || undefined);
       addFloatingXP(result.xpEarned, window.innerWidth / 2, window.innerHeight / 2);
       toast.success(result.message);
+      void refreshUser();
     } catch {
       toast.error('Error registrando sesión');
     } finally {
