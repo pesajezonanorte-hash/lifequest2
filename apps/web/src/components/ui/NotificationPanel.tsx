@@ -176,12 +176,20 @@ export function NotificationBell() {
                           </p>
                           <p className="text-[10px] text-[var(--text-muted)] mt-1">{timeAgo(n.createdAt)}</p>
                         </div>
-                        {!n.isRead && (
-                          <span className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background: 'var(--accent-cyan)' }} />
-                        )}
-                      </div>
-                      {/* Actions on hover */}
-                      <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1">
+                      {/* Punto "nuevo": se aparta (fade) al hacer hover para
+                          dejarle el sitio a las acciones sin solaparse */}
+                      {!n.isRead && (
+                        <span
+                          className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 transition-opacity group-hover:opacity-0"
+                          style={{ background: 'var(--accent-cyan)' }}
+                        />
+                      )}
+                    </div>
+                    {/* Actions on hover */}
+                    <div
+                      className="absolute right-1.5 top-1.5 hidden group-hover:flex items-center gap-0.5 rounded-lg px-1 py-0.5 shadow-sm"
+                      style={{ background: 'color-mix(in oklab, var(--bg-panel) 92%, transparent)', backdropFilter: 'blur(6px)' }}
+                    >
                         {!n.isRead && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleMarkRead(n.id); }}
