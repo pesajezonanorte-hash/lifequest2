@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Quest } from '@lifequest/shared';
 import { CategoryIcon, CATEGORY_LABELS } from './CategoryIcon';
@@ -29,7 +30,9 @@ export function QuestModal({ quest, onClose, onComplete, onEdit, onArchive, onFa
     } catch { /* ignore */ }
   }
 
-  return (
+  // Portal al body: el backdrop fixed debe cubrir el viewport, no el
+  // contenedor de la página (que por las transiciones crea containing block).
+  return createPortal((
     <AnimatePresence>
       <motion.div
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
@@ -154,5 +157,5 @@ export function QuestModal({ quest, onClose, onComplete, onEdit, onArchive, onFa
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  );
+  ), document.body);
 }

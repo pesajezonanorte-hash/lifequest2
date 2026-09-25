@@ -97,7 +97,11 @@ function AnimatedRoutes() {
         initial="initial"
         animate="animate"
         exit="exit"
-        style={{ width: '100%', willChange: 'transform, opacity' }}
+        // OJO: nada de `will-change: transform` aquí. Crearía un containing
+        // block para los `position: fixed` de los modales y sus backdrops/blur
+        // se recortarían al contenedor de la página en vez del viewport
+        // (el rectángulo feo encima del HUD).
+        style={{ width: '100%' }}
       >
         <Routes location={location}>
           <Route path="/"             element={<SafePage><DashboardPage /></SafePage>} />

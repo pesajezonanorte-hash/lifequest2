@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PixelButton } from '../ui/PixelButton';
 import { PixelInput } from '../ui/PixelInput';
@@ -69,7 +70,9 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
   const xp = calcXp();
   const gold = Math.floor(xp * 0.2);
 
-  return (
+  // Portal al body: el backdrop fixed debe cubrir el viewport, no el
+  // contenedor de la página (que por las transiciones crea containing block).
+  return createPortal((
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
@@ -299,5 +302,5 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
         </div>
       </motion.div>
     </div>
-  );
+  ), document.body);
 }
