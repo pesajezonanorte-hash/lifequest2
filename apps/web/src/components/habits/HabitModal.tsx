@@ -109,32 +109,50 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
           {/* Color picker */}
           <div>
             <label className="text-sm font-medium text-[var(--text-secondary)] block mb-2">Color</label>
-            <div className="flex gap-2">
-              {COLOR_OPTIONS.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setForm((f) => ({ ...f, color }))}
-                  className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110"
-                  style={{ backgroundColor: color, borderColor: form.color === color ? '#fff' : color }}
-                />
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {COLOR_OPTIONS.map((color) => {
+                const selected = form.color === color;
+                return (
+                  <button
+                    key={color}
+                    onClick={() => setForm((f) => ({ ...f, color }))}
+                    aria-pressed={selected}
+                    className={`relative w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 ${selected ? 'scale-110 ring-2 ring-white ring-offset-2 ring-offset-[var(--bg-panel)]' : 'ring-1 ring-white/20'}`}
+                    style={{ backgroundColor: color }}
+                  >
+                    {selected && (
+                      <span className="w-4 h-4 bg-black/60 rounded-full flex items-center justify-center text-[10px] font-bold text-white leading-none">✓</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Category */}
           <div>
             <label className="text-sm font-medium text-[var(--text-secondary)] block mb-2">Categoría</label>
-            <div className="grid grid-cols-4 gap-1">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setForm((f) => ({ ...f, category: cat }))}
-                  className={`p-1.5 border rounded-lg text-center text-xl transition-colors ${form.category === cat ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'}`}
-                >
-                  {CATEGORY_ICONS[cat]}
-                </button>
-              ))}
+            <div className="grid grid-cols-4 gap-2">
+              {CATEGORIES.map((cat) => {
+                const selected = form.category === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setForm((f) => ({ ...f, category: cat }))}
+                    aria-pressed={selected}
+                    className={`relative p-2 border-2 rounded-lg text-center text-xl transition-all ${selected ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 shadow-[0_0_10px_rgba(255,210,63,0.35)]' : 'border-[var(--border)] hover:border-[var(--text-secondary)]'}`}
+                  >
+                    {CATEGORY_ICONS[cat]}
+                    {selected && (
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[var(--accent-gold)] rounded-full flex items-center justify-center text-[10px] font-bold text-black leading-none">✓</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
+            <p className="mt-1.5 text-xs text-[var(--accent-gold)] font-medium capitalize">
+              Seleccionado: {CATEGORY_ICONS[form.category]} {form.category.toLowerCase()}
+            </p>
           </div>
 
           {/* Reminder */}
