@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { PixelButton } from '../ui/PixelButton';
 import { PixelInput } from '../ui/PixelInput';
@@ -55,7 +56,7 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
     }
   }
 
-  return (
+  return createPortal((
     <div
       className="fixed inset-0 z-[200] isolate overflow-y-auto overscroll-contain"
       role="dialog"
@@ -191,5 +192,5 @@ export function HabitModal({ onSubmit, onClose, initial, title }: Props) {
         </motion.div>
       </div>
     </div>
-  );
+  ), document.body);
 }
