@@ -16,7 +16,7 @@ import {
   ShoppingBag, Globe, Crosshair, Users, Skull, CalendarDays,
   Sparkles, Trophy, Settings, User,
   Volume2, VolumeX, UserPlus, Zap, Search, Castle, ChevronRight,
-  Scroll, MapPin,
+  Scroll, MapPin, Sun, LogOut,
 } from 'lucide-react';
 import { FocusMode } from '../ui/FocusMode';
 import { FeedbackButton } from '../ui/FeedbackButton';
@@ -34,6 +34,7 @@ import SkyToggle from '../ui/sky-toggle';
 import { applyThemeMode, resolveIsDark, subscribeThemeMode } from '../../lib/themeMode';
 import { Sidebar, SidebarBody, SidebarLink, useSidebar } from '../ui/sidebar';
 import { AvatarDisplay } from '../character/AvatarDisplay';
+import { Dock, DockIcon, DockItem, DockLabel } from '../ui/dock';
 
 interface NavItem {
   to: string;
@@ -217,6 +218,34 @@ function StatBarFill({
         />
       )}
     </div>
+  );
+}
+
+interface HeaderDockButtonProps {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+  className?: string;
+  color?: string;
+}
+
+function HeaderDockButton({ label, onClick, children, className, color = 'var(--text-2)' }: HeaderDockButtonProps) {
+  return (
+    <DockItem className={className}>
+      <DockLabel>{label}</DockLabel>
+      <DockIcon className="aspect-square">
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={label}
+          title={label}
+          className="flex h-full w-full items-center justify-center rounded-[10px] transition-colors hover:bg-[var(--bg-panel-light)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]"
+          style={{ color }}
+        >
+          {children}
+        </button>
+      </DockIcon>
+    </DockItem>
   );
 }
 
@@ -509,7 +538,7 @@ export function GameLayout({ children }: Props) {
             </div>
 
             <button
-              className="flex items-center gap-2"
+              className="hidden xl:flex items-center gap-2"
               onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
               title="Barra de comandos (Ctrl+K)"
               style={{ height: 38, padding: '0 14px', minWidth: 280, maxWidth: 380, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-3)' }}
@@ -521,25 +550,83 @@ export function GameLayout({ children }: Props) {
 
             {user && (
               <>
-                <div className="flex items-center gap-1.5 tabular-nums" style={{ height: 38, padding: '0 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--c-gold)', fontWeight: 700, fontSize: 13 }}>
+                <div className="flex shrink-0 items-center gap-1.5 tabular-nums" style={{ height: 38, padding: '0 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--c-gold)', fontWeight: 700, fontSize: 13 }}>
                   <Wallet size={15} />{user.gold.toLocaleString('es-CO')}
                 </div>
                 <LiveClock />
-                <div className="flex shrink-0 items-center"><SkyToggle checked={isDarkMode} onChange={handleToggleTheme} /></div>
-                <FeedbackButton variant="desktop" />
-                <motion.button onClick={() => navigate('/guild')} whileTap={{ scale: 0.96 }} title="Añadir amigos" className="flex items-center justify-center" style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
-                  <UserPlus size={16} />
-                </motion.button>
-                <NotificationBell />
-                <motion.button className="flex items-center justify-center" onClick={toggleAudio} whileTap={{ scale: 0.96 }} title={audioEnabled ? 'Silenciar audio' : 'Activar audio'} style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
-                  {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} className="text-red-400" />}
-                </motion.button>
-                <motion.button onClick={() => navigate('/wisdom')} whileTap={{ scale: 0.97 }} className="hidden lg:flex items-center gap-2" style={{ height: 38, padding: '0 14px', background: 'var(--text-primary)', color: 'var(--text-inv)', borderRadius: 10, fontSize: 13, fontWeight: 700, boxShadow: '0 6px 18px rgba(0,0,0,.15)' }}>
-                  <Sparkles size={15} />Sabiduría
-                </motion.button>
-                <motion.button onClick={handleLogout} whileTap={{ scale: 0.96 }} className="text-[12px] font-semibold" style={{ padding: '0 14px', height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
-                  Salir
-                </motion.button>
+
+                {/* Acciones secundarias: dock compacto para no llenar la cabecera de botones. */}
+                <Dock
+                  containerClassName="w-[320px] shrink-0 lg:w-[452px] xl:w-[408px] 2xl:w-[420px]"
+                  className="w-full justify-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--shadow-sm)]"
+                  panelHeight={48}
+                  maxHeight={60}
+                  reserveHeight
+                  magnification={62}
+                  distance={110}
+                  ariaLabel="Acciones de la barra superior"
+                >
+                  <HeaderDockButton
+                    className="inline-flex xl:hidden"
+                    label="Buscar"
+                    onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, key: 'k', bubbles: true }))}
+                  >
+                    <Search className="h-[80%] w-[80%]" strokeWidth={1.8} />
+                  </HeaderDockButton>
+                  <HeaderDockButton
+                    className="hidden lg:inline-flex"
+                    label={isDarkMode ? 'Usar tema claro' : 'Usar tema oscuro'}
+                    onClick={() => handleToggleTheme(!isDarkMode)}
+                    color="var(--accent-gold)"
+                  >
+                    {isDarkMode ? <Sun className="h-[80%] w-[80%]" strokeWidth={1.8} /> : <Moon className="h-[80%] w-[80%]" strokeWidth={1.8} />}
+                  </HeaderDockButton>
+                  <DockItem>
+                    <DockLabel>Feedback</DockLabel>
+                    <DockIcon className="aspect-square"><FeedbackButton variant="dock" /></DockIcon>
+                  </DockItem>
+                  <HeaderDockButton
+                    className="hidden lg:inline-flex"
+                    label="Añadir amigos"
+                    onClick={() => navigate('/guild')}
+                  >
+                    <UserPlus className="h-[80%] w-[80%]" strokeWidth={1.8} />
+                  </HeaderDockButton>
+                  <DockItem>
+                    <DockLabel>Notificaciones</DockLabel>
+                    <DockIcon className="aspect-square"><NotificationBell variant="dock" /></DockIcon>
+                  </DockItem>
+                  <HeaderDockButton
+                    label={audioEnabled ? 'Silenciar audio' : 'Activar audio'}
+                    onClick={toggleAudio}
+                    color={audioEnabled ? 'var(--text-2)' : 'var(--accent-red)'}
+                  >
+                    {audioEnabled
+                      ? <Volume2 className="h-[80%] w-[80%]" strokeWidth={1.8} />
+                      : <VolumeX className="h-[80%] w-[80%]" strokeWidth={1.8} />}
+                  </HeaderDockButton>
+                  <HeaderDockButton
+                    className="hidden lg:inline-flex"
+                    label="Sabiduría"
+                    onClick={() => navigate('/wisdom')}
+                    color="var(--c-xp)"
+                  >
+                    <Sparkles className="h-[80%] w-[80%]" strokeWidth={1.8} />
+                  </HeaderDockButton>
+                  <HeaderDockButton
+                    label="Modo enfoque"
+                    onClick={() => setShowFocus(true)}
+                    color="var(--accent-cyan)"
+                  >
+                    <Zap className="h-[80%] w-[80%]" strokeWidth={1.8} />
+                  </HeaderDockButton>
+                  <HeaderDockButton
+                    label="Cerrar sesión"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-[80%] w-[80%]" strokeWidth={1.8} />
+                  </HeaderDockButton>
+                </Dock>
                 <span className="hidden"><XPSparkles trigger={xpSparkTrigger} /></span>
               </>
             )}
@@ -662,17 +749,6 @@ export function GameLayout({ children }: Props) {
 
       {/* Reproductor de música global */}
       <MusicPlayer url={user?.gymPlaylistUrl} />
-
-      {/* Focus Mode Fab — solo desktop */}
-      <motion.button
-        onClick={() => setShowFocus(true)}
-        whileTap={{ scale: 0.94 }}
-        className="hidden md:flex fixed bottom-6 right-[5.5rem] z-40 w-10 h-10 rounded-full items-center justify-center shadow-md border border-[var(--border)] bg-[var(--bg-panel)]"
-        style={{ color: 'var(--accent-cyan)' }}
-        title="Modo Enfoque"
-      >
-        <Zap size={16} />
-      </motion.button>
 
       <AP>
         {showFocus && <FocusMode onClose={() => setShowFocus(false)} />}

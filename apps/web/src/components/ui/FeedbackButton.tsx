@@ -8,7 +8,7 @@ import { E } from '@/components/ui/glyphs';
 type Kind = 'bug' | 'idea' | 'other';
 
 interface FeedbackButtonProps {
-  variant?: 'desktop' | 'mobile' | 'inline';
+  variant?: 'desktop' | 'mobile' | 'inline' | 'dock';
   className?: string;
 }
 
@@ -51,15 +51,20 @@ export function FeedbackButton({ variant = 'desktop', className = '' }: Feedback
 
   return (
     <>
-      {variant === 'mobile' ? (
+      {variant === 'mobile' || variant === 'dock' ? (
         <motion.button
           onClick={() => setOpen(true)}
           whileTap={{ scale: 0.96 }}
           title="Feedback"
-          className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${className}`}
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--accent-gold)' }}
+          aria-label="Enviar feedback"
+          className={variant === 'dock'
+            ? `flex h-full w-full items-center justify-center rounded-[10px] text-[var(--accent-gold)] transition-colors hover:bg-[var(--bg-panel-light)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)] ${className}`
+            : `flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${className}`}
+          style={variant === 'dock'
+            ? { border: 'none', background: 'transparent' }
+            : { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--accent-gold)' }}
         >
-          <MessageSquare size={14} />
+          <MessageSquare size={variant === 'dock' ? 16 : 14} className={variant === 'dock' ? 'h-[80%] w-[80%]' : undefined} />
         </motion.button>
       ) : (
         <motion.button

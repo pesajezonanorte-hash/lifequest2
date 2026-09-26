@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getOpenOrigin } from '@/lib/origin';
-import { Plus, X, Swords, Wallet, Flame, NotebookPen, Zap, ChevronRight } from 'lucide-react';
+import { Plus, X, Swords, Wallet, Flame, NotebookPen, Zap, ChevronRight, type LucideIcon } from 'lucide-react';
 import { createQuest } from '../../services/quest.service';
 import { createTransaction } from '../../services/finance.service';
 import { fetchHabits, logHabit } from '../../services/habit.service';
@@ -11,15 +11,16 @@ import { useToastStore } from '../../hooks/useToast';
 import { refreshUser } from '../../hooks/useAuth';
 import type { Habit } from '../../services/habit.service';
 import { E } from '@/components/ui/glyphs';
+import { Dock, DockIcon, DockItem, DockLabel } from './dock';
 
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
 
-const ACTIONS: { icon: React.ReactNode; label: string; color: string; modal: ModalType }[] = [
-  { icon: <Swords size={16} />,      label: 'Nueva Quest',   color: '#a8871e', modal: 'quest' },
-  { icon: <Wallet size={16} />,      label: 'Gasto rápido',  color: '#5c5c64', modal: 'expense' },
-  { icon: <Flame size={16} />,       label: 'Marcar hábito', color: '#b5453a', modal: 'habit' },
-  { icon: <NotebookPen size={16} />, label: 'Nota rápida',   color: '#8f8f98', modal: 'note' },
-  { icon: <Zap size={16} />,         label: 'Check-in',      color: '#6b6b73', modal: 'checkin' },
+const ACTIONS: { icon: LucideIcon; label: string; color: string; modal: Exclude<ModalType, null> }[] = [
+  { icon: Swords,      label: 'Nueva Quest',   color: '#a8871e', modal: 'quest' },
+  { icon: Wallet,      label: 'Gasto rápido',  color: '#5c5c64', modal: 'expense' },
+  { icon: Flame,       label: 'Marcar hábito', color: '#b5453a', modal: 'habit' },
+  { icon: NotebookPen, label: 'Nota rápida',   color: '#8f8f98', modal: 'note' },
+  { icon: Zap,         label: 'Check-in',      color: '#6b6b73', modal: 'checkin' },
 ];
 
 // ── Quest Modal ──────────────────────────────────────────────────────────────
@@ -252,6 +253,50 @@ function SaveButton({ onClick, saving, disabled, color = 'var(--accent-gold)', l
   );
 }
 
+// ── Dock de acciones de escritorio ────────────────────────────────────────────
+function DesktopQuickActionsDock({ onOpen }: { onOpen: (modal: ModalType) => void }) {
+  return (
+    <div className="pointer-events-none fixed bottom-5 right-5 z-40 hidden md:block">
+      <div className="pointer-events-auto">
+        <Dock
+          containerClassName="w-fit max-w-[calc(100vw-2rem)]"
+          className="gap-1 rounded-2xl border border-[var(--border)] bg-[color-mix(in_oklab,var(--bg-panel)_92%,transparent)] p-1.5 shadow-[var(--shadow-lg)] backdrop-blur-xl"
+          panelHeight={52}
+          maxHeight={98}
+          magnification={78}
+          distance={135}
+          ariaLabel="Acciones rápidas"
+        >
+          {ACTIONS.map((action) => {
+            const Icon = action.icon;
+            return (
+              <DockItem key={action.modal}>
+                <DockLabel>{action.label}</DockLabel>
+                <DockIcon className="aspect-square">
+                  <button
+                    type="button"
+                    onClick={() => onOpen(action.modal)}
+                    aria-label={action.label}
+                    title={action.label}
+                    className="flex h-full w-full items-center justify-center rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]"
+                    style={{
+                      color: action.color,
+                      borderColor: `color-mix(in oklab, ${action.color} 34%, var(--border))`,
+                      background: `color-mix(in oklab, ${action.color} 13%, transparent)`,
+                    }}
+                  >
+                    <Icon className="h-[78%] w-[78%]" strokeWidth={1.75} />
+                  </button>
+                </DockIcon>
+              </DockItem>
+            );
+          })}
+        </Dock>
+      </div>
+    </div>
+  );
+}
+
 // ── Main FAB ─────────────────────────────────────────────────────────────────
 export function QuickActionsFAB() {
   const [open, setOpen] = useState(false);
@@ -317,7 +362,7 @@ export function QuickActionsFAB() {
       {/* FAB container */}
       <div
         ref={fabRef}
-        className="fixed z-50"
+        className="fixed z-50 md:hidden"
         style={{
           bottom: 'var(--fab-bottom, 1.5rem)',
           right: 'var(--fab-right, 1.25rem)',
@@ -356,32 +401,35 @@ export function QuickActionsFAB() {
 
               {/* Lista de acciones */}
               <div className="flex flex-col gap-1 p-2 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-                {ACTIONS.map((action, i) => (
-                  <motion.button
-                    key={action.modal}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    transition={{ type: 'spring', stiffness: 420, damping: 28, delay: i * 0.025 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => openModal(action.modal)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left transition-colors"
-                    style={{ background: 'transparent', border: 'none' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = `${action.color}14`; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span
-                      className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
-                      style={{ background: `${action.color}1f`, color: action.color }}
+                {ACTIONS.map((action, i) => {
+                  const Icon = action.icon;
+                  return (
+                    <motion.button
+                      key={action.modal}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      transition={{ type: 'spring', stiffness: 420, damping: 28, delay: i * 0.025 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => openModal(action.modal)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left transition-colors"
+                      style={{ background: 'transparent', border: 'none' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = `${action.color}14`; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                      {action.icon}
-                    </span>
-                    <span className="flex-1 truncate" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13 }}>
-                      {action.label}
-                    </span>
-                    <ChevronRight size={14} strokeWidth={1.8} className="flex-shrink-0" style={{ color: 'var(--text-3)' }} />
-                  </motion.button>
-                ))}
+                      <span
+                        className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
+                        style={{ background: `${action.color}1f`, color: action.color }}
+                      >
+                        <Icon size={16} strokeWidth={1.8} />
+                      </span>
+                      <span className="flex-1 truncate" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13 }}>
+                        {action.label}
+                      </span>
+                      <ChevronRight size={14} strokeWidth={1.8} className="flex-shrink-0" style={{ color: 'var(--text-3)' }} />
+                    </motion.button>
+                  );
+                })}
               </div>
             </motion.div>
           )}
@@ -415,6 +463,8 @@ export function QuickActionsFAB() {
           </motion.div>
         </motion.button>
       </div>
+
+      <DesktopQuickActionsDock onOpen={openModal} />
 
       {/* CSS para posición responsive */}
       <style>{`

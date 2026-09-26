@@ -19,7 +19,7 @@ const TYPE_ICON: Record<string, string> = {
   sage: '🧙', goal: '🎯', levelup: '⭐', system: '📢',
 };
 
-export function NotificationBell() {
+export function NotificationBell({ variant = 'default' }: { variant?: 'default' | 'dock' }) {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
   const [items, setItems] = useState<InAppNotification[]>([]);
@@ -79,14 +79,17 @@ export function NotificationBell() {
   }
 
   return (
-    <div className="relative" ref={panelRef}>
+    <div className={variant === 'dock' ? 'relative h-full w-full' : 'relative'} ref={panelRef}>
       <motion.button
         onClick={() => setOpen((o) => !o)}
         whileTap={{ scale: 0.94 }}
-        className="relative flex items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] h-8 w-8 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-gold)] transition-colors"
+        aria-label="Notificaciones"
+        className={variant === 'dock'
+          ? 'relative flex h-full w-full items-center justify-center rounded-[10px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-panel-light)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]'
+          : 'relative flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] text-[var(--text-secondary)] transition-colors hover:border-[var(--accent-gold)] hover:text-[var(--text-primary)]'}
         title="Notificaciones"
       >
-        <Bell size={16} />
+        <Bell size={16} className={variant === 'dock' ? 'h-[80%] w-[80%]' : undefined} />
         {unread > 0 && (
           <motion.span
             initial={{ scale: 0 }}
