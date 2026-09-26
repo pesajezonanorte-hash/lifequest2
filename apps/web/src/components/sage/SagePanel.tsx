@@ -56,6 +56,11 @@ function TypewriterText({ text, onDone }: { text: string; onDone?: () => void })
 }
 
 export function SagePanel({ onClose }: Props) {
+  useEffect(() => {
+    const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
   const { sagePendingMessage, clearSagePending } = useUIStore();
   const [activeTab, setActiveTab] = useState<TabId>('chat');
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -151,12 +156,13 @@ export function SagePanel({ onClose }: Props) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex justify-end bg-[var(--bg-overlay)] backdrop-blur-[2px]"
+      className="fixed inset-0 z-[150] flex justify-end bg-[var(--bg-overlay)] backdrop-blur-[2px]" onClick={onClose}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <motion.aside
+        onClick={(e) => e.stopPropagation()}
         className="flex h-full w-full max-w-[420px] flex-col border-l border-[var(--border)] bg-[var(--bg-panel)] shadow-2xl"
         initial={{ x: 420 }}
         animate={{ x: 0 }}
@@ -175,6 +181,7 @@ export function SagePanel({ onClose }: Props) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Cerrar"
             className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-2 text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
           >
             <X size={18} />
