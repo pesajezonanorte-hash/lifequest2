@@ -18,6 +18,7 @@ export const createHabitSchema = z.object({
   frequency: frequencySchema.optional(),
   resetTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
   reminderTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  syncToGoogleCalendar: z.boolean().optional(),
   isRitual: z.boolean().optional(),
 });
 
@@ -32,6 +33,7 @@ export const updateHabitSchema = z.object({
   frequency: frequencySchema.optional(),
   resetTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
   reminderTime: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional(),
+  syncToGoogleCalendar: z.boolean().optional(),
   isRitual: z.boolean().optional(),
 });
 

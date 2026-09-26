@@ -8,11 +8,9 @@ import { CATEGORY_ICONS, CATEGORY_LABELS } from './CategoryIcon';
 import { E } from '@/components/ui/glyphs';
 
 const QUEST_TYPES = [
-  { key: 'MAIN',   icon: '⚔️', label: 'Misión Principal',  desc: 'Tu gran aventura. Metas a largo plazo.', multiplier: 10 },
-  { key: 'SIDE',   icon: '🗡️', label: 'Misión Secundaria', desc: 'Aventuras de mediano plazo.',              multiplier: 4 },
-  { key: 'DAILY',  icon: '☀️', label: 'Misión Diaria',     desc: 'Se resetea cada día. Construye hábitos.', multiplier: 1 },
-  { key: 'WEEKLY', icon: '📅', label: 'Misión Semanal',    desc: 'Se resetea cada lunes.',                  multiplier: 2.5 },
-  { key: 'META',   icon: '🎯', label: 'Meta',              desc: 'Objetivo de largo plazo. Sin fecha fija.', multiplier: 8 },
+  { key: 'MAIN', icon: '⚔️', label: 'Proyecto', desc: 'Un objetivo importante con plazo y etapas.', multiplier: 10 },
+  { key: 'SIDE', icon: '🗡️', label: 'Tarea', desc: 'Un pendiente concreto que puedes completar.', multiplier: 4 },
+  { key: 'META', icon: '🎯', label: 'Meta', desc: 'Un objetivo a largo plazo que progresa por pasos.', multiplier: 8 },
 ] as const;
 
 const DIFFICULTIES = [
@@ -46,7 +44,8 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
   const [origin] = useState(() => getOpenOrigin());
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<FormData>({
-    type: initialData?.type ?? 'SIDE',
+    // Legacy daily/weekly quests are converted to a normal task on edit.
+    type: QUEST_TYPES.some((questType) => questType.key === initialData?.type) ? (initialData?.type ?? 'SIDE') : 'SIDE',
     title: initialData?.title ?? '',
     description: initialData?.description ?? '',
     category: initialData?.category ?? 'PERSONAL',
@@ -137,6 +136,9 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                       <p className="text-xs text-[var(--text-secondary)] mt-1">{qt.desc}</p>
                     </button>
                   ))}
+                  <p className="col-span-2 rounded-lg border border-[var(--border)] bg-[var(--bg-panel-light)] px-3 py-2 text-xs leading-relaxed text-[var(--text-secondary)]">
+                    Para acciones que se repiten, usa Hábitos: allí se registran rachas y frecuencia propia.
+                  </p>
                 </motion.div>
               )}
 
@@ -208,7 +210,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-[var(--text-secondary)] block mb-1">Deadline (opcional)</label>
+                    <label className="text-sm font-medium text-[var(--text-secondary)] block mb-1">Fecha límite (opcional)</label>
                     <input
                       type="date"
                       value={form.deadline}
@@ -225,7 +227,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                   initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
                   className="space-y-3"
                 >
-                  {(form.type === 'MAIN' || form.type === 'SIDE') ? (
+                  {(form.type === 'MAIN' || form.type === 'SIDE' || form.type === 'META') ? (
                     <>
                       <p className="text-sm text-[var(--text-secondary)]">
                         Divide tu misión en pasos pequeños. Cada objetivo que tildes actualiza el progreso.
@@ -262,8 +264,7 @@ export function QuestWizard({ onSubmit, onClose, initialData }: Props) {
                     <div className="text-center py-8">
                       <p className="text-3xl mb-3"><E e="☀" /></p>
                       <p className="text-sm text-[var(--text-secondary)]">
-                        Las misiones {form.type === 'DAILY' ? 'diarias' : 'semanales'} no necesitan sub-objetivos.
-                        <br />¡Simplemente complétala cuando la logres!
+                        Esta misión no tiene pasos configurados. Puedes volver atrás y añadir objetivos para medir su progreso.
                       </p>
                     </div>
                   )}

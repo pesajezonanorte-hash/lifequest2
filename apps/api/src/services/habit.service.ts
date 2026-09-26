@@ -3,6 +3,7 @@ import { addCalendarDays, getCalendarDay } from '../lib/calendar';
 import { awardXpAndGold } from './xp.service';
 import { checkAchievements } from './achievement.service';
 import { createNotification } from './notification.service';
+import { removeHabitFromGoogleCalendar, syncHabitWithGoogleCalendar } from './agenda.service';
 import type { QuestCategory } from '@prisma/client';
 
 export interface CreateHabitInput {
@@ -16,6 +17,7 @@ export interface CreateHabitInput {
   frequency?: { type: 'daily' | 'days_per_week'; days: number[] };
   resetTime?: string;
   reminderTime?: string;
+  syncToGoogleCalendar?: boolean;
 }
 
 export interface UpdateHabitInput {
@@ -29,6 +31,7 @@ export interface UpdateHabitInput {
   frequency?: { type: 'daily' | 'days_per_week'; days: number[] };
   resetTime?: string;
   reminderTime?: string | null;
+  syncToGoogleCalendar?: boolean;
 }
 
 /**
@@ -113,14 +116,14 @@ export async function reconcileHabitStreaks(userId?: string, now = new Date()): 
 function getLastRequiredDay(today: Date, rawFrequency: unknown): Date {
   for (let daysAgo = 1; daysAgo <= 7; daysAgo += 1) {
     const candidate = addCalendarDays(today, -daysAgo);
-    if (isHabitRequiredOn(candidate, rawFrequency)) return candidate;
+    if (isHabitScheduledForDay(candidate, rawFrequency)) return candidate;
   }
   // Una frecuencia inválida o sin días se considera diaria, por lo que esta
   // línea solo es una defensa adicional.
   return addCalendarDays(today, -1);
 }
 
-function isHabitRequiredOn(date: Date, rawFrequency: unknown): boolean {
+export function isHabitScheduledForDay(date: Date, rawFrequency: unknown): boolean {
   if (!rawFrequency || typeof rawFrequency !== 'object' || Array.isArray(rawFrequency)) return true;
 
   const frequency = rawFrequency as { type?: string; days?: unknown };
@@ -176,12 +179,23 @@ export async function createHabit(userId: string, input: CreateHabitInput) {
       frequency: input.frequency ?? { type: 'daily', days: [] },
       resetTime: input.resetTime ?? '04:00',
       reminderTime: input.reminderTime,
+      syncToGoogleCalendar: input.syncToGoogleCalendar ?? false,
     },
   });
 
+  if (habit.syncToGoogleCalendar) {
+    try {
+      await syncHabitWithGoogleCalendar(userId, habit);
+    } catch (error) {
+      // Keep the opt-in persisted. Agenda's manual sync can retry a transient
+      // Google failure without losing the user's choice.
+      console.error('[HABIT_GOOGLE_CALENDAR_CREATE_SYNC_ERROR]', habit.id, error);
+    }
+  }
+
   await checkAchievements(userId, 'habit_created', {});
 
-  return habit;
+  return prisma.habit.findUnique({ where: { id: habit.id } }) ?? habit;
 }
 
 export async function listHabits(userId: string) {
@@ -231,7 +245,7 @@ export async function updateHabit(userId: string, habitId: string, input: Update
   const habit = await prisma.habit.findFirst({ where: { id: habitId, userId } });
   if (!habit) throw new Error('HABIT_NOT_FOUND');
 
-  return prisma.habit.update({
+  const updatedHabit = await prisma.habit.update({
     where: { id: habitId },
     data: {
       ...(input.title !== undefined && { title: input.title }),
@@ -244,14 +258,58 @@ export async function updateHabit(userId: string, habitId: string, input: Update
       ...(input.frequency !== undefined && { frequency: input.frequency }),
       ...(input.resetTime !== undefined && { resetTime: input.resetTime }),
       ...(input.reminderTime !== undefined && { reminderTime: input.reminderTime }),
+      ...(input.syncToGoogleCalendar !== undefined && { syncToGoogleCalendar: input.syncToGoogleCalendar }),
     },
   });
+
+  if (input.syncToGoogleCalendar === false && habit.googleCalendarEventId) {
+    try {
+      const removal = await removeHabitFromGoogleCalendar(userId, habit);
+      if (removal.removed) {
+        return prisma.habit.update({
+          where: { id: habitId },
+          data: { syncToGoogleCalendar: false, googleCalendarEventId: null },
+        });
+      }
+    } catch (error) {
+      console.error('[HABIT_GOOGLE_CALENDAR_REMOVE_ERROR]', habit.id, error);
+    }
+
+    return prisma.habit.findUnique({ where: { id: habitId } }) ?? updatedHabit;
+  }
+
+  if (updatedHabit.syncToGoogleCalendar) {
+    try {
+      await syncHabitWithGoogleCalendar(userId, updatedHabit);
+    } catch (error) {
+      console.error('[HABIT_GOOGLE_CALENDAR_UPDATE_SYNC_ERROR]', updatedHabit.id, error);
+    }
+  }
+
+  return prisma.habit.findUnique({ where: { id: habitId } }) ?? updatedHabit;
 }
 
 export async function archiveHabit(userId: string, habitId: string) {
   const habit = await prisma.habit.findFirst({ where: { id: habitId, userId } });
   if (!habit) throw new Error('HABIT_NOT_FOUND');
-  return prisma.habit.update({ where: { id: habitId }, data: { isActive: false } });
+
+  let remoteRemoved = !habit.googleCalendarEventId;
+  if (habit.googleCalendarEventId) {
+    try {
+      const removal = await removeHabitFromGoogleCalendar(userId, habit);
+      remoteRemoved = removal.removed;
+    } catch (error) {
+      console.error('[HABIT_GOOGLE_CALENDAR_ARCHIVE_REMOVE_ERROR]', habit.id, error);
+    }
+  }
+
+  return prisma.habit.update({
+    where: { id: habitId },
+    data: {
+      isActive: false,
+      ...(remoteRemoved && { syncToGoogleCalendar: false, googleCalendarEventId: null }),
+    },
+  });
 }
 
 export type HabitLogStatus = 'completed' | 'failed' | 'skipped';

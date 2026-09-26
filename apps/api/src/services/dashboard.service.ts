@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { getCalendarDay } from '../lib/calendar';
-import { reconcileHabitStreaks } from './habit.service';
+import { isHabitScheduledForDay, reconcileHabitStreaks } from './habit.service';
 import { reconcileUserActivityStreak } from './xp.service';
 
 export async function getDashboard(userId: string) {
@@ -89,7 +89,7 @@ export async function getDashboard(userId: string) {
         },
       },
       orderBy: { createdAt: 'asc' },
-      take: 6,
+      take: 30,
     }),
     prisma.dailyCheckin.findUnique({
       where: { userId_date: { userId, date: todayStart } },
@@ -161,7 +161,10 @@ export async function getDashboard(userId: string) {
       ...userAchievement.achievement,
       unlockedAt: userAchievement.unlockedAt.toISOString(),
     })),
-    todayHabits: todayHabits.map((habit) => ({
+    todayHabits: todayHabits
+      .filter((habit) => isHabitScheduledForDay(habitTodayStart, habit.frequency))
+      .slice(0, 6)
+      .map((habit) => ({
       id: habit.id,
       title: habit.title,
       icon: habit.icon,
@@ -232,14 +235,12 @@ export async function getTodayQuests(userId: string) {
   });
 
   const sorted = quests.sort((a, b) => {
-    if (a.type === 'DAILY' && b.type !== 'DAILY') return -1;
-    if (b.type === 'DAILY' && a.type !== 'DAILY') return 1;
     if (a.deadline && b.deadline) {
       return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
     }
     if (a.deadline) return -1;
     if (b.deadline) return 1;
-    return 0;
+    return a.createdAt.getTime() - b.createdAt.getTime();
   });
 
   return sorted.slice(0, 5).map((quest) => ({
@@ -265,7 +266,38 @@ export interface Priority {
   detail?: string;
 }
 
-export async function getTodayPriorities(userId: string): Promise<Priority[]> {
+/**
+ * Priorities are intentionally grouped. A recurring habit is never returned as
+ * a mission, and Agenda events retain their own lane in the dashboard UI.
+ */
+export interface TodayPriorities {
+  quests: Priority[];
+  habits: Priority[];
+  events: Priority[];
+}
+
+const QUEST_TYPE_LABELS: Record<string, string> = {
+  MAIN: 'Proyecto',
+  SIDE: 'Tarea',
+  META: 'Meta',
+  // Legacy recurring quests can still be completed, but new routines belong
+  // in Habits rather than being presented as the same kind of work.
+  DAILY: 'Misión recurrente',
+  WEEKLY: 'Misión recurrente',
+};
+
+function questDeadlineDetail(deadline: Date | null, now: Date, type: string): string {
+  const label = QUEST_TYPE_LABELS[type] ?? 'Misión';
+  if (!deadline) return label;
+
+  const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysLeft < 0) return `${label} · vencida`;
+  if (daysLeft === 0) return `${label} · vence hoy`;
+  if (daysLeft === 1) return `${label} · vence mañana`;
+  return `${label} · ${daysLeft} días`;
+}
+
+export async function getTodayPriorities(userId: string): Promise<TodayPriorities> {
   await reconcileHabitStreaks(userId);
 
   const now = new Date();
@@ -274,7 +306,6 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
   const habitTomorrowStart = new Date(habitTodayStart);
   habitTomorrowStart.setUTCDate(habitTomorrowStart.getUTCDate() + 1);
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const tomorrowEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
 
   const [habits, quests, events] = await Promise.all([
@@ -287,73 +318,82 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
         },
       },
       orderBy: { currentStreak: 'desc' },
-      take: 3,
+      take: 100,
     }),
     prisma.quest.findMany({
       where: { userId, status: 'ACTIVE' },
-      orderBy: [{ type: 'asc' }, { deadline: 'asc' }],
-      take: 4,
+      orderBy: [{ deadline: 'asc' }, { createdAt: 'asc' }],
+      take: 6,
     }),
     prisma.agendaEvent.findMany({
-      where: { userId, startDate: { gte: todayStart, lt: tomorrowEnd } },
+      where: {
+        userId,
+        startDate: { gte: todayStart, lt: tomorrowEnd },
+        eventType: { not: 'habit' },
+      },
       orderBy: { startDate: 'asc' },
-      take: 2,
+      take: 4,
     }),
   ]);
 
-  const priorities: Priority[] = [];
-
-  for (const habit of habits) {
-    priorities.push({
+  const habitPriorities = habits
+    .filter((habit) => isHabitScheduledForDay(habitTodayStart, habit.frequency))
+    .slice(0, 4)
+    .map<Priority>((habit) => ({
       id: habit.id,
       type: 'habit',
       title: habit.title,
-      icon: habit.icon ?? '✅',
+      icon: habit.icon ?? 'habit',
       xp: habit.xpReward,
       urgent: habit.currentStreak > 0,
-      detail: habit.currentStreak > 0 ? `Racha: ${habit.currentStreak} días` : undefined,
+      detail: habit.currentStreak > 0 ? `Racha: ${habit.currentStreak} días` : 'Por completar hoy',
+    }));
+
+  const questPriorities = quests
+    .slice()
+    .sort((a, b) => {
+      if (a.deadline && b.deadline) return a.deadline.getTime() - b.deadline.getTime();
+      if (a.deadline) return -1;
+      if (b.deadline) return 1;
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    })
+    .slice(0, 4)
+    .map<Priority>((quest) => {
+      const daysLeft = quest.deadline
+        ? Math.ceil((quest.deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        : null;
+
+      return {
+        id: quest.id,
+        type: 'quest',
+        title: quest.title,
+        icon: 'quest',
+        xp: quest.xpReward,
+        urgent: daysLeft !== null && daysLeft <= 1,
+        detail: questDeadlineDetail(quest.deadline, now, quest.type),
+      };
     });
-    if (priorities.length >= 4) break;
-  }
 
-  const sortedQuests = quests.sort((a, b) => {
-    if (a.type === 'DAILY' && b.type !== 'DAILY') return -1;
-    if (b.type === 'DAILY' && a.type !== 'DAILY') return 1;
-    if (a.deadline && b.deadline) return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-    if (a.deadline) return -1;
-    if (b.deadline) return 1;
-    return 0;
-  });
+  const eventPriorities = events.map<Priority>((event) => {
+    const isToday = event.startDate < new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+    const time = event.isAllDay
+      ? 'Todo el día'
+      : event.startDate.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 
-  for (const quest of sortedQuests) {
-    if (priorities.length >= 4) break;
-    const daysLeft = quest.deadline
-      ? Math.ceil((new Date(quest.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-      : null;
-
-    priorities.push({
-      id: quest.id,
-      type: 'quest',
-      title: quest.title,
-      icon: quest.type === 'DAILY' ? '📅' : quest.type === 'MAIN' ? '⚔️' : '📜',
-      xp: quest.xpReward,
-      urgent: daysLeft !== null && daysLeft <= 1,
-      detail: daysLeft !== null ? `${daysLeft}d` : quest.type,
-    });
-  }
-
-  for (const event of events) {
-    if (priorities.length >= 4) break;
-    priorities.push({
+    return {
       id: event.id,
       type: 'event',
       title: event.title,
-      icon: '📆',
+      icon: 'calendar',
       xp: 0,
-      urgent: event.startDate < todayEnd,
-      detail: event.startDate.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
-    });
-  }
+      urgent: isToday,
+      detail: isToday ? time : `Mañana · ${time}`,
+    };
+  });
 
-  return priorities.slice(0, 4);
+  return {
+    quests: questPriorities,
+    habits: habitPriorities,
+    events: eventPriorities,
+  };
 }

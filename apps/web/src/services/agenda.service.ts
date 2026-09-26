@@ -13,6 +13,11 @@ export interface AgendaEvent {
   reminder?: number;
   isCompleted: boolean;
   color?: string;
+  isRecurring?: boolean;
+  recurrenceRule?: string;
+  eventType?: 'personal' | 'quest' | 'habit' | string;
+  googleEventId?: string;
+  googleSeriesId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,6 +52,17 @@ export async function deleteEvent(id: string): Promise<void> {
 
 // ─── Google Calendar API Methods ─────────────────────────────────────────────
 
+export interface GoogleCalendarStatus {
+  connected: boolean;
+  calendarId: string;
+  lastSyncAt: string | null;
+}
+
+export async function getGoogleCalendarStatus(): Promise<GoogleCalendarStatus> {
+  const { data } = await api.get<GoogleCalendarStatus>('/agenda/google/status');
+  return data;
+}
+
 export async function getGoogleAuthUrl(redirectUri?: string): Promise<string> {
   const { data } = await api.get<{ url: string }>(`/agenda/google/url${redirectUri ? `?redirectUri=${encodeURIComponent(redirectUri)}` : ''}`);
   return data.url;
@@ -56,8 +72,8 @@ export async function handleGoogleCallback(code: string, redirectUri: string): P
   await api.post('/agenda/google/callback', { code, redirectUri });
 }
 
-export async function syncGoogleCalendar(): Promise<{ syncedCount: number; message: string }> {
-  const { data } = await api.post<{ syncedCount: number; message: string }>('/agenda/google/sync');
+export async function syncGoogleCalendar(): Promise<{ syncedCount: number; exportedHabitCount?: number; message: string }> {
+  const { data } = await api.post<{ syncedCount: number; exportedHabitCount?: number; message: string }>('/agenda/google/sync');
   return data;
 }
 

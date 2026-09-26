@@ -13,7 +13,7 @@ const FAQ: QA[] = [
   },
   {
     q: '¿Cómo funcionan las quests?',
-    a: 'Las quests son tus objetivos. Pueden ser MAIN (grandes, importantes), SIDE (secundarias), DAILY (diarias) o WEEKLY (semanales). Al completarlas ganas XP, oro y suben tus stats. Las daily se reinician cada día; las weekly cada lunes.',
+    a: 'Las misiones representan tareas, proyectos y metas concretas. Puedes definir su dificultad, fecha límite y pasos para medir el progreso. Al completarlas ganas XP, oro y suben tus stats. Las acciones recurrentes se crean como hábitos, donde tienen frecuencia y racha propias.',
   },
   {
     q: '¿Cómo se calcula el XP y los niveles?',

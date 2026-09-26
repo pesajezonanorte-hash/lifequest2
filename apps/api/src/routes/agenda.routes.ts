@@ -10,6 +10,7 @@ router.get('/',         ctrl.listEvents);
 router.post('/',        ctrl.createEvent);
 
 // Google Calendar routes
+router.get('/google/status',     ctrl.getGoogleCalendarStatus);
 router.get('/google/url',        ctrl.getGoogleAuthUrl);
 router.post('/google/callback',  ctrl.handleGoogleCallback);
 router.post('/google/sync',      ctrl.syncGoogleCalendar);

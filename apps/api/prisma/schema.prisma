@@ -290,6 +290,11 @@ model Habit {
   reminderTime String?
   isActive     Boolean @default(true)
 
+  // If enabled, LifeQuest owns a recurring event in the linked Google Calendar.
+  // The instances are imported back into Agenda using their Google IDs.
+  syncToGoogleCalendar  Boolean @default(false)
+  googleCalendarEventId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -856,11 +861,15 @@ model AgendaEvent {
   eventType      String    @default("personal") // personal | quest | habit
 
   googleEventId  String?   @unique
+  // Google returns one instance per occurrence; this links those instances
+  // back to the recurring series LifeQuest created for a habit.
+  googleSeriesId String?
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([userId, startDate])
+  @@index([userId, googleSeriesId])
   @@map("agenda_events")
 }
 

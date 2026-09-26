@@ -16,7 +16,7 @@ import { Dock, DockIcon, DockItem, DockLabel } from './dock';
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
 
 const ACTIONS: { icon: LucideIcon; label: string; color: string; modal: Exclude<ModalType, null> }[] = [
-  { icon: Swords,      label: 'Nueva Quest',   color: '#a8871e', modal: 'quest' },
+  { icon: Swords,      label: 'Nueva misión',  color: '#a8871e', modal: 'quest' },
   { icon: Wallet,      label: 'Gasto rápido',  color: '#5c5c64', modal: 'expense' },
   { icon: Flame,       label: 'Marcar hábito', color: '#b5453a', modal: 'habit' },
   { icon: NotebookPen, label: 'Nota rápida',   color: '#8f8f98', modal: 'note' },
@@ -26,21 +26,21 @@ const ACTIONS: { icon: LucideIcon; label: string; color: string; modal: Exclude<
 // ── Quest Modal ──────────────────────────────────────────────────────────────
 function QuestModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
   const [title, setTitle] = useState('');
-  const [type, setType] = useState<'DAILY' | 'SIDE' | 'MAIN'>('SIDE');
+  const [type, setType] = useState<'SIDE' | 'MAIN' | 'META'>('SIDE');
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
     if (!title.trim()) return;
     setSaving(true);
     try {
-      await createQuest({ title, type, difficulty: 'EASY', category: 'PERSONAL', xpReward: type === 'DAILY' ? 30 : 50, goldReward: 10 });
+      await createQuest({ title, type, difficulty: 'EASY', category: 'PERSONAL', xpReward: type === 'META' ? 75 : 50, goldReward: 10 });
       useToastStore.getState().success('¡Misión creada!', 'El XP se gana al completarla');
       onDone();
     } catch { setSaving(false); }
   }
 
   return (
-    <ModalShell title="Nueva Quest" onClose={onClose}>
+    <ModalShell title="Nueva misión" onClose={onClose}>
       <input
         autoFocus
         value={title}
@@ -50,10 +50,10 @@ function QuestModal({ onClose, onDone }: { onClose: () => void; onDone: () => vo
         className="w-full px-3 py-2 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-deep)] text-[var(--text-primary)] outline-none focus:border-[var(--accent-gold)]"
       />
       <div className="flex gap-1.5 mt-2">
-        {(['DAILY', 'SIDE', 'MAIN'] as const).map(t => (
+        {(['SIDE', 'MAIN', 'META'] as const).map(t => (
           <button key={t} onClick={() => setType(t)} className="flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all"
             style={{ border: `1px solid ${type === t ? 'var(--accent-gold)' : 'var(--border)'}`, background: type === t ? 'color-mix(in oklab, var(--accent-gold) 12%, transparent)' : 'transparent', color: type === t ? 'var(--accent-gold)' : 'var(--text-muted)' }}>
-            {t === 'DAILY' ? <><E e="📅" s={11} /> Diaria</> : t === 'SIDE' ? <><E e="📜" s={11} /> Side</> : <><E e="⚔️" s={11} /> Main</>}
+            {t === 'SIDE' ? <><E e="📜" s={11} /> Tarea</> : t === 'MAIN' ? <><E e="⚔️" s={11} /> Proyecto</> : <><E e="🎯" s={11} /> Meta</>}
           </button>
         ))}
       </div>

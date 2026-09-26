@@ -24,16 +24,44 @@ export async function createEvent(req: AuthRequest, res: Response) {
 }
 
 export async function updateEvent(req: AuthRequest, res: Response) {
-  const event = await svc.updateEvent(req.userId!, req.params.id, req.body as Record<string, unknown>);
-  res.json({ event });
+  try {
+    const event = await svc.updateEvent(req.userId!, req.params.id, req.body as Record<string, unknown>);
+    return res.json({ event });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error al actualizar el evento';
+    if (message === 'HABIT_EVENT_MANAGED_IN_HABITS') {
+      return res.status(409).json({ error: 'Este evento pertenece a un hábito. Edítalo desde Hábitos.' });
+    }
+    if (message === 'AGENDA_EVENT_NOT_FOUND') return res.status(404).json({ error: 'Evento no encontrado' });
+    return res.status(500).json({ error: message });
+  }
 }
 
 export async function deleteEvent(req: AuthRequest, res: Response) {
-  await svc.deleteEvent(req.userId!, req.params.id);
-  res.json({ ok: true });
+  try {
+    await svc.deleteEvent(req.userId!, req.params.id);
+    return res.json({ ok: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error al eliminar el evento';
+    if (message === 'HABIT_EVENT_MANAGED_IN_HABITS') {
+      return res.status(409).json({ error: 'Este evento pertenece a un hábito. Adminístralo desde Hábitos.' });
+    }
+    if (message === 'AGENDA_EVENT_NOT_FOUND') return res.status(404).json({ error: 'Evento no encontrado' });
+    return res.status(500).json({ error: message });
+  }
 }
 
 // ─── Google Calendar Controllers ─────────────────────────────────────────────
+
+export async function getGoogleCalendarStatus(req: AuthRequest, res: Response) {
+  try {
+    const status = await svc.getGoogleCalendarStatus(req.userId!);
+    return res.json(status);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error al consultar el estado de Google Calendar';
+    return res.status(500).json({ error: msg });
+  }
+}
 
 export async function getGoogleAuthUrl(req: AuthRequest, res: Response) {
   try {

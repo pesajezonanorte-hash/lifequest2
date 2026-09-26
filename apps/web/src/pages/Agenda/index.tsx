@@ -6,6 +6,7 @@ import { PixelButton } from '../../components/ui/PixelButton';
 import { useToast } from '../../hooks/useToast';
 import * as agendaService from '../../services/agenda.service';
 import type { AgendaEvent } from '../../services/agenda.service';
+import { Link2 } from 'lucide-react';
 import { E } from '@/components/ui/glyphs';
 
 type ViewMode = 'day' | 'week' | 'month';
@@ -47,6 +48,19 @@ function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
+// Google returns all-day events as YYYY-MM-DD. They are stored as a UTC
+// calendar key, so compare UTC parts to avoid showing them one day early in
+// timezones west of Greenwich.
+function isEventOnDay(event: AgendaEvent, day: Date) {
+  const eventDate = new Date(event.startDate);
+  if (event.isAllDay) {
+    return eventDate.getUTCFullYear() === day.getFullYear()
+      && eventDate.getUTCMonth() === day.getMonth()
+      && eventDate.getUTCDate() === day.getDate();
+  }
+  return isSameDay(eventDate, day);
+}
+
 // ─── Event Card ───────────────────────────────────────────────────────────────
 
 function EventCard({
@@ -61,6 +75,7 @@ function EventCard({
   onToggle: () => void;
 }) {
   const cat = catInfo(event.category);
+  const isHabitEvent = event.eventType === 'habit';
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -83,33 +98,50 @@ function EventCard({
             {event.location ? ` · ${event.location}` : ''}
             {event.reminder ? ` · ⏰ ${REMINDERS.find(r => r.value === event.reminder)?.label ?? ''}` : ''}
           </p>
+          {isHabitEvent && (
+            <p className="mt-1 flex items-center gap-1 text-xs text-accent-gold">
+              <Link2 size={12} strokeWidth={1.8} aria-hidden="true" /> Hábito recurrente · se gestiona desde Hábitos
+            </p>
+          )}
           {event.description && (
             <p className="font-vt text-text-secondary text-sm mt-0.5">{event.description}</p>
           )}
         </div>
         <div className="flex gap-1 flex-shrink-0">
-          <button
-            onClick={onToggle}
-            title={event.isCompleted ? 'Marcar pendiente' : 'Marcar completado'}
-            className="font-pixel text-text-secondary hover:text-accent-green transition-colors"
-            style={{ fontSize: '10px' }}
-          >
-            {event.isCompleted ? '↩' : '✓'}
-          </button>
-          <button
-            onClick={onEdit}
-            className="font-pixel text-text-secondary hover:text-accent-gold transition-colors"
-            style={{ fontSize: '10px' }}
-          >
-            <E e="✏" />
-          </button>
-          <button
-            onClick={onDelete}
-            className="font-pixel text-text-secondary hover:text-accent-red transition-colors"
-            style={{ fontSize: '10px' }}
-          >
-            <E e="✕" />
-          </button>
+          {isHabitEvent ? (
+            <a
+              href="/habits"
+              className="font-pixel text-accent-gold hover:text-text-primary transition-colors"
+              style={{ fontSize: '8px' }}
+            >
+              HÁBITOS
+            </a>
+          ) : (
+            <>
+              <button
+                onClick={onToggle}
+                title={event.isCompleted ? 'Marcar pendiente' : 'Marcar completado'}
+                className="font-pixel text-text-secondary hover:text-accent-green transition-colors"
+                style={{ fontSize: '10px' }}
+              >
+                {event.isCompleted ? '↩' : '✓'}
+              </button>
+              <button
+                onClick={onEdit}
+                className="font-pixel text-text-secondary hover:text-accent-gold transition-colors"
+                style={{ fontSize: '10px' }}
+              >
+                <E e="✏" />
+              </button>
+              <button
+                onClick={onDelete}
+                className="font-pixel text-text-secondary hover:text-accent-red transition-colors"
+                style={{ fontSize: '10px' }}
+              >
+                <E e="✕" />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </motion.div>
@@ -394,7 +426,7 @@ export default function AgendaPage() {
   // ── Day view ────────────────────────────────────────────────────────────────
 
   function DayView() {
-    const dayEvents = events.filter(e => isSameDay(new Date(e.startDate), currentDate));
+    const dayEvents = events.filter((event) => isEventOnDay(event, currentDate));
     const dateLabel = currentDate.toLocaleDateString('es-CO', {
       weekday: 'long', day: 'numeric', month: 'long',
     });
@@ -470,7 +502,7 @@ export default function AgendaPage() {
         </div>
         <div className="grid grid-cols-7 gap-1">
           {days.map((day, i) => {
-            const dayEvents = events.filter(e => isSameDay(new Date(e.startDate), day));
+            const dayEvents = events.filter((event) => isEventOnDay(event, day));
             const isToday = isSameDay(day, new Date());
             const DAY_NAMES = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
             return (
@@ -548,7 +580,7 @@ export default function AgendaPage() {
         <div className="grid grid-cols-7 gap-0.5">
           {cells.map((day, i) => {
             if (!day) return <div key={i} />;
-            const dayEvents = events.filter(e => isSameDay(new Date(e.startDate), day));
+            const dayEvents = events.filter((event) => isEventOnDay(event, day));
             const isToday = isSameDay(day, new Date());
             const isSelected = isSameDay(day, currentDate);
 
@@ -584,7 +616,7 @@ export default function AgendaPage() {
 
         {/* Selected day events */}
         {(() => {
-          const dayEvents = events.filter(e => isSameDay(new Date(e.startDate), currentDate));
+          const dayEvents = events.filter((event) => isEventOnDay(event, currentDate));
           if (dayEvents.length === 0) return null;
           return (
             <div className="space-y-2 mt-2">
@@ -615,6 +647,13 @@ export default function AgendaPage() {
   const [syncingGoogle, setSyncingGoogle] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
   const handledCodeRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    agendaService
+      .getGoogleCalendarStatus()
+      .then((status) => setGoogleConnected(status.connected))
+      .catch(() => setGoogleConnected(false));
+  }, []);
 
   useEffect(() => {
     // Check if redirect contains OAuth code
@@ -716,7 +755,7 @@ export default function AgendaPage() {
               INTEGRACIÓN GOOGLE CALENDAR
             </p>
             <p className="font-vt text-text-secondary text-sm">
-              Sincroniza tus reuniones y eventos de Google Calendar como misiones de tu agenda.
+              Sincroniza tus reuniones y eventos de Google Calendar; los hábitos que elijas se añaden como series recurrentes separadas.
             </p>
           </div>
         </div>

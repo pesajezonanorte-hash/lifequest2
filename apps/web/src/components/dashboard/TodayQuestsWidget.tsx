@@ -9,7 +9,7 @@ import type { Quest } from '@lifequest/shared';
 import { E } from '@/components/ui/glyphs';
 
 const TYPE_ICONS: Record<string, string> = {
-  MAIN: '🏆', SIDE: '⚔️', DAILY: '🔄', WEEKLY: '📅',
+  MAIN: '🏆', SIDE: '⚔️', META: '🎯', DAILY: '🔄', WEEKLY: '📅',
 };
 const DIFF_COLORS: Record<string, string> = {
   EASY: 'text-accent-green', NORMAL: 'text-accent-cyan', HARD: 'text-accent-gold', EPIC: 'text-accent-pink',
@@ -60,10 +60,10 @@ export function TodayQuestsWidget({ quests, onQuestCompleted }: Props) {
 
   if (quests.length === 0) {
     return (
-      <PixelPanel animate title="MISIONES DE HOY" className="p-5 flex flex-col items-center gap-3">
+      <PixelPanel animate title="MISIONES PENDIENTES" className="p-5 flex flex-col items-center gap-3">
         <MiguelSprite size={64} animate="idle" />
         <p className="font-vt text-text-secondary text-xl text-center">
-          No tienes misiones activas, héroe.
+          No tienes misiones pendientes, héroe.
         </p>
         <p className="font-vt text-text-secondary text-lg text-center">
           ¡Crea una misión para empezar tu aventura! <E e="⚔" />
@@ -73,7 +73,7 @@ export function TodayQuestsWidget({ quests, onQuestCompleted }: Props) {
   }
 
   return (
-    <PixelPanel animate title="MISIONES DE HOY" className="p-4">
+    <PixelPanel animate title="MISIONES PENDIENTES" className="p-4">
       <div className="space-y-2">
         <AnimatePresence>
           {quests.map((quest, i) => {

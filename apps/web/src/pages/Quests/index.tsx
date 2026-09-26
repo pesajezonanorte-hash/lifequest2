@@ -17,13 +17,11 @@ import { SageContextButton } from '../../components/sage/SageContextButton';
 import { E } from '@/components/ui/glyphs';
 
 const TABS = [
-  { key: '',        label: 'Todas',        icon: '📜' },
-  { key: 'MAIN',    label: 'Principales',  icon: '⚔️' },
-  { key: 'SIDE',    label: 'Secundarias',  icon: '🗡️' },
-  { key: 'DAILY',   label: 'Diarias',      icon: '☀️' },
-  { key: 'WEEKLY',  label: 'Semanales',    icon: '📅' },
-  { key: 'META',    label: 'Metas',        icon: '🎯' },
-  { key: 'COMPLETED', label: 'Completadas',icon: '✅' },
+  { key: '',          label: 'Todas',        icon: '📜' },
+  { key: 'MAIN',      label: 'Proyectos',    icon: '⚔️' },
+  { key: 'SIDE',      label: 'Tareas',       icon: '🗡️' },
+  { key: 'META',      label: 'Metas',        icon: '🎯' },
+  { key: 'COMPLETED', label: 'Completadas',  icon: '✅' },
 ] as const;
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -216,7 +214,7 @@ export default function QuestsPage() {
             <E e="📜" /> PERGAMINO DE MISIONES
           </h1>
           <p className="font-vt text-text-secondary text-base">
-            Tus aventuras pendientes, {user?.displayName?.split(' ')[0]}
+            Tareas, proyectos y metas con fecha, dificultad y progreso, {user?.displayName?.split(' ')[0]}
           </p>
         </div>
         <div className="flex items-center gap-2">
