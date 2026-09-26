@@ -495,7 +495,7 @@ export function GameLayout({ children }: Props) {
                 <div className="flex items-center gap-1 tabular-nums px-2 h-7 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--c-gold)', fontSize: 12, fontWeight: 700 }}>
                   <Wallet size={12} />{user.gold.toLocaleString('es-CO')}
                 </div>
-                <SkyToggle checked={isDarkMode} onChange={handleToggleTheme} />
+                <SkyToggle checked={isDarkMode} onChange={handleToggleTheme} size={10} />
                 <NotificationBell />
                 <FeedbackButton variant="mobile" />
                 <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={toggleAudio} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
