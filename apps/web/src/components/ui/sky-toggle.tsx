@@ -6,11 +6,11 @@ export interface SkyToggleProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   ariaLabel?: string;
-  /** Tamaño base en px (el resto de medidas del switch son em relativos). Default 12 */
+  /** Tamaño base en px (el resto de medidas del switch son em relativos). Default 9 */
   size?: number;
 }
 
-const Switch = ({ checked, onChange, ariaLabel = 'Cambiar tema', size = 12 }: SkyToggleProps) => {
+const Switch = ({ checked, onChange, ariaLabel = 'Cambiar tema', size = 9 }: SkyToggleProps) => {
   return (
     <StyledWrapper $size={size}>
       <label className="theme-switch">
@@ -45,7 +45,7 @@ const Switch = ({ checked, onChange, ariaLabel = 'Cambiar tema', size = 12 }: Sk
 
 const StyledWrapper = styled.div<{ $size?: number }>`
   .theme-switch {
-    --toggle-size: ${(p) => p.$size ?? 12}px;
+    --toggle-size: ${(p) => p.$size ?? 9}px;
     /* the size is adjusted using font-size,
        this is not transform scale,
        so you can choose any size */

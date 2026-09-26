@@ -93,7 +93,7 @@ export const DesktopSidebar = ({
   return (
     <motion.div
       className={cn(
-        "h-full px-2 py-4 hidden md:flex md:flex-col bg-[var(--surface)] border-r border-[var(--border-soft)] w-[300px] flex-shrink-0",
+        "h-full px-2 py-4 hidden md:flex md:flex-col bg-[var(--surface)] border-r border-[var(--border-soft)] w-[300px] flex-shrink-0 overflow-hidden",
         className
       )}
       animate={{
@@ -185,7 +185,7 @@ export const SidebarLink = ({
       {({ isActive }) => (
         <span
           className={cn(
-            "relative flex items-center gap-[11px] px-3 py-[9px]",
+            "relative flex items-center gap-[11px] px-3 py-[9px] overflow-hidden",
             className
           )}
           style={{

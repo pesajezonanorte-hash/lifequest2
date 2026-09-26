@@ -490,7 +490,7 @@ export function GameLayout({ children }: Props) {
                 <div className="flex items-center gap-1 tabular-nums px-2 h-7 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--c-gold)', fontSize: 12, fontWeight: 700 }}>
                   <Wallet size={12} />{user.gold.toLocaleString('es-CO')}
                 </div>
-                <SkyToggle checked={isDarkMode} onChange={handleToggleTheme} size={10} />
+                <div className="flex shrink-0 items-center"><SkyToggle checked={isDarkMode} onChange={handleToggleTheme} size={7} /></div>
                 <NotificationBell />
                 <FeedbackButton variant="mobile" />
                 <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={toggleAudio} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
@@ -546,7 +546,7 @@ export function GameLayout({ children }: Props) {
                   <Wallet size={15} />{user.gold.toLocaleString('es-CO')}
                 </div>
                 <LiveClock />
-                <SkyToggle checked={isDarkMode} onChange={handleToggleTheme} />
+                <div className="flex shrink-0 items-center"><SkyToggle checked={isDarkMode} onChange={handleToggleTheme} /></div>
                 <FeedbackButton variant="desktop" />
                 <motion.button onClick={() => navigate('/guild')} whileTap={{ scale: 0.96 }} title="Añadir amigos" className="flex items-center justify-center" style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   <UserPlus size={16} />
