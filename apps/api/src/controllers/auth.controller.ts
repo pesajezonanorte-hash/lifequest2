@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as authService from '../services/auth.service';
 import { REFRESH_COOKIE_OPTIONS } from '../lib/jwt';
 import type { AuthRequest } from '../middleware/auth.middleware';
+import { reconcileUserActivityStreak } from '../services/xp.service';
 
 export async function register(req: Request, res: Response): Promise<void> {
   try {
@@ -70,6 +71,7 @@ export async function logout(req: AuthRequest, res: Response): Promise<void> {
 
 export async function me(req: AuthRequest, res: Response): Promise<void> {
   try {
+    await reconcileUserActivityStreak(req.userId!);
     const { prisma } = await import('../lib/prisma');
     const user = await prisma.user.findUniqueOrThrow({
       where: { id: req.userId },

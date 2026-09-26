@@ -1,7 +1,15 @@
 import { prisma } from '../lib/prisma';
+import { getCalendarDay } from '../lib/calendar';
+import { reconcileHabitStreaks } from './habit.service';
+import { reconcileUserActivityStreak } from './xp.service';
 
 export async function getDashboard(userId: string) {
+  // No dependemos del cron: una lectura del castillo siempre sanea rachas vencidas.
+  await Promise.all([reconcileHabitStreaks(userId), reconcileUserActivityStreak(userId)]);
+
   const now = new Date();
+  const timezoneRecord = await prisma.user.findUnique({ where: { id: userId }, select: { timezone: true } });
+  const habitTodayStart = getCalendarDay(timezoneRecord?.timezone, now);
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const todayStart = startOfDay(now);
@@ -76,7 +84,7 @@ export async function getDashboard(userId: string) {
       where: { userId, isActive: true },
       include: {
         logs: {
-          where: { date: todayStart },
+          where: { date: habitTodayStart },
           take: 1,
         },
       },
@@ -258,7 +266,13 @@ export interface Priority {
 }
 
 export async function getTodayPriorities(userId: string): Promise<Priority[]> {
+  await reconcileHabitStreaks(userId);
+
   const now = new Date();
+  const timezoneRecord = await prisma.user.findUnique({ where: { id: userId }, select: { timezone: true } });
+  const habitTodayStart = getCalendarDay(timezoneRecord?.timezone, now);
+  const habitTomorrowStart = new Date(habitTodayStart);
+  habitTomorrowStart.setUTCDate(habitTomorrowStart.getUTCDate() + 1);
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const tomorrowEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
@@ -269,7 +283,7 @@ export async function getTodayPriorities(userId: string): Promise<Priority[]> {
         userId,
         isActive: true,
         NOT: {
-          logs: { some: { date: { gte: todayStart, lt: todayEnd }, completed: true } },
+          logs: { some: { date: { gte: habitTodayStart, lt: habitTomorrowStart }, completed: true } },
         },
       },
       orderBy: { currentStreak: 'desc' },

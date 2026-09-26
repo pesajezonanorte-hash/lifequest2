@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { addCalendarDays, getCalendarDay } from '../lib/calendar';
 import { awardXpAndGold } from './xp.service';
 import { checkAchievements } from './achievement.service';
 import { createNotification } from './notification.service';
@@ -30,6 +31,137 @@ export interface UpdateHabitInput {
   reminderTime?: string | null;
 }
 
+/**
+ * Una racha no puede depender exclusivamente del cron: en serverless o después
+ * de una pausa del proceso el cron puede no correr. Esta reconciliación se
+ * invoca al leer hábitos/dashboard y deja la BD en el estado real.
+ *
+ * `HabitLog.date` se usa como fecha-calendario (medianoche), igual que el
+ * resto de este servicio. Un log "skipped" mantiene la regla histórica de la
+ * aplicación: no suma, pero tampoco rompe la racha.
+ */
+export async function reconcileHabitStreaks(userId?: string, now = new Date()): Promise<number> {
+  // Las fechas de HabitLog se guardan como llaves de calendario. El rango
+  // amplio cubre cualquier huso horario; el filtro definitivo se hace por usuario.
+  const queryDay = getCalendarDay(undefined, now);
+  // Siete días alcanzan para hallar el último día obligatorio incluso para una
+  // frecuencia semanal. Para hábitos diarios basta con ayer.
+  const lookbackStart = addCalendarDays(queryDay, -8);
+  const lookaheadEnd = addCalendarDays(queryDay, 2);
+
+  const habits = await prisma.habit.findMany({
+    where: {
+      ...(userId ? { userId } : {}),
+      isActive: true,
+      currentStreak: { gt: 0 },
+    },
+    include: {
+      user: { select: { timezone: true } },
+      logs: {
+        where: { date: { gte: lookbackStart, lt: lookaheadEnd } },
+        select: { date: true, completed: true, status: true },
+      },
+    },
+  });
+
+  const stale = habits.filter((habit) => {
+    const today = getCalendarDay(habit.user.timezone, now);
+    const lastRequiredDay = getLastRequiredDay(today, habit.frequency);
+    const lastLog = habit.logs.find((log) => log.date.getTime() === lastRequiredDay.getTime());
+    return !lastLog || (!lastLog.completed && lastLog.status !== 'skipped');
+  });
+
+  if (stale.length === 0) return 0;
+
+  const resetUserIds = new Set<string>();
+  let resetCount = 0;
+
+  for (const habit of stale) {
+    // El guard evita borrar una racha que se haya actualizado concurrentemente.
+    const result = await prisma.habit.updateMany({
+      where: { id: habit.id, currentStreak: habit.currentStreak },
+      data: { currentStreak: 0 },
+    });
+
+    if (result.count === 0) continue;
+
+    resetCount += 1;
+    resetUserIds.add(habit.userId);
+    await createHabitRecoveryChallengeIfEligible(
+      habit.userId,
+      habit.id,
+      habit.title,
+      habit.currentStreak,
+      now,
+    );
+  }
+
+  // Un consejo proactivo creado con la racha anterior no debe quedarse visible.
+  // La siguiente consulta del Sabio se genera usando los datos ya reconciliados.
+  if (resetUserIds.size > 0) {
+    await prisma.sageProactiveNote.deleteMany({
+      where: {
+        userId: { in: [...resetUserIds] },
+        createdAt: { gte: queryDay },
+      },
+    });
+  }
+
+  return resetCount;
+}
+
+function getLastRequiredDay(today: Date, rawFrequency: unknown): Date {
+  for (let daysAgo = 1; daysAgo <= 7; daysAgo += 1) {
+    const candidate = addCalendarDays(today, -daysAgo);
+    if (isHabitRequiredOn(candidate, rawFrequency)) return candidate;
+  }
+  // Una frecuencia inválida o sin días se considera diaria, por lo que esta
+  // línea solo es una defensa adicional.
+  return addCalendarDays(today, -1);
+}
+
+function isHabitRequiredOn(date: Date, rawFrequency: unknown): boolean {
+  if (!rawFrequency || typeof rawFrequency !== 'object' || Array.isArray(rawFrequency)) return true;
+
+  const frequency = rawFrequency as { type?: string; days?: unknown };
+  if (frequency.type !== 'days_per_week') return true;
+  if (!Array.isArray(frequency.days) || frequency.days.length === 0) return true;
+
+  // La Date es una llave UTC que representa el día local del usuario.
+  return frequency.days.some((day) => typeof day === 'number' && day === date.getUTCDay());
+}
+
+async function createHabitRecoveryChallengeIfEligible(
+  userId: string,
+  habitId: string,
+  habitTitle: string,
+  lostStreak: number,
+  now = new Date(),
+): Promise<void> {
+  if (lostStreak <= 7) return;
+
+  const existing = await prisma.recoveryChallenge.findFirst({
+    where: { userId, habitId, isCompleted: false, expiresAt: { gt: now } },
+    select: { id: true },
+  });
+  if (existing) return;
+
+  const bonusXp = Math.floor(lostStreak * 1.5);
+  const expiresAt = addCalendarDays(now, 7);
+
+  await prisma.recoveryChallenge.create({
+    data: { userId, habitId, lostStreak, requiredDays: 3, bonusXp, expiresAt },
+  });
+
+  createNotification(userId, {
+    type: 'streak',
+    title: 'Reto de recuperación disponible',
+    body: `"${habitTitle}" puede volver a encenderse: 3 días seguidos por +${bonusXp} XP.`,
+    icon: 'habit',
+    link: '/habits',
+  }).catch(() => {});
+}
+
 export async function createHabit(userId: string, input: CreateHabitInput) {
   const habit = await prisma.habit.create({
     data: {
@@ -53,13 +185,16 @@ export async function createHabit(userId: string, input: CreateHabitInput) {
 }
 
 export async function listHabits(userId: string) {
+  await reconcileHabitStreaks(userId);
+
   const habits = await prisma.habit.findMany({
     where: { userId, isActive: true },
     orderBy: { createdAt: 'asc' },
   });
 
-  // Attach today's log to each habit
-  const today = getTodayDate();
+  // Attach today's log using the user's calendar, not the server's UTC date.
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { timezone: true } });
+  const today = getCalendarDay(user?.timezone);
   const logs = await prisma.habitLog.findMany({
     where: { userId, date: today },
   });
@@ -78,6 +213,8 @@ export async function listHabits(userId: string) {
 }
 
 export async function getHabitById(userId: string, habitId: string) {
+  await reconcileHabitStreaks(userId);
+
   const habit = await prisma.habit.findFirst({ where: { id: habitId, userId } });
   if (!habit) return null;
 
@@ -120,10 +257,17 @@ export async function archiveHabit(userId: string, habitId: string) {
 export type HabitLogStatus = 'completed' | 'failed' | 'skipped';
 
 export async function logHabit(userId: string, habitId: string, status: HabitLogStatus, notes?: string) {
-  const habit = await prisma.habit.findFirst({ where: { id: habitId, userId, isActive: true } });
+  // Si el servidor estuvo inactivo al cambiar el día, corregir antes de usar
+  // currentStreak para que un nuevo registro empiece exactamente en 1.
+  await reconcileHabitStreaks(userId);
+
+  const habit = await prisma.habit.findFirst({
+    where: { id: habitId, userId, isActive: true },
+    include: { user: { select: { timezone: true } } },
+  });
   if (!habit) throw new Error('HABIT_NOT_FOUND');
 
-  const today = getTodayDate();
+  const today = getCalendarDay(habit.user.timezone);
   const completed = status === 'completed';
 
   // Upsert the log for today
@@ -137,12 +281,15 @@ export async function logHabit(userId: string, habitId: string, status: HabitLog
   let { currentStreak, longestStreak } = habit;
 
   if (status === 'completed') {
-    // Check if yesterday was completed or skipped (to continue streak)
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayLog = await prisma.habitLog.findUnique({ where: { habitId_date: { habitId, date: yesterday } } });
+    // Continúa desde el último día en que este hábito realmente era exigible.
+    // Para un hábito diario es ayer; para frecuencias semanales, el día marcado
+    // más reciente. Así una fecha libre no corta la racha.
+    const previousRequiredDay = getLastRequiredDay(today, habit.frequency);
+    const previousLog = await prisma.habitLog.findUnique({
+      where: { habitId_date: { habitId, date: previousRequiredDay } },
+    });
 
-    if (yesterdayLog && (yesterdayLog.completed || yesterdayLog.status === 'skipped')) {
+    if (previousLog && (previousLog.completed || previousLog.status === 'skipped')) {
       currentStreak += 1;
     } else {
       currentStreak = 1;
@@ -296,10 +443,4 @@ export async function getHabitHeatmap(userId: string, habitId: string, days = 90
     status: l.status,
     completed: l.completed,
   }));
-}
-
-function getTodayDate(): Date {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
 }

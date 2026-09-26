@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { prisma } from '../lib/prisma';
 import { generateText, hasAIProvider } from '../lib/ai';
 import { createNotification, isInQuietHours, sendPush } from '../services/notification.service';
+import { reconcileHabitStreaks } from '../services/habit.service';
 import { generateDailyScroll } from '../services/scrolls.service';
 import { seedWisdomCards } from '../services/wisdom.service';
 
@@ -146,68 +147,9 @@ async function failExpiredQuests() {
 }
 
 async function penalizeInactiveHabitStreaks() {
-  const yesterday = startOfDay(addDays(new Date(), -1));
-
-  const activeHabits = await prisma.habit.findMany({
-    where: { isActive: true, currentStreak: { gt: 0 } },
-  });
-
-  for (const habit of activeHabits) {
-    const log = await prisma.habitLog.findUnique({
-      where: { habitId_date: { habitId: habit.id, date: yesterday } },
-    });
-
-    if (!log || log.status === 'failed') {
-      await createRecoveryChallengeIfEligible(habit.userId, habit.id, habit.title, habit.currentStreak);
-      await prisma.habit.update({
-        where: { id: habit.id },
-        data: { currentStreak: 0 },
-      });
-    }
-  }
-}
-
-async function createRecoveryChallengeIfEligible(
-  userId: string,
-  habitId: string,
-  habitTitle: string,
-  lostStreak: number
-) {
-  if (lostStreak <= 7) return;
-
-  const now = new Date();
-  const existing = await prisma.recoveryChallenge.findFirst({
-    where: {
-      userId,
-      habitId,
-      isCompleted: false,
-      expiresAt: { gt: now },
-    },
-    select: { id: true },
-  });
-
-  if (existing) return;
-
-  const bonusXp = Math.floor(lostStreak * 1.5);
-
-  await prisma.recoveryChallenge.create({
-    data: {
-      userId,
-      habitId,
-      lostStreak,
-      requiredDays: 3,
-      bonusXp,
-      expiresAt: addDays(now, 7),
-    },
-  });
-
-  createNotification(userId, {
-    type: 'streak',
-    title: '🔥 Reto de recuperación disponible',
-    body: `"${habitTitle}" puede volver a encenderse: 3 días seguidos por +${bonusXp} XP.`,
-    icon: '🔥',
-    link: '/habits',
-  }).catch(() => {});
+  // Respaldo para procesos persistentes. Las lecturas de hábitos/dashboard también
+  // hacen esta conciliación para que el resultado sea correcto en serverless.
+  await reconcileHabitStreaks();
 }
 
 async function sendDeadlineAlerts() {

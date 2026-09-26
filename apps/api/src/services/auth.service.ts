@@ -132,6 +132,12 @@ export async function loginUser(data: LoginInput) {
   const valid = await bcrypt.compare(data.password, user.passwordHash);
   if (!valid) throw new Error('INVALID_CREDENTIALS');
 
+  const { reconcileUserActivityStreak } = await import('./xp.service');
+  const reconciledStreak = await reconcileUserActivityStreak(user.id);
+  const userForResponse = reconciledStreak === user.currentStreak
+    ? user
+    : { ...user, currentStreak: reconciledStreak };
+
   const payload = { userId: user.id, email: user.email };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
@@ -143,9 +149,9 @@ export async function loginUser(data: LoginInput) {
   });
 
   // Check login_30 achievement silently
-  checkAchievements(user.id, 'user_login', { currentStreak: user.currentStreak }).catch(() => {});
+  checkAchievements(user.id, 'user_login', { currentStreak: userForResponse.currentStreak }).catch(() => {});
 
-  return { user: sanitizeUser(user), accessToken, refreshToken };
+  return { user: sanitizeUser(userForResponse), accessToken, refreshToken };
 }
 
 export async function refreshAccessToken(refreshToken: string) {
@@ -162,8 +168,14 @@ export async function refreshAccessToken(refreshToken: string) {
   const valid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
   if (!valid) throw new Error('INVALID_REFRESH_TOKEN');
 
+  const { reconcileUserActivityStreak } = await import('./xp.service');
+  const reconciledStreak = await reconcileUserActivityStreak(user.id);
+  const userForResponse = reconciledStreak === user.currentStreak
+    ? user
+    : { ...user, currentStreak: reconciledStreak };
+
   const newAccessToken = signAccessToken({ userId: user.id, email: user.email });
-  return { accessToken: newAccessToken, user: sanitizeUser(user) };
+  return { accessToken: newAccessToken, user: sanitizeUser(userForResponse) };
 }
 
 export async function logoutUser(userId: string) {

@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { getCalendarDay } from '../lib/calendar';
 import type { QuestCategory } from '@prisma/client';
 import { damageSeasonBoss } from './season.service';
 
@@ -64,6 +65,36 @@ function applyClassMultiplier(playerClass: string | null, category: QuestCategor
   return { xp: Math.round(xp * catMult), gold: Math.round(gold * goldMult) };
 }
 
+/** Restablece la racha general si ya pasó un día calendario completo sin actividad. */
+export async function reconcileUserActivityStreak(userId: string, now = new Date()): Promise<number> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { currentStreak: true, lastActivityDate: true, timezone: true },
+  });
+
+  if (!user || user.currentStreak === 0 || !user.lastActivityDate) return user?.currentStreak ?? 0;
+
+  const today = getCalendarDay(user.timezone, now);
+  const yesterday = new Date(today);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+
+  const lastActivityDay = getCalendarDay(user.timezone, user.lastActivityDate);
+
+  // Ayer todavía deja la racha viva: el usuario tiene hasta terminar hoy para
+  // continuarla. Antes de ayer significa que ya hubo un día entero perdido.
+  if (lastActivityDay.getTime() < yesterday.getTime()) {
+    await prisma.user.update({ where: { id: userId }, data: { currentStreak: 0 } });
+    // Un mensaje del Sabio guardado antes del reinicio puede mencionar una racha
+    // que ya no existe. Se regenerará en la siguiente lectura con datos reales.
+    await prisma.sageProactiveNote.deleteMany({
+      where: { userId, createdAt: { gte: today } },
+    });
+    return 0;
+  }
+
+  return user.currentStreak;
+}
+
 export async function awardXpAndGold(
   userId: string,
   xp: number,
@@ -116,15 +147,16 @@ export async function awardXpAndGold(
   const newMaxHp = Math.min(user.maxHp + (statIncreases.hp ?? 0), 300);
   const newMaxMp = Math.min(user.maxMp + (statIncreases.mp ?? 0), 250);
 
-  // Update streak
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const lastActivity = user.lastActivityDate ? new Date(user.lastActivityDate) : null;
-  if (lastActivity) lastActivity.setHours(0, 0, 0, 0);
+  // Update streak according to the player's own calendar day, not the API host's UTC day.
+  const today = getCalendarDay(user.timezone);
+  const lastActivity = user.lastActivityDate
+    ? getCalendarDay(user.timezone, user.lastActivityDate)
+    : null;
 
   const isNewDay = !lastActivity || lastActivity.getTime() < today.getTime();
-  const isYesterday = lastActivity &&
-    lastActivity.getTime() === today.getTime() - 86400000;
+  const yesterday = new Date(today);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const isYesterday = lastActivity && lastActivity.getTime() === yesterday.getTime();
 
   let newStreak = user.currentStreak;
   if (isNewDay) {

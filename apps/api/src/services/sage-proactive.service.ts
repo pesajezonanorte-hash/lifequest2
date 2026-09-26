@@ -1,7 +1,12 @@
 import { prisma } from '../lib/prisma';
 import { generateText, hasAIProvider } from '../lib/ai';
+import { reconcileHabitStreaks } from './habit.service';
+import { reconcileUserActivityStreak } from './xp.service';
 
 export async function getTodayProactiveNote(userId: string) {
+  // Evita devolver un consejo ya guardado con una racha vencida.
+  await Promise.all([reconcileHabitStreaks(userId), reconcileUserActivityStreak(userId)]);
+
   const today = new Date();
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
