@@ -509,12 +509,6 @@ button {
   animation: chromatic 0.5s ease-in-out;
 }
 
-.bg-panel-glass {
-  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
 /* ─── Visual Themes (Fase 8 Bloque 13) ──────────────────────────────────────── */
 
 /* Aurora — neutro clásico profundo (la piel base apenas afinada) */

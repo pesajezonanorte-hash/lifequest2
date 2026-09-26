@@ -260,7 +260,7 @@ function DesktopQuickActionsDock({ onOpen }: { onOpen: (modal: ModalType) => voi
       <div className="pointer-events-auto">
         <Dock
           containerClassName="w-fit max-w-[calc(100vw-2rem)]"
-          className="gap-1 rounded-2xl border border-[var(--border)] bg-[color-mix(in_oklab,var(--bg-panel)_92%,transparent)] p-1.5 shadow-[var(--shadow-lg)] backdrop-blur-xl"
+          className="gap-1 rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-1.5 shadow-[var(--shadow-lg)]"
           panelHeight={52}
           maxHeight={98}
           magnification={78}
@@ -438,7 +438,6 @@ export function QuickActionsFAB() {
         {/* ── Botón principal + ── */}
         <motion.button
           whileTap={{ scale: 0.9 }}
-          whileHover={{ scale: 1.06 }}
           onClick={() => setOpen(o => !o)}
           aria-label={open ? 'Cerrar acciones rápidas' : 'Abrir acciones rápidas'}
           aria-expanded={open}

@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 /**
  * Helper estándar de shadcn/ui: combina clases con soporte de conflictos
  * de Tailwind (la última gana). Lo usan los componentes tipo shadcn
- * (liquid-glass-button, etc.).
+ * (flow-button, etc.).
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

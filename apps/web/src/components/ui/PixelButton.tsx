@@ -1,6 +1,6 @@
-import { type ReactNode, type ButtonHTMLAttributes } from 'react';
+import { Children, isValidElement, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { audio } from '../../lib/audio';
-import { LiquidButton } from './liquid-glass-button';
+import { FlowButton, type FlowButtonTone } from './flow-button';
 import { cn } from '@/lib/utils';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'cyan' | 'green';
@@ -13,33 +13,28 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
-/**
- * PixelButton mantiene su API (variant, size, fullWidth, loading, blips de
- * audio) pero ahora se renderiza con el LiquidButton (liquid glass) por dentro,
- * para que todos los botones de las páginas tengan el look glass sin tocar
- * ninguna llamada.
- *
- * Cada variante es el glass con su tinte de color (texto de color + velo
- * translúcido), respetando la paleta del juego.
- */
-const variantClasses: Record<Variant, string> = {
-  // NOTA: bg-primary/15 no funciona en Tailwind v3 con colores CSS-var (se come
-  // el /15 y pinta el fondo SÓLIDO, ese rectángulo morado-azul encima del glass).
-  // accent-purple es hex y respeta la opacidad.
-  primary:   'font-semibold text-primary bg-accent-purple/15',
-  secondary: 'font-semibold text-accent-blue bg-accent-blue/15',
-  danger:    'font-semibold text-accent-red bg-accent-red/15',
-  ghost:     'text-text-secondary bg-transparent',
-  cyan:      'font-semibold text-accent-cyan bg-accent-cyan/15',
-  green:     'font-semibold text-accent-green bg-accent-green/15',
+const variantTones: Record<Variant, FlowButtonTone> = {
+  primary: 'primary',
+  secondary: 'secondary',
+  danger: 'danger',
+  ghost: 'ghost',
+  cyan: 'cyan',
+  green: 'green',
 };
 
-const sizeMap = {
-  sm: 'sm',
-  md: 'default',
-  lg: 'lg',
-} as const;
+function hasTextualLabel(node: ReactNode): boolean {
+  return Children.toArray(node).some((child) => {
+    if (typeof child === 'string') return child.trim().length > 1;
+    if (!isValidElement(child)) return false;
+    return hasTextualLabel((child.props as { children?: ReactNode }).children);
+  });
+}
 
+/**
+ * Shared action button for LifeQuest. It preserves the historical PixelButton
+ * API and audio feedback, while rendering the bounded FlowButton interaction
+ * instead of the previous liquid-glass/scale-on-hover treatment.
+ */
 export function PixelButton({
   variant = 'primary',
   size = 'md',
@@ -53,41 +48,37 @@ export function PixelButton({
   ...props
 }: Props) {
   const isDisabled = disabled || loading;
+  const hasTextLabel = hasTextualLabel(children);
 
-  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
+  function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
     if (isDisabled) return;
     audio.play('blip');
-    onClick?.(e);
+    onClick?.(event);
   }
 
   return (
-    <LiquidButton
-      variant="default"
-      size={sizeMap[size]}
-      className={cn(
-        'font-sans select-none',
-        variantClasses[variant],
-        fullWidth ? 'w-full' : '',
-        isDisabled ? 'opacity-50 cursor-not-allowed' : '',
-        className,
-      )}
+    <FlowButton
+      tone={variantTones[variant]}
+      size={size}
+      fullWidth={fullWidth}
+      withArrows={!loading && hasTextLabel}
+      className={cn('font-sans select-none', className)}
       disabled={isDisabled}
+      aria-busy={loading || undefined}
       onClick={handleClick}
-      onMouseEnter={(e) => {
+      onMouseEnter={(event) => {
         if (!isDisabled) audio.play('hover');
-        onMouseEnter?.(e);
+        onMouseEnter?.(event);
       }}
       {...props}
     >
       {loading ? (
-        <span className="inline-flex items-center gap-2">
-          <span className="inline-block w-2 h-2 bg-current animate-bounce" />
-          <span className="inline-block w-2 h-2 bg-current animate-bounce [animation-delay:0.1s]" />
-          <span className="inline-block w-2 h-2 bg-current animate-bounce [animation-delay:0.2s]" />
+        <span className="inline-flex items-center gap-1.5" aria-label="Cargando">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce" />
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:0.1s]" />
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-current animate-bounce [animation-delay:0.2s]" />
         </span>
-      ) : (
-        children
-      )}
-    </LiquidButton>
+      ) : children}
+    </FlowButton>
   );
 }
