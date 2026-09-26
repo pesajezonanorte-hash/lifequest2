@@ -344,121 +344,100 @@ export function GameLayout({ children }: Props) {
             </nav>
           </div>
 
-          {/* hero card */}
+          {/* perfil: el avatar nunca se recorta; los datos se revelan hacia la derecha */}
           {user && (
             <div className="relative min-w-[252px] px-1 pt-2 pb-2">
-              {sidebarOpen ? (
-                <button
-                  onClick={() => navigate('/character')}
-                  className="block w-full text-left"
-                  style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
-                >
+              <button
+                type="button"
+                onClick={() => navigate('/character')}
+                title={`${user.displayName} · Ver personaje`}
+                aria-label={`Ver perfil de ${user.displayName}`}
+                className="block w-full text-left"
+                style={{
+                  appearance: 'none',
+                  border: 0,
+                  background: 'transparent',
+                  padding: 0,
+                  cursor: 'pointer',
+                  display: 'block',
+                  width: '100%',
+                }}
+              >
+                <div className="flex min-h-[45px] items-center gap-3">
+                  {/* Al recogerse se ve solo esto: el sprite completo, sin tarjeta ni recorte. */}
                   <div
-                    style={{
-                      padding: 8,
-                      borderRadius: 14,
-                      background:
-                        'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
-                      border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
-                      display: 'flex', flexDirection: 'column', gap: 10,
-                    }}
+                    className="flex shrink-0 items-center justify-center"
+                    style={{ width: 36, height: 45 }}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div
+                    <AvatarDisplay
+                      avatarConfig={u.avatarConfig}
+                      avatarUrl={u.avatarUrl}
+                      equippedAura={u.equippedAura}
+                      equippedFrame={u.equippedFrame}
+                      size={36}
+                      animate="none"
+                    />
+                  </div>
+
+                  {/* Siempre ocupa su lugar: el ancho del sidebar solo lo revela hacia la derecha. */}
+                  <motion.div
+                    animate={{ opacity: sidebarOpen ? 1 : 0 }}
+                    transition={{ duration: 0.16, ease: 'easeOut' }}
+                    className="min-w-0 flex-1 pr-1"
+                    style={{ pointerEvents: sidebarOpen ? 'auto' : 'none' }}
+                  >
+                    <div className="flex min-w-0 items-center gap-1.5 leading-none">
+                      <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">
+                        {user.displayName}
+                      </span>
+                      <span
                         style={{
-                          width: 36, height: 36, borderRadius: 12, flexShrink: 0,
-                          overflow: 'hidden',
-                          background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
-                          border: '1px solid var(--border)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 9.5,
+                          padding: '2px 5px',
+                          borderRadius: 5,
+                          background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
+                          color: 'var(--c-xp)',
+                          fontWeight: 800,
+                          letterSpacing: '.06em',
+                          flexShrink: 0,
                         }}
                       >
-                        <AvatarDisplay avatarConfig={u.avatarConfig} avatarUrl={u.avatarUrl} equippedAura={u.equippedAura} equippedFrame={u.equippedFrame} size={30} animate="idle" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
-                          <span
-                            style={{
-                              fontSize: 9.5,
-                              padding: '1px 5px',
-                              borderRadius: 5,
-                              background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
-                              color: 'var(--c-xp)',
-                              fontWeight: 800,
-                              letterSpacing: '.06em',
-                              flexShrink: 0,
-                            }}
-                          >
-                            NV {user.level}
-                          </span>
-                        </div>
-                        <div className="mt-px text-[11px] truncate" style={{ color: 'var(--text-2)' }}>
-                          {getLevelTitle(user.level)}
-                        </div>
-                      </div>
+                        NV {user.level}
+                      </span>
                     </div>
-                    <div>
-                      <div
-                        className="mb-1 flex justify-between text-[10px] tabular-nums"
+                    <div className="mt-1 truncate text-[11px]" style={{ color: 'var(--text-2)' }}>
+                      {getLevelTitle(user.level)}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span
+                        className="shrink-0 text-[9px] font-bold uppercase tracking-[0.1em]"
                         style={{ color: 'var(--text-3)' }}
                       >
-                        <span>XP</span>
-                        <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
-                      </div>
+                        XP
+                      </span>
                       <div
-                        style={{
-                          height: 5,
-                          background: 'var(--ring-track)',
-                          borderRadius: 999,
-                          overflow: 'hidden',
-                        }}
+                        className="min-w-0 flex-1 overflow-hidden rounded-full"
+                        style={{ height: 4, background: 'var(--ring-track)' }}
                       >
                         <div
                           style={{
                             width: `${xpPctSide}%`,
                             height: '100%',
+                            borderRadius: 999,
                             background:
                               'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
-                            boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
+                            boxShadow: '0 0 7px color-mix(in oklab, var(--c-xp) 55%, transparent)',
                             transition: 'width 1s cubic-bezier(.22,1,.36,1)',
                           }}
                         />
                       </div>
+                      <span className="shrink-0 text-[10px] tabular-nums" style={{ color: 'var(--text-3)' }}>
+                        {user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}
+                      </span>
                     </div>
-                  </div>
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate('/character')}
-                  title={user.displayName}
-                  className="block w-full text-left"
-                  style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
-                >
-                  <div
-                    style={{
-                      padding: 8,
-                      borderRadius: 14,
-                      background:
-                        'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
-                      border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
-                      display: 'flex',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 36, height: 36, borderRadius: 12, flexShrink: 0,
-                        overflow: 'hidden',
-                        background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
-                        border: '1px solid var(--border)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}
-                    >
-                      <AvatarDisplay avatarConfig={u.avatarConfig} avatarUrl={u.avatarUrl} equippedAura={u.equippedAura} equippedFrame={u.equippedFrame} size={30} animate="none" />
-                    </div>
-                  </div>
-                </button>
-              )}
+                  </motion.div>
+                </div>
+              </button>
             </div>
           )}
         </SidebarBody>
