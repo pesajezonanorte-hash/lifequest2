@@ -16,7 +16,7 @@ import {
   ShoppingBag, Globe, Crosshair, Users, Skull, CalendarDays,
   Sparkles, Trophy, Settings, User,
   Volume2, VolumeX, UserPlus, Zap, Search, Castle, ChevronRight,
-  Scroll, MapPin, Sun, LogOut,
+  Scroll, MapPin, LogOut,
 } from 'lucide-react';
 import { FocusMode } from '../ui/FocusMode';
 import { FeedbackButton } from '../ui/FeedbackButton';
@@ -232,7 +232,7 @@ interface HeaderDockButtonProps {
 function HeaderDockButton({ label, onClick, children, className, color = 'var(--text-2)' }: HeaderDockButtonProps) {
   return (
     <DockItem className={className}>
-      <DockLabel>{label}</DockLabel>
+      <DockLabel placement="bottom">{label}</DockLabel>
       <DockIcon className="aspect-square">
         <button
           type="button"
@@ -554,10 +554,13 @@ export function GameLayout({ children }: Props) {
                   <Wallet size={15} />{user.gold.toLocaleString('es-CO')}
                 </div>
                 <LiveClock />
+                <div className="hidden shrink-0 items-center lg:flex">
+                  <SkyToggle checked={isDarkMode} onChange={handleToggleTheme} />
+                </div>
 
                 {/* Acciones secundarias: dock compacto para no llenar la cabecera de botones. */}
                 <Dock
-                  containerClassName="w-[320px] shrink-0 lg:w-[452px] xl:w-[408px] 2xl:w-[420px]"
+                  containerClassName="w-[320px] shrink-0 lg:w-[404px] xl:w-[360px] 2xl:w-[372px]"
                   className="w-full justify-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--shadow-sm)]"
                   panelHeight={48}
                   maxHeight={60}
@@ -573,16 +576,8 @@ export function GameLayout({ children }: Props) {
                   >
                     <Search className="h-[80%] w-[80%]" strokeWidth={1.8} />
                   </HeaderDockButton>
-                  <HeaderDockButton
-                    className="hidden lg:inline-flex"
-                    label={isDarkMode ? 'Usar tema claro' : 'Usar tema oscuro'}
-                    onClick={() => handleToggleTheme(!isDarkMode)}
-                    color="var(--accent-gold)"
-                  >
-                    {isDarkMode ? <Sun className="h-[80%] w-[80%]" strokeWidth={1.8} /> : <Moon className="h-[80%] w-[80%]" strokeWidth={1.8} />}
-                  </HeaderDockButton>
                   <DockItem>
-                    <DockLabel>Feedback</DockLabel>
+                    <DockLabel placement="bottom">Feedback</DockLabel>
                     <DockIcon className="aspect-square"><FeedbackButton variant="dock" /></DockIcon>
                   </DockItem>
                   <HeaderDockButton
@@ -593,7 +588,7 @@ export function GameLayout({ children }: Props) {
                     <UserPlus className="h-[80%] w-[80%]" strokeWidth={1.8} />
                   </HeaderDockButton>
                   <DockItem>
-                    <DockLabel>Notificaciones</DockLabel>
+                    <DockLabel placement="bottom">Notificaciones</DockLabel>
                     <DockIcon className="aspect-square"><NotificationBell variant="dock" /></DockIcon>
                   </DockItem>
                   <HeaderDockButton

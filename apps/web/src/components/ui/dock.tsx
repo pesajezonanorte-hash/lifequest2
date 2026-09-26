@@ -50,6 +50,7 @@ type DockItemProps = {
 type DockLabelProps = {
   className?: string;
   children: ReactNode;
+  placement?: 'top' | 'bottom';
   isHovered?: MotionValue<number>;
 };
 
@@ -176,8 +177,9 @@ function DockItem({ children, className }: DockItemProps) {
   );
 }
 
-function DockLabel({ children, className, isHovered }: DockLabelProps) {
+function DockLabel({ children, className, placement = 'top', isHovered }: DockLabelProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const opensDown = placement === 'bottom';
 
   useEffect(() => {
     if (!isHovered) return undefined;
@@ -191,12 +193,13 @@ function DockLabel({ children, className, isHovered }: DockLabelProps) {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 3, scale: 0.96 }}
-          animate={{ opacity: 1, y: -10, scale: 1 }}
-          exit={{ opacity: 0, y: 2, scale: 0.96 }}
+          initial={{ opacity: 0, y: opensDown ? -3 : 3, scale: 0.96 }}
+          animate={{ opacity: 1, y: opensDown ? 6 : -10, scale: 1 }}
+          exit={{ opacity: 0, y: opensDown ? -2 : 2, scale: 0.96 }}
           transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
-            'pointer-events-none absolute -top-7 left-1/2 z-30 w-fit whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-semibold shadow-md',
+            'pointer-events-none absolute left-1/2 z-30 w-fit whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-semibold shadow-md',
+            opensDown ? 'top-[calc(100%+2px)]' : '-top-7',
             'border-[var(--border)] bg-[var(--bg-panel)] text-[var(--text-primary)]',
             className,
           )}
