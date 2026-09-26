@@ -256,7 +256,7 @@ function SaveButton({ onClick, saving, disabled, color = 'var(--accent-gold)', l
 // ── Dock de acciones de escritorio ────────────────────────────────────────────
 function DesktopQuickActionsDock({ onOpen }: { onOpen: (modal: ModalType) => void }) {
   return (
-    <div className="pointer-events-none fixed bottom-5 right-5 z-40 hidden md:block">
+    <div className="pointer-events-none fixed bottom-5 left-1/2 z-40 hidden -translate-x-1/2 md:block">
       <div className="pointer-events-auto">
         <Dock
           containerClassName="w-fit max-w-[calc(100vw-2rem)]"
