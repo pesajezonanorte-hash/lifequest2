@@ -115,11 +115,18 @@ function timeTogetherText(createdAt: string) {
   return `${days} días juntos`;
 }
 
+const DATE_ICON_OPTIONS = [
+  { id: 'heart', label: 'Corazón' },
+  { id: 'gift', label: 'Regalo' },
+  { id: 'calendar', label: 'Fecha' },
+  { id: 'star', label: 'Especial' },
+];
+
 function AddDateModal({ relationshipId, onClose, onSave }: { relationshipId: string; onClose: () => void; onSave: (r: Relationship) => void }) {
   const [label, setLabel] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isRecurring, setIsRecurring] = useState(true);
-  const [emoji, setEmoji] = useState('💝');
+  const [iconKey, setIconKey] = useState('heart');
   const [saving, setSaving] = useState(false);
   const toast = useToast();
 
@@ -127,7 +134,7 @@ function AddDateModal({ relationshipId, onClose, onSave }: { relationshipId: str
     if (!label.trim()) return;
     setSaving(true);
     try {
-      const r = await loveService.addImportantDate(relationshipId, { label, date, isRecurring, emoji });
+      const r = await loveService.addImportantDate(relationshipId, { label, date, isRecurring, emoji: iconKey });
       onSave(r);
       toast.success('Fecha agregada ');
     } catch { toast.error('Error al agregar'); }
@@ -139,7 +146,25 @@ function AddDateModal({ relationshipId, onClose, onSave }: { relationshipId: str
       <motion.div initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="bg-bg-panel border-2 border-border-pixel w-full max-w-sm space-y-4 p-5" onClick={e => e.stopPropagation()}>
         <p className="font-pixel text-accent-gold" style={{ fontSize: '10px' }}>AGREGAR FECHA ESPECIAL</p>
         <div className="flex gap-2">
-          <input value={emoji} onChange={e => setEmoji(e.target.value)} className="w-16 bg-bg-deep border-2 border-border-pixel text-text-primary text-center font-vt text-2xl py-2 focus:border-accent-gold outline-none" />
+          <div className="flex shrink-0 items-center gap-1 rounded-lg border-2 border-border-pixel bg-bg-deep p-1" role="radiogroup" aria-label="Ícono de la fecha">
+            {DATE_ICON_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                title={option.label}
+                aria-label={option.label}
+                aria-pressed={iconKey === option.id}
+                onClick={() => setIconKey(option.id)}
+                className="flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+                style={{
+                  color: iconKey === option.id ? 'var(--accent-gold)' : 'var(--text-secondary)',
+                  background: iconKey === option.id ? 'color-mix(in oklab, var(--accent-gold) 16%, transparent)' : 'transparent',
+                }}
+              >
+                <E e={option.id} s={16} />
+              </button>
+            ))}
+          </div>
           <input autoFocus value={label} onChange={e => setLabel(e.target.value)} placeholder="Nombre de la fecha" className="flex-1 bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-3 py-2 focus:border-accent-gold outline-none" />
         </div>
         <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-3 py-2 focus:border-accent-gold outline-none" />

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getOpenOrigin } from '@/lib/origin';
-import { Plus, X, Swords, Wallet, Flame, NotebookPen, Zap } from 'lucide-react';
+import { Plus, X, Swords, Wallet, Flame, NotebookPen, Zap, ChevronRight } from 'lucide-react';
 import { createQuest } from '../../services/quest.service';
 import { createTransaction } from '../../services/finance.service';
 import { fetchHabits, logHabit } from '../../services/habit.service';
@@ -14,12 +14,12 @@ import { E } from '@/components/ui/glyphs';
 
 type ModalType = 'quest' | 'expense' | 'habit' | 'note' | 'checkin' | null;
 
-const ACTIONS: { icon: React.ReactNode; label: string; color: string; modal: ModalType; emoji: string }[] = [
-  { icon: <Swords size={16} />, label: 'Nueva Quest',   color: '#a8871e', modal: 'quest',   emoji: '⚔️' },
-  { icon: <Wallet size={16} />, label: 'Gasto rápido',  color: '#5c5c64', modal: 'expense', emoji: '💸' },
-  { icon: <Flame size={16} />,  label: 'Marcar hábito', color: '#b5453a', modal: 'habit',   emoji: '🔥' },
-  { icon: <NotebookPen size={16} />, label: 'Nota rápida', color: '#8f8f98', modal: 'note', emoji: '✍️' },
-  { icon: <Zap size={16} />,    label: 'Check-in',      color: '#6b6b73', modal: 'checkin', emoji: '⚡' },
+const ACTIONS: { icon: React.ReactNode; label: string; color: string; modal: ModalType }[] = [
+  { icon: <Swords size={16} />,      label: 'Nueva Quest',   color: '#a8871e', modal: 'quest' },
+  { icon: <Wallet size={16} />,      label: 'Gasto rápido',  color: '#5c5c64', modal: 'expense' },
+  { icon: <Flame size={16} />,       label: 'Marcar hábito', color: '#b5453a', modal: 'habit' },
+  { icon: <NotebookPen size={16} />, label: 'Nota rápida',   color: '#8f8f98', modal: 'note' },
+  { icon: <Zap size={16} />,         label: 'Check-in',      color: '#6b6b73', modal: 'checkin' },
 ];
 
 // ── Quest Modal ──────────────────────────────────────────────────────────────
@@ -379,7 +379,7 @@ export function QuickActionsFAB() {
                     <span className="flex-1 truncate" style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 13 }}>
                       {action.label}
                     </span>
-                    <span className="flex-shrink-0 text-xs" style={{ color: 'var(--text-3)' }}><E e={action.emoji} /></span>
+                    <ChevronRight size={14} strokeWidth={1.8} className="flex-shrink-0" style={{ color: 'var(--text-3)' }} />
                   </motion.button>
                 ))}
               </div>

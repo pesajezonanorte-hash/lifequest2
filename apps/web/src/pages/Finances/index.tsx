@@ -113,7 +113,7 @@ function TransactionModal({ onClose, onSave }: { onClose: () => void; onSave: (t
               onClick={() => setCategory(key)}
               className={`flex flex-col items-center p-2 border transition-all ${category === key ? 'border-accent-gold bg-accent-gold/10' : 'border-border-pixel hover:border-text-secondary'}`}
             >
-              <span className="text-lg">{icon}</span>
+              <span className="flex h-5 items-center justify-center"><E e={icon} s={17} /></span>
               <span className="font-pixel text-text-secondary mt-0.5" style={{ fontSize: '6px' }}><E e={CATEGORY_LABELS[key]} /></span>
             </button>
           ))}

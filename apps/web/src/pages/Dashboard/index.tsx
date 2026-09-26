@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Flame, NotebookPen, Swords, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Quest } from '@lifequest/shared';
 import { useAuthStore } from '../../store/authStore';
@@ -124,6 +125,13 @@ const ZONES: { icon: ReactNode; label: string; sublabel: string; to: string; col
   { icon: <span className="text-4xl leading-none block"><E e="🌙" /></span>, label: 'Sueño', sublabel: 'La Torre', to: '/sleep', color: 'border-[var(--accent-cyan)]', badge: undefined },
   { icon: <span className="text-4xl leading-none block"><E e="💕" /></span>, label: 'Amor', sublabel: 'El Jardín', to: '/love', color: 'border-[var(--accent-pink)]', badge: undefined },
 ];
+
+const DASHBOARD_SHORTCUTS = [
+  { label: 'Nueva Quest', Icon: Swords,      to: '/quests',   color: 'var(--primary)' },
+  { label: 'Gasto',       Icon: Wallet,      to: '/finances', color: 'var(--text-2)' },
+  { label: 'Hábitos',     Icon: Flame,       to: '/habits',   color: 'var(--primary)' },
+  { label: 'Diario',      Icon: NotebookPen, to: '/journal',  color: 'var(--text-2)' },
+] as const;
 
 const CLASS_TITLES: Record<string, string> = {
   warrior: ' Guerrero',
@@ -492,20 +500,17 @@ export default function DashboardPage() {
       <WhatToDoWidget />
 
       <div className="grid grid-cols-4 gap-2">
-        {[
-          { label: 'Nueva Quest', emoji: '⚔️', to: '/quests' },
-          { label: 'Gasto', emoji: '💸', to: '/finances' },
-          { label: 'Hábitos', emoji: '🔥', to: '/habits' },
-          { label: 'Diario', emoji: '📖', to: '/journal' },
-        ].map(({ label, emoji, to }) => (
+        {DASHBOARD_SHORTCUTS.map(({ label, Icon, to, color }) => (
           <motion.button
             key={to}
-            whileTap={{ scale: 0.93 }}
+            type="button"
+            aria-label={label}
+            whileTap={{ scale: 0.96 }}
             onClick={() => navigate(to)}
-            className="flex flex-col items-center gap-1 py-2 border border-[var(--border)] rounded-xl bg-[var(--bg-panel)] hover:border-[var(--accent-gold)] hover:bg-[var(--bg-panel-light)] transition-all"
+            className="flex min-h-[60px] flex-col items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] transition-colors hover:border-[var(--primary)] hover:bg-[var(--bg-panel-light)]"
           >
-            <span className="text-xl">{emoji}</span>
-            <span className="text-[10px] text-[var(--text-secondary)] font-medium leading-tight text-center px-1">{label}</span>
+            <Icon size={18} strokeWidth={1.8} style={{ color }} aria-hidden="true" />
+            <span className="px-1 text-center text-[10px] font-medium leading-tight text-[var(--text-secondary)]">{label}</span>
           </motion.button>
         ))}
       </div>

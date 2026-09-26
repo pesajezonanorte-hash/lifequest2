@@ -61,6 +61,8 @@ const COLOR_PALETTE = [
 const DIFFICULTY_LABELS: Record<string, string> = { EASY: 'Fácil', NORMAL: 'Normal', HARD: 'Difícil' };
 const DIFFICULTY_COLORS: Record<string, string> = { EASY: 'var(--text-muted)', NORMAL: 'var(--text-secondary)', HARD: 'var(--text-primary)' };
 
+const ZONE_ICON_KEYS = ['target', 'book', 'brain', 'money', 'heart', 'leaf', 'music', 'star', 'gym', 'notes', 'code', 'moon'];
+
 // Detect if an action type creates a habit or quest
 function actionCreatesHabit(type: string) {
   return type === 'new_habit' || type.includes('habit') || type.includes('habito') || type.includes('habito') || type.includes('rutina');
@@ -423,7 +425,7 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
   const [editedColor, setEditedColor] = useState('#5c5c64');
-  const [editedIcon, setEditedIcon] = useState('📍');
+  const [editedIcon, setEditedIcon] = useState('target');
   const [isMeasurable, setIsMeasurable] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -434,7 +436,7 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
       const { data } = await api.post('/custom-zones/suggest', { description });
       setSuggestion(data);
       setEditedColor(data.color ?? '#5c5c64');
-      setEditedIcon(data.icon ?? '📍');
+      setEditedIcon(data.icon ?? 'target');
       setIsMeasurable(data.isMeasurable ?? false);
       setStep(2);
     } catch {
@@ -496,7 +498,7 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
           <div className="rounded-xl p-4 space-y-3"
             style={{ background: `${editedColor}18`, border: `1px solid ${editedColor}40` }}>
             <div className="flex items-center gap-3">
-              <span style={{ fontSize: 28 }}>{editedIcon}</span>
+              <span className="flex h-8 w-8 items-center justify-center"><E e={editedIcon} s={28} /></span>
               <div>
                 <p className="font-bold">{suggestion.name}</p>
                 <p className="text-sm" style={{ color: 'var(--text-2)' }}>{suggestion.description}</p>
@@ -521,12 +523,26 @@ function ZoneWizard({ onCreated, onCancel }: { onCreated: () => void; onCancel: 
 
           <div>
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-2)' }}>Ícono</p>
-            <input
-              className="w-24 px-3 py-2 rounded-lg text-center text-xl"
-              style={{ background: 'var(--bg-soft)', border: '1px solid var(--border)', color: 'var(--text)' }}
-              value={editedIcon}
-              onChange={e => setEditedIcon(e.target.value)}
-            />
+            <div className="grid grid-cols-6 gap-1.5" role="radiogroup" aria-label="Ícono de la zona">
+              {ZONE_ICON_KEYS.map((iconKey) => (
+                <button
+                  key={iconKey}
+                  type="button"
+                  title={iconKey}
+                  aria-label={`Elegir ícono ${iconKey}`}
+                  aria-pressed={editedIcon === iconKey}
+                  onClick={() => setEditedIcon(iconKey)}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
+                  style={{
+                    background: editedIcon === iconKey ? `${editedColor}20` : 'var(--bg-soft)',
+                    border: `1px solid ${editedIcon === iconKey ? editedColor : 'var(--border)'}`,
+                    color: editedIcon === iconKey ? editedColor : 'var(--text-2)',
+                  }}
+                >
+                  <E e={iconKey} s={16} />
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>
@@ -596,7 +612,7 @@ export default function CustomZonesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-pixel text-[var(--accent-gold)]" style={{ fontSize: '14px' }}>
-            <E e="📍" /> MIS ZONAS
+            <E e="target" /> MIS ZONAS
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-2)' }}>
             Zonas personalizadas creadas con El Sabio · {zones.length}/10 activas

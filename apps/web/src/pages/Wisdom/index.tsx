@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Lock, Sparkles } from 'lucide-react';
+import { BookOpen, Lock, Sparkles, Swords, Brain, Coins, Dumbbell, Heart, TreePine, type LucideIcon } from 'lucide-react';
 import * as wisdomService from '../../services/wisdom.service';
 import type { WisdomCard } from '../../services/wisdom.service';
 import { E } from '@/components/ui/glyphs';
 
-const CATEGORY_CONFIG: Record<string, { label: string; color: string; emoji: string }> = {
-  discipline:    { label: 'Disciplina',  color: 'var(--accent-red)',   emoji: '⚔️' },
-  mindset:       { label: 'Mentalidad',  color: 'var(--accent-cyan)',  emoji: '🧠' },
-  finance:       { label: 'Finanzas',    color: 'var(--accent-gold)',  emoji: '💰' },
-  health:        { label: 'Salud',       color: 'var(--accent-green)', emoji: '💪' },
-  relationships: { label: 'Relaciones',  color: 'var(--accent-pink)',  emoji: '❤️' },
-  growth:        { label: 'Crecimiento', color: 'var(--accent-cyan)',  emoji: '🌱' },
+type CategoryConfig = { label: string; color: string; Icon: LucideIcon };
+
+const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
+  discipline:    { label: 'Disciplina',  color: 'var(--accent-red)',   Icon: Swords },
+  mindset:       { label: 'Mentalidad',  color: 'var(--accent-cyan)',  Icon: Brain },
+  finance:       { label: 'Finanzas',    color: 'var(--accent-gold)',  Icon: Coins },
+  health:        { label: 'Salud',       color: 'var(--accent-green)', Icon: Dumbbell },
+  relationships: { label: 'Relaciones',  color: 'var(--accent-pink)',  Icon: Heart },
+  growth:        { label: 'Crecimiento', color: 'var(--accent-cyan)',  Icon: TreePine },
 };
 
 function WisdomCardUI({ card, delay = 0 }: { card: WisdomCard; delay?: number }) {
-  const cfg = CATEGORY_CONFIG[card.category] ?? { label: card.category, color: 'var(--text-muted)', emoji: '📖' };
+  const cfg: CategoryConfig = CATEGORY_CONFIG[card.category] ?? { label: card.category, color: 'var(--text-muted)', Icon: BookOpen };
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -26,7 +28,7 @@ function WisdomCardUI({ card, delay = 0 }: { card: WisdomCard; delay?: number })
       style={{ borderColor: cfg.color + '33' }}
     >
       <div className="flex items-center gap-2">
-        <span className="text-lg"><E e={cfg.emoji} /></span>
+        <span className="text-lg"><E e={cfg.Icon} s={18} /></span>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: cfg.color + '22', color: cfg.color }}>
           {cfg.label}
         </span>
@@ -123,7 +125,7 @@ export default function WisdomPage() {
                 color: filter === cat ? (cfg?.color ?? 'var(--accent-gold)') : 'var(--text-muted)',
               }}
             >
-              {cfg ? `${cfg.emoji} ${cfg.label}` : 'Todas'}
+              {cfg ? <><E e={cfg.Icon} s={13} /> <span>{cfg.label}</span></> : 'Todas'}
             </button>
           );
         })}
@@ -157,7 +159,7 @@ export default function WisdomPage() {
               return (
                 <div key={card.id} className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-4 flex flex-col items-center gap-2 opacity-40">
                   <Lock size={20} className="text-[var(--text-muted)]" />
-                  <span className="text-xs text-[var(--text-muted)]"><E e={cfg?.emoji ?? '📖'} /> {cfg?.label ?? card.category}</span>
+                  <span className="text-xs text-[var(--text-muted)]"><E e={cfg?.Icon ?? BookOpen} /> {cfg?.label ?? card.category}</span>
                   <span className="text-[10px] text-[var(--text-muted)]">Nivel {card.levelRequired}</span>
                 </div>
               );

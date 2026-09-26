@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Coins, Heart, Swords, Wand2, Zap } from 'lucide-react';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
-import { E } from '@/components/ui/glyphs';
 
 const CLASSES = [
   {
     id: 'warrior',
-    emoji: '⚔️',
+    Icon: Swords,
     name: 'Guerrero',
     color: '#2a2a2e',
     description: 'Maestro del fitness y la disciplina',
@@ -16,7 +16,7 @@ const CLASSES = [
   },
   {
     id: 'mage',
-    emoji: '🧙',
+    Icon: Wand2,
     name: 'Mago',
     color: '#5c5c64',
     description: 'Sabio del conocimiento y la inteligencia',
@@ -25,7 +25,7 @@ const CLASSES = [
   },
   {
     id: 'merchant',
-    emoji: '💰',
+    Icon: Coins,
     name: 'Mercader',
     color: '#a8871e',
     description: 'Maestro de las finanzas y el ahorro',
@@ -34,7 +34,7 @@ const CLASSES = [
   },
   {
     id: 'paladin',
-    emoji: '❤️',
+    Icon: Heart,
     name: 'Paladín',
     color: '#c0c0c8',
     description: 'Guardián de las relaciones y el bienestar',
@@ -84,7 +84,7 @@ export function ClassSelectionModal({ onClose }: Props) {
         <div className="pixel-panel p-6" style={{ background: 'linear-gradient(135deg, var(--bg-panel-light) 0%, var(--bg-panel) 100%)' }}>
           {confirmed ? (
             <motion.div className="text-center py-8" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 12 }}>
-              <p className="text-6xl mb-4">{cls?.emoji}</p>
+              {cls && <cls.Icon size={48} strokeWidth={1.5} className="mx-auto mb-4" style={{ color: cls.color }} />}
               <h2 className="pixel-text text-2xl text-accent-gold mb-2">¡Clase Elegida!</h2>
               <p className="text-[var(--text-primary)] font-mono">Ahora eres un {cls?.name}</p>
               <p className="text-sm text-[var(--text-secondary)] mt-2">{cls?.bonus}</p>
@@ -92,7 +92,7 @@ export function ClassSelectionModal({ onClose }: Props) {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h2 className="pixel-text text-xl text-yellow-300"><E e="⚡" /> Elige tu Clase</h2>
+                <h2 className="pixel-text text-xl text-yellow-300 flex items-center justify-center gap-2"><Zap size={18} /> Elige tu Clase</h2>
                 <p className="text-purple-300 font-mono text-sm mt-1">Has alcanzado el Nivel 10 — ¡es hora de especializarte!</p>
               </div>
 
@@ -108,7 +108,7 @@ export function ClassSelectionModal({ onClose }: Props) {
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-3xl"><E e={c.emoji} /></span>
+                      <c.Icon size={28} strokeWidth={1.7} style={{ color: c.color }} />
                       <span className="font-bold text-white pixel-text text-sm">{c.name}</span>
                     </div>
                     <p className="text-xs text-gray-400 mb-1">{c.description}</p>
@@ -130,7 +130,7 @@ export function ClassSelectionModal({ onClose }: Props) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {loading ? '...' : <><E e="⚡" s={11} /> Confirmar Clase</>}
+                  {loading ? '...' : <><Zap size={13} /> Confirmar Clase</>}
                 </motion.button>
               </div>
             </>

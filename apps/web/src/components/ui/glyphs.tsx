@@ -1,6 +1,7 @@
 // glyphs.tsx — Sistema de iconos minimalistas (lucide) con mapeo desde emojis legados.
 // Los emojis que ya viven en datos (hábitos guardados, preferencias) se conservan
 // como CLAVES internas y se resuelven a lucide al renderizar con <E e="clave" />.
+import { isValidElement } from 'react';
 import type React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
@@ -227,7 +228,9 @@ const GLYPHS: Record<string, LucideIcon> = {
   code: Laptop, notes: StickyNote, target: Target, star: Star,
   strong: Dumbbell, brain: Brain, money: Coins, art: Palette,
   dance: Sparkles, salad: Salad, sleep: Bed, read: BookMarked,
-  sea: Waves, heart: Heart,
+  sea: Waves, heart: Heart, gift: Gift, calendar: Calendar,
+  quest: Swords, expense: Banknote, habit: Flame, journal: StickyNote,
+  checkin: Zap, warrior: Swords, mage: Wand2, merchant: Coins, paladin: Shield,
 };
 
 /** Resuelve una clave (emoji legado o id) a su icono lucide. */
@@ -246,8 +249,13 @@ interface EProps {
 
 /** Icono inline que sustituye a un emoji: <E e="🔥" /> o <E e={item.icon} s={18} /> */
 export function E({ e, s = 15, className, strokeWidth = 2 }: EProps) {
-  if (e && typeof e === 'object') return <>{e}</>;
-  const Icon = typeof e === 'function' ? e : resolveGlyph(typeof e === 'string' ? e : null);
+  // React elements (por ejemplo <Swords />) ya vienen renderizados. Los iconos
+  // de lucide creados con forwardRef son objetos, no funciones: se conservan como
+  // componentes y se instancian abajo en vez de intentar pintarlos como un nodo.
+  if (isValidElement(e)) return <>{e}</>;
+  const Icon = typeof e === 'string' || !e
+    ? resolveGlyph(typeof e === 'string' ? e : null)
+    : e as LucideIcon;
   return <Icon size={s} strokeWidth={strokeWidth} className={className ?? 'inline-block shrink-0 align-middle'} />;
 }
 

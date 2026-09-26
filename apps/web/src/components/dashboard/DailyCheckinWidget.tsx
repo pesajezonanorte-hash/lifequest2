@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Zap, CheckCircle2 } from 'lucide-react';
+import { Heart, Zap, CheckCircle2, Frown, Annoyed, Meh, Smile, Laugh } from 'lucide-react';
 import * as checkinService from '../../services/checkin.service';
 import type { DailyCheckin } from '../../services/checkin.service';
 import { E } from '@/components/ui/glyphs';
 
 const MOOD_OPTIONS = [
-  { value: 1, emoji: '😔', label: 'Mal' },
-  { value: 2, emoji: '😕', label: 'Bajo' },
-  { value: 3, emoji: '😐', label: 'Normal' },
-  { value: 4, emoji: '😊', label: 'Bien' },
-  { value: 5, emoji: '🤩', label: '¡Genial!' },
+  { value: 1, Icon: Frown,   label: 'Mal' },
+  { value: 2, Icon: Annoyed, label: 'Bajo' },
+  { value: 3, Icon: Meh,     label: 'Normal' },
+  { value: 4, Icon: Smile,   label: 'Bien' },
+  { value: 5, Icon: Laugh,   label: '¡Genial!' },
 ];
 
 export function DailyCheckinWidget() {
@@ -49,6 +49,8 @@ export function DailyCheckinWidget() {
 
   if (checkin === undefined) return null; // loading
 
+  const selectedMood = MOOD_OPTIONS.find((option) => option.value === checkin?.mood) ?? MOOD_OPTIONS[2];
+
   if (done && checkin) {
     return (
       <motion.div
@@ -63,8 +65,8 @@ export function DailyCheckinWidget() {
             <span className="text-xs font-semibold text-[var(--accent-green)]">Check-in de hoy completado</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span>{MOOD_OPTIONS.find((m) => m.value === checkin.mood)?.emoji} {MOOD_OPTIONS.find((m) => m.value === checkin.mood)?.label}</span>
-            <span className="text-[var(--text-muted)]"><E e="⚡" />{checkin.energy}/10</span>
+            <span className="flex items-center gap-1.5"><E e={selectedMood.Icon} s={15} />{selectedMood.label}</span>
+            <span className="flex items-center gap-1 text-[var(--text-muted)]"><Zap size={13} />{checkin.energy}/10</span>
           </div>
         </div>
       </motion.div>
@@ -97,7 +99,7 @@ export function DailyCheckinWidget() {
               border: `1px solid ${mood === m.value ? 'var(--accent-cyan)' : 'transparent'}`,
             }}
           >
-            <span className="text-xl"><E e={m.emoji} /></span>
+            <span className="flex h-6 items-center justify-center"><E e={m.Icon} s={19} /></span>
             <span className="text-[10px] text-[var(--text-muted)]">{m.label}</span>
           </motion.button>
         ))}
