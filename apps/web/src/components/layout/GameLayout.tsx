@@ -33,6 +33,7 @@ import { E } from '@/components/ui/glyphs';
 import SkyToggle from '../ui/sky-toggle';
 import { applyThemeMode, resolveIsDark, subscribeThemeMode } from '../../lib/themeMode';
 import { Sidebar, SidebarBody, SidebarLink, useSidebar } from '../ui/sidebar';
+import { AvatarDisplay } from '../character/AvatarDisplay';
 
 interface NavItem {
   to: string;
@@ -284,6 +285,7 @@ export function GameLayout({ children }: Props) {
   const xpPct = user ? (user.xp / user.xpToNextLevel) * 100 : 0;
 
   const xpPctSide = user ? Math.round((user.xp / user.xpToNextLevel) * 100) : 0;
+  const u = user as unknown as { avatarConfig?: unknown; avatarUrl?: string | null; equippedAura?: string | null; equippedFrame?: string | null };
 
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
@@ -345,86 +347,118 @@ export function GameLayout({ children }: Props) {
           {/* hero card */}
           {user && (
             <div className="relative min-w-[252px] px-1 pt-2 pb-2">
-              <button
-                onClick={() => navigate('/character')}
-                className="block w-full text-left"
-                style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
-              >
-                <div
-                  style={{
-                    padding: 8,
-                    borderRadius: 14,
-                    background:
-                      'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
-                    border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
-                    display: 'flex', flexDirection: 'column', gap: 10,
-                  }}
+              {sidebarOpen ? (
+                <button
+                  onClick={() => navigate('/character')}
+                  className="block w-full text-left"
+                  style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div
+                    style={{
+                      padding: 8,
+                      borderRadius: 14,
+                      background:
+                        'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
+                      border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
+                      display: 'flex', flexDirection: 'column', gap: 10,
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        style={{
+                          width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+                          overflow: 'hidden',
+                          background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
+                          border: '1px solid var(--border)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                      >
+                        <AvatarDisplay avatarConfig={u.avatarConfig} avatarUrl={u.avatarUrl} equippedAura={u.equippedAura} equippedFrame={u.equippedFrame} size={30} animate="idle" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
+                          <span
+                            style={{
+                              fontSize: 9.5,
+                              padding: '1px 5px',
+                              borderRadius: 5,
+                              background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
+                              color: 'var(--c-xp)',
+                              fontWeight: 800,
+                              letterSpacing: '.06em',
+                              flexShrink: 0,
+                            }}
+                          >
+                            NV {user.level}
+                          </span>
+                        </div>
+                        <div className="mt-px text-[11px] truncate" style={{ color: 'var(--text-2)' }}>
+                          {getLevelTitle(user.level)}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div
+                        className="mb-1 flex justify-between text-[10px] tabular-nums"
+                        style={{ color: 'var(--text-3)' }}
+                      >
+                        <span>XP</span>
+                        <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
+                      </div>
+                      <div
+                        style={{
+                          height: 5,
+                          background: 'var(--ring-track)',
+                          borderRadius: 999,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${xpPctSide}%`,
+                            height: '100%',
+                            background:
+                              'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
+                            boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
+                            transition: 'width 1s cubic-bezier(.22,1,.36,1)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate('/character')}
+                  title={user.displayName}
+                  className="block w-full text-left"
+                  style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
+                >
+                  <div
+                    style={{
+                      padding: 8,
+                      borderRadius: 14,
+                      background:
+                        'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
+                      border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
+                      display: 'flex',
+                    }}
+                  >
                     <div
                       style={{
                         width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+                        overflow: 'hidden',
                         background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
                         border: '1px solid var(--border)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 20,
                       }}
                     >
-                      <E e="🧙" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
-                        <span
-                          style={{
-                            fontSize: 9.5,
-                            padding: '1px 5px',
-                            borderRadius: 5,
-                            background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
-                            color: 'var(--c-xp)',
-                            fontWeight: 800,
-                            letterSpacing: '.06em',
-                            flexShrink: 0,
-                          }}
-                        >
-                          NV {user.level}
-                        </span>
-                      </div>
-                      <div className="mt-px text-[11px] truncate" style={{ color: 'var(--text-2)' }}>
-                        {getLevelTitle(user.level)}
-                      </div>
+                      <AvatarDisplay avatarConfig={u.avatarConfig} avatarUrl={u.avatarUrl} equippedAura={u.equippedAura} equippedFrame={u.equippedFrame} size={30} animate="none" />
                     </div>
                   </div>
-                  <div>
-                    <div
-                      className="mb-1 flex justify-between text-[10px] tabular-nums"
-                      style={{ color: 'var(--text-3)' }}
-                    >
-                      <span>XP</span>
-                      <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
-                    </div>
-                    <div
-                      style={{
-                        height: 5,
-                        background: 'var(--ring-track)',
-                        borderRadius: 999,
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${xpPctSide}%`,
-                          height: '100%',
-                          background:
-                            'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
-                          boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
-                          transition: 'width 1s cubic-bezier(.22,1,.36,1)',
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </button>
+                </button>
+              )}
             </div>
           )}
         </SidebarBody>
