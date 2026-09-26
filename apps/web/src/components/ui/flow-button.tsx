@@ -1,7 +1,9 @@
 'use client';
 
 import {
+  Children,
   forwardRef,
+  isValidElement,
   type ButtonHTMLAttributes,
   type CSSProperties,
   type ReactNode,
@@ -76,6 +78,16 @@ const sizeClasses: Record<FlowButtonSize, string> = {
   lg: 'min-h-11 gap-2 px-6 py-2.5 text-sm',
 };
 
+function getLabelText(node: ReactNode): string {
+  return Children.toArray(node)
+    .map((child) => {
+      if (typeof child === 'string' || typeof child === 'number') return String(child);
+      if (!isValidElement(child)) return '';
+      return getLabelText((child.props as { children?: ReactNode }).children);
+    })
+    .join('');
+}
+
 /**
  * FlowButton preserves a fixed button box while the animated circle remains
  * clipped inside it. This gives the flow effect without scale-on-hover or
@@ -99,6 +111,11 @@ export const FlowButton = forwardRef<HTMLButtonElement, FlowButtonProps>(
     ref,
   ) => {
     const label = children ?? text;
+    // A visible “+” already communicates creation. Pairing it with two moving
+    // arrows is visually noisy, so those compact creation actions keep the
+    // flow fill but omit the decorative arrows.
+    const hasLeadingPlus = getLabelText(label).trim().startsWith('+');
+    const shouldShowArrows = withArrows && !hasLeadingPlus;
     const interactiveGroup = disabled ? '' : 'group/flow';
 
     return (
@@ -131,7 +148,7 @@ export const FlowButton = forwardRef<HTMLButtonElement, FlowButtonProps>(
           style={{ backgroundColor: 'var(--flow-fill)' }}
         />
 
-        {withArrows && (
+        {shouldShowArrows && (
           <ArrowRight
             aria-hidden="true"
             className="pointer-events-none absolute -left-6 z-10 h-4 w-4 transition-[left,color] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/flow:left-3"
@@ -141,8 +158,8 @@ export const FlowButton = forwardRef<HTMLButtonElement, FlowButtonProps>(
 
         <span
           className={cn(
-            'relative z-10 inline-flex min-w-0 items-center justify-center transition-[transform,color] duration-500 ease-out',
-            withArrows && '-translate-x-1.5 group-hover/flow:translate-x-1.5',
+            'relative z-10 inline-flex min-w-0 items-center justify-center transition-colors duration-300',
+            shouldShowArrows && 'px-5',
           )}
           style={{ color: 'inherit' }}
         >
@@ -151,7 +168,7 @@ export const FlowButton = forwardRef<HTMLButtonElement, FlowButtonProps>(
           </span>
         </span>
 
-        {withArrows && (
+        {shouldShowArrows && (
           <ArrowRight
             aria-hidden="true"
             className="pointer-events-none absolute right-3 z-10 h-4 w-4 transition-[right,color] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/flow:-right-6"
