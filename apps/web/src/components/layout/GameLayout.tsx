@@ -84,16 +84,16 @@ const NAV_GROUPS: { id: NavItem['group']; label: string }[] = [
 function SidebarGroupLabel({ label }: { label: string }) {
   const { open, animate } = useSidebar();
   return (
-    <motion.div
-      animate={{
-        display: animate ? (open ? 'block' : 'none') : 'block',
-        opacity: animate ? (open ? 1 : 0) : 1,
-      }}
-      className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]"
-      style={{ color: 'var(--text-3)' }}
-    >
-      {label}
-    </motion.div>
+    open ? (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]"
+        style={{ color: 'var(--text-3)' }}
+      >
+        {label}
+      </motion.div>
+    ) : null
   );
 }
 

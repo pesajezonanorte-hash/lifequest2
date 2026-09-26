@@ -186,6 +186,7 @@ export const SidebarLink = ({
         <span
           className={cn(
             "relative flex items-center gap-[11px] px-3 py-[9px] overflow-hidden",
+            !open && "justify-center px-0",
             className
           )}
           style={{
@@ -213,16 +214,16 @@ export const SidebarLink = ({
           >
             {link.icon}
           </span>
-          <motion.span
-            animate={{
-              display: animate ? (open ? "inline-block" : "none") : "inline-block",
-              opacity: animate ? (open ? 1 : 0) : 1,
-            }}
-            className="text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0 flex-1 truncate"
-          >
-            {link.label}
-          </motion.span>
-          {right}
+          {open && (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0 flex-1 truncate"
+            >
+              {link.label}
+            </motion.span>
+          )}
+          {open && right}
         </span>
       )}
     </NavLink>
