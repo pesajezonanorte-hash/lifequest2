@@ -30,6 +30,8 @@ import { MusicPlayer } from '../ui/MusicPlayer';
 import { getLevelTitle, ZONE_TOOLTIPS } from '../../lib/gameProgress';
 import { refreshUser } from '../../hooks/useAuth';
 import { E } from '@/components/ui/glyphs';
+import SkyToggle from '../ui/sky-toggle';
+import { applyThemeMode, resolveIsDark, subscribeThemeMode } from '../../lib/themeMode';
 
 interface NavItem {
   to: string;
@@ -209,6 +211,9 @@ interface Props {
 export function GameLayout({ children }: Props) {
   const { user, logout: storeLogout } = useAuthStore();
   const { toggleAudio, audioEnabled, xpSparkTrigger } = useUIStore();
+  const [isDarkMode, setIsDarkMode] = useState(() => resolveIsDark());
+  useEffect(() => subscribeThemeMode(() => setIsDarkMode(resolveIsDark())), []);
+  const handleToggleTheme = (checked: boolean) => applyThemeMode(checked ? 'dark' : 'light');
   const navigate = useNavigate();
   const location = useLocation();
   const [showFocus, setShowFocus] = useState(false);
@@ -490,6 +495,7 @@ export function GameLayout({ children }: Props) {
                 <div className="flex items-center gap-1 tabular-nums px-2 h-7 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--c-gold)', fontSize: 12, fontWeight: 700 }}>
                   <Wallet size={12} />{user.gold.toLocaleString('es-CO')}
                 </div>
+                <SkyToggle checked={isDarkMode} onChange={handleToggleTheme} />
                 <NotificationBell />
                 <FeedbackButton variant="mobile" />
                 <motion.button className="flex h-7 w-7 items-center justify-center rounded-lg" onClick={toggleAudio} whileTap={{ scale: 0.96 }} style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
@@ -545,6 +551,7 @@ export function GameLayout({ children }: Props) {
                   <Wallet size={15} />{user.gold.toLocaleString('es-CO')}
                 </div>
                 <LiveClock />
+                <SkyToggle checked={isDarkMode} onChange={handleToggleTheme} />
                 <FeedbackButton variant="desktop" />
                 <motion.button onClick={() => navigate('/guild')} whileTap={{ scale: 0.96 }} title="Añadir amigos" className="flex items-center justify-center" style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
                   <UserPlus size={16} />

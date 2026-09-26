@@ -10,6 +10,7 @@ import * as userService from '../../services/user.service';
 import { requestPermissionAndSubscribe, sendTestNotification } from '../../services/notification.service';
 import api from '../../lib/api';
 import { E } from '@/components/ui/glyphs';
+import { applyThemeMode, readThemeMode, subscribeThemeMode } from '../../lib/themeMode';
 
 const THEMES = [
   { id: 'aurora', name: 'Aurora', cost: 0, description: 'B&N clásico profundo', emoji: '🌌', preview: '#111113' },
@@ -22,27 +23,10 @@ const THEMES = [
 
 type ThemeMode = 'dark' | 'light' | 'system';
 
-function applyTheme(mode: ThemeMode) {
-  const html = document.documentElement;
-  html.classList.remove('dark', 'light');
-  if (mode === 'system') {
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    html.classList.add(systemDark ? 'dark' : 'light');
-  } else {
-    html.classList.add(mode);
-  }
-  localStorage.setItem('theme', mode);
-}
-
 function useThemeMode() {
-  const [mode, setMode] = useState<ThemeMode>(() => {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'system') return stored;
-    return 'light';
-  });
-
-  useEffect(() => { applyTheme(mode); }, [mode]);
-
+  const [mode, setModeState] = useState<ThemeMode>(readThemeMode);
+  useEffect(() => subscribeThemeMode(() => setModeState(readThemeMode())), []);
+  const setMode = (m: ThemeMode) => { applyThemeMode(m); setModeState(m); };
   return { mode, setMode };
 }
 
