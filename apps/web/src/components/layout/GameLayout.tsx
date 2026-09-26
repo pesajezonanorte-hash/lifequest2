@@ -32,6 +32,7 @@ import { refreshUser } from '../../hooks/useAuth';
 import { E } from '@/components/ui/glyphs';
 import SkyToggle from '../ui/sky-toggle';
 import { applyThemeMode, resolveIsDark, subscribeThemeMode } from '../../lib/themeMode';
+import { Sidebar, SidebarBody, SidebarLink, useSidebar } from '../ui/sidebar';
 
 interface NavItem {
   to: string;
@@ -78,6 +79,23 @@ const NAV_GROUPS: { id: NavItem['group']; label: string }[] = [
   { id: 'social', label: 'Mundo' },
   { id: 'me',     label: 'Tú' },
 ];
+
+
+function SidebarGroupLabel({ label }: { label: string }) {
+  const { open, animate } = useSidebar();
+  return (
+    <motion.div
+      animate={{
+        display: animate ? (open ? 'block' : 'none') : 'block',
+        opacity: animate ? (open ? 1 : 0) : 1,
+      }}
+      className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]"
+      style={{ color: 'var(--text-3)' }}
+    >
+      {label}
+    </motion.div>
+  );
+}
 
 function LiveClock() {
   const [time, setTime] = useState(() => new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }));
@@ -212,6 +230,7 @@ export function GameLayout({ children }: Props) {
   const { user, logout: storeLogout } = useAuthStore();
   const { toggleAudio, audioEnabled, xpSparkTrigger } = useUIStore();
   const [isDarkMode, setIsDarkMode] = useState(() => resolveIsDark());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   useEffect(() => subscribeThemeMode(() => setIsDarkMode(resolveIsDark())), []);
   const handleToggleTheme = (checked: boolean) => applyThemeMode(checked ? 'dark' : 'light');
   const navigate = useNavigate();
@@ -270,204 +289,180 @@ export function GameLayout({ children }: Props) {
   const xpPctSide = user ? Math.round((user.xp / user.xpToNextLevel) * 100) : 0;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      <aside
-        className="hidden md:flex w-[264px] flex-shrink-0 flex-col relative overflow-hidden"
-        style={{
-          background: 'color-mix(in oklab, var(--surface) 60%, var(--bg))',
-          borderRight: '1px solid var(--border)',
-        }}
-      >
-        {/* bg glow */}
-        <div
-          className="pointer-events-none"
-          style={{
-            position: 'absolute', top: -80, left: -60, width: 240, height: 240,
-            borderRadius: '50%', filter: 'blur(60px)', opacity: 0.55,
-            background: 'radial-gradient(circle, color-mix(in oklab, var(--primary) 30%, transparent), transparent 70%)',
-          }}
-        />
-
-        {/* brand */}
-        <div className="relative flex items-center gap-2.5 px-[22px] pt-[22px] pb-4">
-          <img
-            src="/brand/lifequest-logo.png"
-            alt="LifeQuest"
-            className="h-[42px] w-[42px] rounded-[12px] border border-[var(--border)] bg-white object-cover"
-          />
-          <div>
-            <div className="text-[17px] font-extrabold tracking-[-0.02em] leading-none">LifeQuest</div>
-            <div className="mt-[2px] text-[10.5px] font-semibold uppercase tracking-[0.1em]" style={{ color: 'var(--text-3)' }}>
-              v0.3 · alpha
-            </div>
-          </div>
-        </div>
-
-        {/* nav (grouped) */}
-        <nav className="flex-1 overflow-y-auto px-3 pt-1 pb-5 flex flex-col gap-3.5">
-          {NAV_GROUPS.map((g) => {
-            const items = NAV_ITEMS.filter((n) => n.group === g.id);
-            if (!items.length) return null;
-            return (
-              <div key={g.id}>
-                <div className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--text-3)' }}>
-                  {g.label}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  {items.map((it) => (
-                    <NavLink
-                      key={it.to}
-                      to={it.to}
-                      end={it.to === '/'}
-                      onClick={() => audio.play('blip')}
-                    >
-                      {({ isActive }) => (
-                        <div
-                          className="relative flex items-center gap-[11px] px-3 py-[9px] transition-colors"
-                          style={{
-                            borderRadius: 10,
-                            fontSize: 13.5,
-                            fontWeight: isActive ? 700 : 500,
-                            color: isActive ? 'var(--text)' : 'var(--text-2)',
-                            background: isActive
-                              ? 'color-mix(in oklab, var(--primary) 14%, transparent)'
-                              : 'transparent',
-                            boxShadow: isActive
-                              ? 'inset 0 0 0 1px color-mix(in oklab, var(--primary) 30%, transparent)'
-                              : 'none',
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isActive)
-                              (e.currentTarget as HTMLDivElement).style.background =
-                                'color-mix(in oklab, var(--text) 5%, transparent)';
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isActive)
-                              (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-                          }}
-                        >
-                          {isActive && (
-                            <div
-                              style={{
-                                position: 'absolute', left: -12, top: 8, bottom: 8, width: 3,
-                                borderRadius: 999, background: 'var(--primary)',
-                              }}
-                            />
-                          )}
-                          <span
-                            style={{
-                              display: 'flex',
-                              color: isActive ? 'var(--primary)' : it.accent ? 'var(--c-xp)' : 'var(--text-3)',
-                            }}
-                          >
-                            {it.icon}
-                          </span>
-                          <span className="flex-1 truncate">{it.label}</span>
-                          {it.accent && !isActive && (
-                            <span
-                              style={{
-                                width: 6, height: 6, borderRadius: 999,
-                                background: 'var(--c-xp)',
-                                boxShadow: '0 0 8px var(--c-xp)',
-                              }}
-                            />
-                          )}
-                        </div>
-                      )}
-                    </NavLink>
-                  ))}
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
+      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
+        <SidebarBody className="justify-between gap-2 py-2">
+          <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            {/* marca */}
+            {sidebarOpen ? (
+              <div className="relative flex items-center gap-2.5 px-3 pt-1 pb-4">
+                <img
+                  src="/brand/lifequest-logo.png"
+                  alt="LifeQuest"
+                  className="h-[42px] w-[42px] rounded-[12px] border border-[var(--border)] bg-white object-cover"
+                />
+                <div>
+                  <div className="text-[17px] font-extrabold tracking-[-0.02em] leading-none">LifeQuest</div>
+                  <div className="mt-[2px] text-[10.5px] font-semibold uppercase tracking-[0.1em]" style={{ color: 'var(--text-3)' }}>
+                    v0.3 · alpha
+                  </div>
                 </div>
               </div>
-            );
-          })}
+            ) : (
+              <div className="flex justify-center pt-1 pb-4">
+                <img
+                  src="/brand/lifequest-logo.png"
+                  alt="LifeQuest"
+                  className="h-[38px] w-[38px] rounded-[12px] border border-[var(--border)] bg-white object-cover"
+                />
+              </div>
+            )}
 
-        </nav>
+            {/* nav agrupada (toda la info) */}
+            <nav className="flex flex-col gap-3.5 px-1">
+              {NAV_GROUPS.map((g) => {
+                const items = NAV_ITEMS.filter((n) => n.group === g.id);
+                if (!items.length) return null;
+                return (
+                  <div key={g.id}>
+                    <SidebarGroupLabel label={g.label} />
+                    <div className="flex flex-col gap-0.5">
+                      {items.map((it) => (
+                        <SidebarLink
+                          key={it.to}
+                          link={{ label: it.label, href: it.to, icon: it.icon, hint: it.hint }}
+                          end={it.to === '/'}
+                          accent={it.accent}
+                          onClick={() => audio.play('blip')}
+                          right={
+                            it.accent ? (
+                              <span
+                                style={{
+                                  width: 6, height: 6, borderRadius: 999,
+                                  background: 'var(--c-xp)',
+                                  boxShadow: '0 0 8px var(--c-xp)',
+                                  flexShrink: 0,
+                                }}
+                              />
+                            ) : undefined
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </nav>
+          </div>
 
-        {/* hero card */}
-        {user && (
-          <div className="relative px-3 pt-2 pb-4">
-            <button
-              onClick={() => navigate('/character')}
-              className="block w-full text-left"
-              style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
-            >
-              <div
-                style={{
-                  padding: 12,
-                  borderRadius: 14,
-                  background:
-                    'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
-                  border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
-                  display: 'flex', flexDirection: 'column', gap: 10,
-                }}
-              >
-                <div className="flex items-center gap-2.5">
+          {/* hero card */}
+          {user && (
+            <div className="relative px-1 pt-2 pb-2">
+              {sidebarOpen ? (
+                <button
+                  onClick={() => navigate('/character')}
+                  className="block w-full text-left"
+                  style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
+                >
                   <div
                     style={{
-                      width: 42, height: 42, borderRadius: 12,
-                      background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
-                      border: '1px solid var(--border)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 22,
+                      padding: 12,
+                      borderRadius: 14,
+                      background:
+                        'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
+                      border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
+                      display: 'flex', flexDirection: 'column', gap: 10,
                     }}
                   >
-                    <E e="🧙" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
-                      <span
+                    <div className="flex items-center gap-2.5">
+                      <div
                         style={{
-                          fontSize: 9.5,
-                          padding: '1px 5px',
-                          borderRadius: 5,
-                          background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
-                          color: 'var(--c-xp)',
-                          fontWeight: 800,
-                          letterSpacing: '.06em',
+                          width: 42, height: 42, borderRadius: 12,
+                          background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
+                          border: '1px solid var(--border)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 22,
                         }}
                       >
-                        NV {user.level}
-                      </span>
+                        <E e="🧙" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
+                          <span
+                            style={{
+                              fontSize: 9.5,
+                              padding: '1px 5px',
+                              borderRadius: 5,
+                              background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
+                              color: 'var(--c-xp)',
+                              fontWeight: 800,
+                              letterSpacing: '.06em',
+                            }}
+                          >
+                            NV {user.level}
+                          </span>
+                        </div>
+                        <div className="mt-px text-[11px]" style={{ color: 'var(--text-2)' }}>
+                          {getLevelTitle(user.level)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-px text-[11px]" style={{ color: 'var(--text-2)' }}>
-                      {getLevelTitle(user.level)}
+                    <div>
+                      <div
+                        className="mb-1 flex justify-between text-[10px] tabular-nums"
+                        style={{ color: 'var(--text-3)' }}
+                      >
+                        <span>XP</span>
+                        <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
+                      </div>
+                      <div
+                        style={{
+                          height: 5,
+                          background: 'var(--ring-track)',
+                          borderRadius: 999,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${xpPctSide}%`,
+                            height: '100%',
+                            background:
+                              'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
+                            boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
+                            transition: 'width 1s cubic-bezier(.22,1,.36,1)',
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <div
-                    className="mb-1 flex justify-between text-[10px] tabular-nums"
-                    style={{ color: 'var(--text-3)' }}
-                  >
-                    <span>XP</span>
-                    <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
-                  </div>
-                  <div
-                    style={{
-                      height: 5,
-                      background: 'var(--ring-track)',
-                      borderRadius: 999,
-                      overflow: 'hidden',
-                    }}
+                </button>
+              ) : (
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => navigate('/character')}
+                    title={user.displayName}
+                    style={{ all: 'unset', cursor: 'pointer' }}
                   >
                     <div
                       style={{
-                        width: `${xpPctSide}%`,
-                        height: '100%',
-                        background:
-                          'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
-                        boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
-                        transition: 'width 1s cubic-bezier(.22,1,.36,1)',
+                        width: 40, height: 40, borderRadius: 12,
+                        background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
+                        border: '1px solid var(--border)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 20,
                       }}
-                    />
-                  </div>
+                    >
+                      <E e="🧙" />
+                    </div>
+                  </button>
                 </div>
-              </div>
-            </button>
-          </div>
-        )}
-      </aside>
+              )}
+            </div>
+          )}
+        </SidebarBody>
+      </Sidebar>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header
