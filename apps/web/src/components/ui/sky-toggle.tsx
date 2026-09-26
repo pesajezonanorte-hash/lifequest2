@@ -6,11 +6,11 @@ export interface SkyToggleProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   ariaLabel?: string;
-  /** Tamaño base en px (el resto de medidas del switch son em relativos). Default 9 */
+  /** Tamaño base en px (el resto de medidas del switch son em relativos). Default 10 */
   size?: number;
 }
 
-const Switch = ({ checked, onChange, ariaLabel = 'Cambiar tema', size = 9 }: SkyToggleProps) => {
+const Switch = ({ checked, onChange, ariaLabel = 'Cambiar tema', size = 10 }: SkyToggleProps) => {
   return (
     <StyledWrapper $size={size}>
       <label className="theme-switch">
@@ -45,7 +45,7 @@ const Switch = ({ checked, onChange, ariaLabel = 'Cambiar tema', size = 9 }: Sky
 
 const StyledWrapper = styled.div<{ $size?: number }>`
   .theme-switch {
-    --toggle-size: ${(p) => p.$size ?? 9}px;
+    --toggle-size: ${(p) => p.$size ?? 10}px;
     /* the size is adjusted using font-size,
        this is not transform scale,
        so you can choose any size */
@@ -113,8 +113,7 @@ const StyledWrapper = styled.div<{ $size?: number }>`
     left: var(--circle-container-offset);
     top: var(--circle-container-offset);
     border-radius: var(--container-radius);
-    -webkit-box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
-    box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 0 0.35em rgba(255, 255, 255, 0.08);
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -135,8 +134,7 @@ const StyledWrapper = styled.div<{ $size?: number }>`
     background-color: var(--sun-bg);
     -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
     box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
-    -webkit-filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
-    filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 0.05em 0.08em rgba(0, 0, 0, 0.28));
     overflow: hidden;
     -webkit-transition: var(--transition);
     -o-transition: var(--transition);
@@ -151,8 +149,7 @@ const StyledWrapper = styled.div<{ $size?: number }>`
     height: 100%;
     background-color: var(--moon-bg);
     border-radius: inherit;
-    -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
-    box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+    box-shadow: 0em -0.05em 0.05em 0em rgba(0, 0, 0, 0.12) inset;
     -webkit-transition: var(--transition);
     -o-transition: var(--transition);
     transition: var(--transition);
@@ -193,9 +190,8 @@ const StyledWrapper = styled.div<{ $size?: number }>`
     position: absolute;
     bottom: -0.625em;
     left: 0.312em;
-    -webkit-box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
-    box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
-    -webkit-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+    box-shadow: 0.9em 0.25em var(--clouds-color), 1.8em -0.1em var(--back-clouds-color), 2.6em 0.2em var(--clouds-color);
+        -webkit-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
     -o-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
     transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
   }
