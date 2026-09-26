@@ -5,7 +5,7 @@ export interface MorningBriefing { briefing: string; cached: boolean; }
 export interface YearInReview { year: number; totalXp: number; totalGold: number; totalWorkouts: number; totalQuestsCompleted: number; totalJournalEntries: number; totalBooksCompleted: number; avgSleepHours: number; avgMood: number; bestMonth: { month: string; xp: number } | null; xpByMonth: Record<string, number>; }
 
 export interface DynamicZoneScore { id: string; name: string; icon: string; color: string; score: number; }
-export interface DynamicLifeScoreData { totalScore: number; zones: DynamicZoneScore[]; trend: number; }
+export interface DynamicLifeScoreData { totalScore: number; zones: DynamicZoneScore[]; trend: string; }
 
 export const fetchLifeScore = () => api.get<LifeScore>('/life/score').then(r => r.data);
 export const fetchDynamicLifeScore = () => api.get<DynamicLifeScoreData>('/life/dynamic').then(r => r.data);

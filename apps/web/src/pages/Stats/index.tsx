@@ -1,78 +1,97 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  Activity,
+  BarChart3,
+  CalendarDays,
+  Download,
+  Flame,
+  HeartPulse,
+} from 'lucide-react';
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
 } from 'recharts';
-import { BarChart2, TrendingUp, Flame, DollarSign, Zap, Share2, Download } from 'lucide-react';
+import type { User } from '@lifequest/shared';
+import { FlowButton } from '@/components/ui/flow-button';
+import AdvancedStats, { type AdvancedStatsData } from '@/components/ui/advanced-stats';
 import {
-  getStatsSummary, getXpHistory, getActivityRadar,
-  getFinanceTrend, getHabitHeatmap, getSleepScatter,
+  getActivityRadar,
+  getHabitHeatmap,
+  getStatsSummary,
+  getXpHistory,
+  type HeatmapPoint,
+  type StatsSummary,
 } from '../../services/stats.service';
-import { fetchLifeScore, fetchDynamicLifeScore } from '../../services/lifescore.service';
-import type { LifeScore, DynamicLifeScoreData } from '../../services/lifescore.service';
-import { getCheckinHistory } from '../../services/checkin.service';
-import type { DailyCheckin } from '../../services/checkin.service';
+import {
+  fetchDynamicLifeScore,
+  fetchLifeScore,
+  type DynamicLifeScoreData,
+  type LifeScore,
+} from '../../services/lifescore.service';
+import { getCheckinHistory, type DailyCheckin } from '../../services/checkin.service';
 import { useAuthStore } from '../../store/authStore';
-import { DynamicLifeScore } from '../../components/ui/DynamicLifeScore';
-import { E } from '@/components/ui/glyphs';
 
 type Period = 'week' | 'month' | '3months' | 'year';
-const PERIODS: { id: Period; label: string }[] = [
-  { id: 'week', label: 'Semana' },
-  { id: 'month', label: 'Mes' },
-  { id: '3months', label: '3 Meses' },
-  { id: 'year', label: 'Año' },
+
+const PERIODS: Array<{ id: Period; label: string; summaryLabel: string }> = [
+  { id: 'week', label: 'Semana', summaryLabel: 'Última semana' },
+  { id: 'month', label: 'Mes', summaryLabel: 'Mes actual' },
+  { id: '3months', label: '3 meses', summaryLabel: 'Últimos 3 meses' },
+  { id: 'year', label: 'Año', summaryLabel: 'Año actual' },
 ];
 
-// ─── Habit Heatmap ─────────────────────────────────────────────────────────
+interface RadarComparisonPoint {
+  subject: string;
+  current: number;
+  previous: number;
+}
 
 function HeatmapCell({ count }: { count: number }) {
   const opacity = count === 0 ? 0.07 : count < 3 ? 0.3 : count < 6 ? 0.6 : 1;
   return (
     <div
-      className="w-3 h-3 rounded-sm"
-      style={{ background: `rgba(251, 191, 36, ${opacity})` }}
-      title={`${count} actividades`}
+      className="h-3 w-3 rounded-sm"
+      style={{ background: `rgba(154, 123, 28, ${opacity})` }}
+      title={`${count} hábitos completados`}
     />
   );
 }
 
-function ActivityHeatmap({ data }: { data: { date: string; count: number }[] }) {
-  const weeks: { date: string; count: number }[][] = [];
-  const map = new Map(data.map((d) => [d.date.split('T')[0], d.count]));
+function ActivityHeatmap({ data }: { data: HeatmapPoint[] }) {
+  const weeks: HeatmapPoint[][] = [];
+  const activityByDay = new Map(data.map((entry) => [entry.date.split('T')[0], entry.count]));
   const today = new Date();
   const start = new Date(today);
   start.setDate(today.getDate() - 363);
-  start.setDate(start.getDate() - start.getDay()); // back to Sunday
+  start.setDate(start.getDate() - start.getDay());
 
-  const cur = new Date(start);
-  while (cur <= today) {
-    const week: { date: string; count: number }[] = [];
-    for (let d = 0; d < 7; d++) {
-      const iso = cur.toISOString().split('T')[0];
-      week.push({ date: iso, count: map.get(iso) ?? 0 });
-      cur.setDate(cur.getDate() + 1);
+  const cursor = new Date(start);
+  while (cursor <= today) {
+    const week: HeatmapPoint[] = [];
+    for (let day = 0; day < 7; day += 1) {
+      const date = cursor.toISOString().split('T')[0];
+      week.push({ date, count: activityByDay.get(date) ?? 0 });
+      cursor.setDate(cursor.getDate() + 1);
     }
     weeks.push(week);
   }
 
   return (
-    <div className="overflow-x-auto">
-      <div className="flex gap-[3px] min-w-max">
-        {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-[3px]">
-            {week.map((day) => (
-              <HeatmapCell key={day.date} count={day.count} />
-            ))}
+    <div className="overflow-x-auto pb-1">
+      <div className="flex min-w-max gap-[3px]" aria-label="Mapa anual de actividad de hábitos">
+        {weeks.map((week, weekIndex) => (
+          <div key={weekIndex} className="flex flex-col gap-[3px]">
+            {week.map((day) => <HeatmapCell key={day.date} count={day.count} />)}
           </div>
         ))}
       </div>
     </div>
   );
 }
-
-// ─── Mood Heatmap ──────────────────────────────────────────────────────────
 
 const MOOD_COLORS = ['', '#b5453a', '#a8a8b0', '#8a8a92', '#6cb98a', '#3f7a55'];
 
@@ -82,413 +101,283 @@ function MoodHeatmap({ checkins }: { checkins: DailyCheckin[] }) {
   const month = now.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
+  const moodsByDay = new Map(checkins.map((checkin) => [new Date(checkin.date).getDate(), checkin.mood]));
+  const cells: Array<number | null> = [];
 
-  const map = new Map(checkins.map((c) => {
-    const d = new Date(c.date);
-    return [d.getDate(), c.mood];
-  }));
-
-  const cells = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  for (let index = 0; index < firstDay; index += 1) cells.push(null);
+  for (let day = 1; day <= daysInMonth; day += 1) cells.push(day);
 
   return (
     <div>
-      <div className="grid grid-cols-7 gap-1 mb-1 text-[10px] text-[var(--text-muted)] text-center">
+      <div className="mb-1 grid grid-cols-7 gap-1 text-center text-[10px] text-[var(--text-muted)]">
         {['D', 'L', 'M', 'X', 'J', 'V', 'S'].map((day) => <span key={day}>{day}</span>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
-        {cells.map((d, i) => (
-          <div
-            key={i}
-            className="aspect-square rounded-md flex items-center justify-center text-[10px] font-medium"
-            style={{
-              background: d ? (map.has(d) ? MOOD_COLORS[map.get(d)!] + '88' : 'rgba(255,255,255,0.05)') : 'transparent',
-              border: d && new Date().getDate() === d ? '1px solid var(--accent-cyan)' : 'none',
-            }}
-          >
-            {d && <span className="opacity-70">{d}</span>}
-          </div>
-        ))}
+        {cells.map((day, index) => {
+          const mood = day ? moodsByDay.get(day) : undefined;
+          const isToday = day === now.getDate();
+          return (
+            <div
+              key={`${day ?? 'empty'}-${index}`}
+              className="flex aspect-square items-center justify-center rounded-md text-[10px] font-medium text-[var(--text-secondary)]"
+              style={{
+                background: day ? (mood ? `${MOOD_COLORS[mood]}88` : 'var(--bg-muted)') : 'transparent',
+                border: isToday ? '1px solid var(--accent-gold)' : '1px solid transparent',
+              }}
+            >
+              {day ?? ''}
+            </div>
+          );
+        })}
       </div>
-      <div className="flex items-center gap-1.5 mt-2">
-        <span className="text-[10px] text-[var(--text-muted)]">Estado ánimo:</span>
-        {MOOD_COLORS.slice(1).map((c, i) => (
-          <div key={i} className="w-3 h-3 rounded-sm" style={{ background: c + '88' }} title={`${i + 1}/5`} />
+      <div className="mt-3 flex items-center gap-1.5 text-[10px] text-[var(--text-muted)]">
+        <span>Ánimo:</span>
+        {MOOD_COLORS.slice(1).map((color, index) => (
+          <span key={color} className="h-3 w-3 rounded-sm" style={{ background: `${color}88` }} title={`${index + 1}/5`} />
         ))}
+        <span className="ml-1">bajo → alto</span>
       </div>
     </div>
   );
 }
 
-// ─── Weekly Rings ──────────────────────────────────────────────────────────
-
-function WeekRing({ pct, day, isToday }: { pct: number; day: string; isToday: boolean }) {
-  const r = 18;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (pct / 100) * circ;
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <svg width={44} height={44}>
-        <circle cx={22} cy={22} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={5} />
-        <motion.circle
-          cx={22} cy={22} r={r}
-          fill="none"
-          stroke={isToday ? 'var(--accent-gold)' : 'var(--accent-cyan)'}
-          strokeWidth={5} strokeLinecap="round"
-          strokeDasharray={circ}
-          initial={{ strokeDashoffset: circ }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, delay: 0.1 }}
-          transform="rotate(-90 22 22)"
-        />
-        <text x={22} y={27} textAnchor="middle" fill="var(--text-primary)" style={{ fontSize: 11, fontWeight: 700 }}>
-          {Math.round(pct)}
-        </text>
-      </svg>
-      <span className="text-[10px]" style={{ color: isToday ? 'var(--accent-gold)' : 'var(--text-muted)' }}>{day}</span>
-    </div>
-  );
-}
-
-// ─── Share Mode ────────────────────────────────────────────────────────────
-
-function ShareButton({ user, score }: { user: any; score: LifeScore | null }) {
+function ShareButton({ user, score }: { user: User | null; score: LifeScore | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   function generate() {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const context = canvas?.getContext('2d');
+    if (!canvas || !context) return;
+
     canvas.width = 600;
     canvas.height = 380;
+    const gradient = context.createLinearGradient(0, 0, 600, 380);
+    gradient.addColorStop(0, '#141416');
+    gradient.addColorStop(1, '#0c0c0e');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 600, 380);
 
-    // Background
-    const grad = ctx.createLinearGradient(0, 0, 600, 380);
-    grad.addColorStop(0, '#141416');
-    grad.addColorStop(1, '#0c0c0e');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 600, 380);
+    context.strokeStyle = '#d9b44a66';
+    context.lineWidth = 2;
+    context.roundRect(4, 4, 592, 372, 16);
+    context.stroke();
 
-    // Border
-    ctx.strokeStyle = '#ffd23f44';
-    ctx.lineWidth = 2;
-    ctx.roundRect(4, 4, 592, 372, 16);
-    ctx.stroke();
+    context.fillStyle = '#d9b44a';
+    context.font = 'bold 28px Montserrat, system-ui';
+    context.fillText('LifeQuest', 32, 56);
+    context.fillStyle = '#9ca3af';
+    context.font = '16px Montserrat, system-ui';
+    context.fillText(user?.displayName ?? 'Héroe', 32, 84);
 
-    // Title
-    ctx.fillStyle = '#d9b44a';
-    ctx.font = 'bold 28px system-ui';
-    ctx.fillText('LifeQuest', 32, 56);
+    context.fillStyle = '#d9b44a22';
+    context.roundRect(32, 104, 110, 36, 8);
+    context.fill();
+    context.fillStyle = '#d9b44a';
+    context.font = 'bold 18px Montserrat, system-ui';
+    context.fillText(`Nivel ${user?.level ?? 1}`, 50, 128);
 
-    ctx.fillStyle = '#9ca3af';
-    ctx.font = '16px system-ui';
-    ctx.fillText(user?.displayName ?? 'Héroe', 32, 84);
-
-    // Level badge
-    ctx.fillStyle = '#ffd23f22';
-    ctx.roundRect(32, 104, 110, 36, 8);
-    ctx.fill();
-    ctx.fillStyle = '#d9b44a';
-    ctx.font = 'bold 18px system-ui';
-    ctx.fillText(`Nivel ${user?.level ?? 1}`, 50, 128);
-
-    // Life Score
     if (score) {
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 72px system-ui';
-      ctx.fillText(score.total.toString(), 400, 160);
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '18px system-ui';
-      ctx.fillText('Life Score', 400, 188);
+      context.fillStyle = '#ffffff';
+      context.font = 'bold 72px Montserrat, system-ui';
+      context.fillText(score.total.toString(), 400, 160);
+      context.fillStyle = '#9ca3af';
+      context.font = '18px Montserrat, system-ui';
+      context.fillText('Life Score', 400, 188);
     }
 
-    // Stats
-    ctx.fillStyle = '#e5e7eb';
-    ctx.font = '15px system-ui';
-    ctx.fillText(`Racha: ${user?.currentStreak ?? 0} días`, 32, 200);
-    ctx.fillText(`XP: ${(user?.xp ?? 0).toLocaleString()}`, 32, 228);
-    ctx.fillText(`STR ${user?.strength ?? 1} | INT ${user?.intelligence ?? 1} | CHA ${user?.charisma ?? 1}`, 32, 256);
+    context.fillStyle = '#e5e7eb';
+    context.font = '15px Montserrat, system-ui';
+    context.fillText(`Racha: ${user?.currentStreak ?? 0} días`, 32, 200);
+    context.fillText(`XP actual: ${(user?.xp ?? 0).toLocaleString('es-CO')}`, 32, 228);
+    context.fillText(`STR ${user?.strength ?? 1} | INT ${user?.intelligence ?? 1} | CHA ${user?.charisma ?? 1}`, 32, 256);
 
-    // Date
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '13px system-ui';
-    ctx.fillText(new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }), 32, 340);
-    ctx.fillText('lifequest.app', 450, 340);
+    context.fillStyle = '#6b7280';
+    context.font = '13px Montserrat, system-ui';
+    context.fillText(new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }), 32, 340);
+    context.fillText('lifequest.app', 450, 340);
 
-    // Download
     const link = document.createElement('a');
     link.download = `lifequest-${new Date().toISOString().split('T')[0]}.png`;
-    link.href = canvas.toDataURL();
+    link.href = canvas.toDataURL('image/png');
     link.click();
   }
 
   return (
     <>
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-      <motion.button
-        onClick={generate}
-        whileTap={{ scale: 0.96 }}
-        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-gold)] transition-all"
-      >
-        <Download size={14} /> Compartir Progreso
-      </motion.button>
+      <canvas ref={canvasRef} className="hidden" />
+      <FlowButton onClick={generate} tone="ghost" size="sm" withArrows={false} className="gap-1.5 whitespace-nowrap">
+        <span className="inline-flex items-center gap-1.5"><Download className="h-3.5 w-3.5" aria-hidden="true" /> Compartir</span>
+      </FlowButton>
     </>
   );
 }
-
-// ─── Main Stats Page ───────────────────────────────────────────────────────
-
-const tooltipStyle = {
-  contentStyle: { background: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12 },
-  labelStyle: { color: 'var(--text-secondary)' },
-};
 
 export default function StatsPage() {
   const { user } = useAuthStore();
   const [period, setPeriod] = useState<Period>('month');
   const [lifeScore, setLifeScore] = useState<LifeScore | null>(null);
   const [dynamicScore, setDynamicScore] = useState<DynamicLifeScoreData | null>(null);
-  const [xpHistory, setXpHistory] = useState<{ date: string; xp: number }[]>([]);
-  const [radarData, setRadarData] = useState<{ subject: string; current: number }[]>([]);
-  const [heatmap, setHeatmap] = useState<{ date: string; count: number }[]>([]);
+  const [xpHistory, setXpHistory] = useState<Array<{ date: string; xp: number }>>([]);
+  const [xpAverage, setXpAverage] = useState(0);
+  const [radarData, setRadarData] = useState<RadarComparisonPoint[]>([]);
+  const [heatmap, setHeatmap] = useState<HeatmapPoint[]>([]);
   const [checkins, setCheckins] = useState<DailyCheckin[]>([]);
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<StatsSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async (p: Period) => {
+  const load = useCallback(async (selectedPeriod: Period) => {
     setLoading(true);
     try {
-      const [score, dynScore, xp, radar, hm, chk, sum] = await Promise.allSettled([
+      const [score, dynamic, xp, radar, habits, checkinHistory, stats] = await Promise.allSettled([
         fetchLifeScore(),
         fetchDynamicLifeScore(),
-        getXpHistory(p),
+        getXpHistory(selectedPeriod),
         getActivityRadar(),
         getHabitHeatmap(),
         getCheckinHistory(30),
-        getStatsSummary(p),
+        getStatsSummary(selectedPeriod),
       ]);
+
       if (score.status === 'fulfilled') setLifeScore(score.value);
-      if (dynScore.status === 'fulfilled') setDynamicScore(dynScore.value);
-      if (xp.status === 'fulfilled') setXpHistory((xp.value as any).data ?? xp.value ?? []);
-      if (radar.status === 'fulfilled') {
-        const raw = (radar.value as any);
-        setRadarData(Array.isArray(raw) ? raw : raw.data ?? []);
+      if (dynamic.status === 'fulfilled') setDynamicScore(dynamic.value);
+      if (xp.status === 'fulfilled') {
+        setXpHistory(xp.value.data);
+        setXpAverage(xp.value.avg);
       }
-      if (hm.status === 'fulfilled') setHeatmap((hm.value as any).data ?? hm.value ?? []);
-      if (chk.status === 'fulfilled') setCheckins(chk.value);
-      if (sum.status === 'fulfilled') setSummary(sum.value);
+      if (radar.status === 'fulfilled') {
+        const previousBySubject = new Map(radar.value.previous.map((item) => [item.subject, item.value]));
+        setRadarData(radar.value.current.map((item) => ({
+          subject: item.subject,
+          current: item.value,
+          previous: previousBySubject.get(item.subject) ?? 0,
+        })));
+      }
+      if (habits.status === 'fulfilled') setHeatmap(habits.value);
+      if (checkinHistory.status === 'fulfilled') setCheckins(checkinHistory.value);
+      if (stats.status === 'fulfilled') setSummary(stats.value);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { load(period); }, [period, load]);
+  useEffect(() => { void load(period); }, [load, period]);
 
-  // Weekly rings from XP history
-  const weeklyRings = (() => {
-    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    const today = new Date();
-    const result = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const iso = d.toISOString().split('T')[0];
-      const entry = xpHistory.find((e) => e.date.startsWith(iso));
-      const maxXp = 200;
-      result.push({
-        day: days[d.getDay()],
-        pct: Math.min(((entry?.xp ?? 0) / maxXp) * 100, 100),
-        isToday: i === 0,
-      });
-    }
-    return result;
-  })();
-
-  const displayScore = dynamicScore?.totalScore ?? lifeScore?.total ?? null;
-  const insightCards = [
-    displayScore !== null && {
-      label: 'Life Score',
-      value: `${displayScore}/100`,
-      color: displayScore >= 70 ? 'var(--accent-green)' : 'var(--accent-gold)',
-      icon: '⭐',
-    },
-    user && user.longestStreak > 0 && {
-      label: 'Racha récord',
-      value: `${user.longestStreak} días`,
-      color: 'var(--accent-pink)',
-      icon: '🔥',
-    },
-    summary?.quests && {
-      label: 'Misiones completadas',
-      value: summary.quests.completed,
-      color: 'var(--accent-cyan)',
-      icon: '⚔️',
-    },
-    checkins.length > 0 && {
-      label: 'Energía promedio',
-      value: `${(checkins.reduce((s, c) => s + c.energy, 0) / checkins.length).toFixed(1)}/10`,
-      color: 'var(--accent-gold)',
-      icon: '⚡',
-    },
-  ].filter(Boolean) as { label: string; value: string | number; color: string; icon: string }[];
+  const selectedPeriod = PERIODS.find((item) => item.id === period) ?? PERIODS[1];
+  const advancedData: AdvancedStatsData = {
+    periodLabel: selectedPeriod.summaryLabel,
+    level: user?.level,
+    currentXp: user?.xp,
+    xpToNextLevel: user?.xpToNextLevel,
+    xpHistory,
+    xpPeriod: summary?.xp.value ?? 0,
+    xpAverage,
+    xpChange: summary?.xp.change,
+    questsInPeriod: summary?.quests.completed ?? 0,
+    questsChange: summary?.quests.change,
+    lifeScore: dynamicScore?.totalScore ?? lifeScore?.total ?? null,
+    lifeScoreTrend: dynamicScore?.trend,
+    zones: dynamicScore?.zones.map((zone) => ({ id: zone.id, name: zone.name, score: zone.score })),
+    currentStreak: summary?.currentStreak ?? user?.currentStreak,
+    bestStreak: summary?.bestStreak ?? user?.longestStreak,
+    totals: summary?.totals,
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <BarChart2 className="text-[var(--accent-gold)]" size={24} />
-            Estadísticas
-          </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">Tu progreso, hermoso y en detalle</p>
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] text-[var(--accent-gold)] shadow-pixel">
+              <BarChart3 className="h-[18px] w-[18px]" aria-hidden="true" />
+            </span>
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Estadísticas</h1>
+          </div>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">Tu progreso real, acumulado y organizado por periodo.</p>
         </div>
-        <div className="flex items-center gap-3">
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <ShareButton user={user} score={lifeScore} />
-          <div className="flex gap-1">
-            {PERIODS.map((p) => (
+          <div className="flex rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-1" role="group" aria-label="Periodo de estadísticas">
+            {PERIODS.map((item) => (
               <button
-                key={p.id}
-                onClick={() => setPeriod(p.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${period === p.id ? 'bg-[var(--accent-gold)] text-[var(--bg-deep)]' : 'border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+                key={item.id}
+                type="button"
+                onClick={() => setPeriod(item.id)}
+                aria-pressed={period === item.id}
+                className={[
+                  'rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors sm:px-3',
+                  period === item.id
+                    ? 'bg-[var(--text-primary)] text-[var(--bg-deep)]'
+                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-muted)] hover:text-[var(--text-primary)]',
+                ].join(' ')}
               >
-                {p.label}
+                {item.label}
               </button>
             ))}
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Life Score Rings Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-6"
-        style={{ borderColor: 'var(--accent-gold)44' }}
-      >
-        <h2 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-          <span><E e="⭐" /></span> Life Score Dinámico
-          {dynamicScore && dynamicScore.trend !== 0 && (
-            <span className={`text-xs ml-auto font-medium ${dynamicScore.trend > 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-pink)]'}`}>
-              {dynamicScore.trend > 0 ? '▲' : '▼'} {Math.abs(dynamicScore.trend)} pts vs semana pasada
-            </span>
-          )}
-        </h2>
-        {dynamicScore ? (
-          <DynamicLifeScore
-            totalScore={dynamicScore.totalScore}
-            zones={dynamicScore.zones}
-            size={220}
-            stroke={13}
-            gap={3}
-          />
-        ) : lifeScore ? (
-          <div className="flex flex-col items-center py-4">
-            <span className="text-5xl font-extrabold" style={{ color: 'var(--text-primary)' }}>{lifeScore.total}</span>
-            <span className="text-xs uppercase tracking-widest mt-1" style={{ color: 'var(--text-muted)' }}>Life Score</span>
-          </div>
-        ) : (
-          <p className="text-center text-sm py-4" style={{ color: 'var(--text-muted)' }}>Cargando...</p>
-        )}
-      </motion.div>
+      <AdvancedStats data={advancedData} loading={loading} />
 
-      {/* Insight Cards */}
-      {insightCards.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {insightCards.map((card) => (
-            <motion.div
-              key={card.label}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-[var(--border)] bg-[var(--bg-panel)] p-4"
-              style={{ borderColor: card.color + '44' }}
-            >
-              <div className="text-2xl mb-2"><E e={card.icon} /></div>
-              <p className="text-xl font-bold" style={{ color: card.color }}>{card.value}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">{card.label}</p>
-            </motion.div>
-          ))}
-        </div>
-      )}
+      <section aria-label="Detalles de actividad" className="grid gap-4 xl:grid-cols-2">
+        {radarData.length > 0 ? (
+          <article className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5 shadow-pixel">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                  <Activity className="h-4 w-4 text-[var(--text-secondary)]" aria-hidden="true" />
+                  Ritmo por área
+                </h2>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">Semana actual frente a la anterior.</p>
+              </div>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">Últimas 2 semanas</span>
+            </div>
+            <ResponsiveContainer width="100%" height={250}>
+              <RadarChart data={radarData} cx="50%" cy="50%" outerRadius={88}>
+                <PolarGrid stroke="var(--border)" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
+                <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
+                <Radar name="Semana anterior" dataKey="previous" stroke="var(--text-muted)" fill="var(--text-muted)" fillOpacity={0.07} strokeWidth={1.25} />
+                <Radar name="Semana actual" dataKey="current" stroke="var(--accent-gold)" fill="var(--accent-gold)" fillOpacity={0.18} strokeWidth={2} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </article>
+        ) : null}
 
-      {/* Weekly Rings */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5">
-        <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-          <Zap size={14} className="text-[var(--accent-gold)]" />
-          Actividad de la semana
-        </h3>
-        <div className="flex justify-between px-4">
-          {weeklyRings.map((r) => (
-            <WeekRing key={r.day} pct={r.pct} day={r.day} isToday={r.isToday} />
-          ))}
-        </div>
-      </div>
+        {heatmap.length > 0 ? (
+          <article className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5 shadow-pixel">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                  <Flame className="h-4 w-4 text-[var(--accent-gold)]" aria-hidden="true" />
+                  Constancia de hábitos
+                </h2>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">Cada bloque representa hábitos completados durante el último año.</p>
+              </div>
+              <CalendarDays className="h-4 w-4 text-[var(--text-muted)]" aria-hidden="true" />
+            </div>
+            <div className="mt-6">
+              <ActivityHeatmap data={heatmap} />
+            </div>
+          </article>
+        ) : null}
 
-      {/* XP Trend */}
-      {xpHistory.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5">
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-            <TrendingUp size={14} className="text-[var(--accent-cyan)]" />
-            Tendencia de XP
-          </h3>
-          <ResponsiveContainer width="100%" height={160}>
-            <AreaChart data={xpHistory.slice(-30)}>
-              <defs>
-                <linearGradient id="xpGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--accent-cyan)" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="var(--accent-cyan)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="date" hide />
-              <YAxis hide />
-              <Tooltip {...tooltipStyle} formatter={(v: any) => [`${v} XP`, 'XP']} />
-              <Area type="monotone" dataKey="xp" stroke="var(--accent-cyan)" fill="url(#xpGrad)" strokeWidth={2} dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Radar de vida */}
-      {radarData.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5">
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-2 flex items-center gap-2">
-            <BarChart2 size={14} className="text-[var(--accent-pink)]" />
-            Radar de Vida
-          </h3>
-          <ResponsiveContainer width="100%" height={240}>
-            <RadarChart data={radarData} cx="50%" cy="50%" outerRadius={90}>
-              <PolarGrid stroke="rgba(255,255,255,0.08)" />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} />
-              <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-              <Radar name="Actual" dataKey="current" stroke="var(--accent-gold)" fill="var(--accent-gold)" fillOpacity={0.2} strokeWidth={2} />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Activity Heatmap */}
-      {heatmap.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5">
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-            <Flame size={14} className="text-[var(--accent-gold)]" />
-            Actividad del año
-          </h3>
-          <ActivityHeatmap data={heatmap} />
-        </div>
-      )}
-
-      {/* Mood Heatmap */}
-      {checkins.length > 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5">
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4 flex items-center gap-2">
-            <span className="text-sm"><E e="😊" /></span>
-            Estado emocional del mes
-          </h3>
-          <MoodHeatmap checkins={checkins} />
-        </div>
-      )}
+        {checkins.length > 0 ? (
+          <article className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-5 shadow-pixel xl:col-span-2">
+            <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(220px,0.75fr)] sm:items-center">
+              <div>
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                  <HeartPulse className="h-4 w-4 text-[var(--accent-red)]" aria-hidden="true" />
+                  Estado emocional del mes
+                </h2>
+                <p className="mt-1 max-w-lg text-xs leading-5 text-[var(--text-muted)]">Tus check-ins ayudan a relacionar tu ánimo con el ritmo de tus hábitos, misiones y descanso.</p>
+              </div>
+              <MoodHeatmap checkins={checkins} />
+            </div>
+          </article>
+        ) : null}
+      </section>
     </div>
   );
 }

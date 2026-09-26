@@ -49,7 +49,23 @@ function periodRange(period: string): { start: Date; prevStart: Date; prevEnd: D
 export async function getStatsSummary(userId: string, period = 'month') {
   const { start, prevStart, prevEnd } = periodRange(period);
 
-  const [xpCurrent, xpPrev, questsCurrent, questsPrev, user, streakData] = await Promise.all([
+  // The overview deliberately combines period comparisons with lifetime totals.
+  // That keeps the primary stats truthful as the player continues recording
+  // activity instead of showing a fixed demo value.
+  const [
+    xpCurrent,
+    xpPrev,
+    questsCurrent,
+    questsPrev,
+    user,
+    streakData,
+    transactions,
+    totalXp,
+    totalQuestCompletions,
+    totalHabitCompletions,
+    totalWorkouts,
+    questsCreatedInPeriod,
+  ] = await Promise.all([
     prisma.xpEvent.aggregate({
       where: { userId, createdAt: { gte: start } },
       _sum: { xpAmount: true },
@@ -68,40 +84,49 @@ export async function getStatsSummary(userId: string, period = 'month') {
       where: { userId, isActive: true },
       select: { currentStreak: true, longestStreak: true },
     }),
+    prisma.transaction.findMany({
+      where: { userId, date: { gte: start } },
+      select: { type: true, amount: true },
+    }),
+    prisma.xpEvent.aggregate({
+      where: { userId },
+      _sum: { xpAmount: true },
+    }),
+    prisma.questCompletion.count({ where: { userId } }),
+    prisma.habitLog.count({ where: { userId, completed: true } }),
+    prisma.workout.count({ where: { userId } }),
+    prisma.quest.count({ where: { userId, createdAt: { gte: start } } }),
   ]);
 
-  const now = new Date();
-  const txMonth = await prisma.transaction.findMany({
-    where: { userId, date: { gte: start } },
-    select: { type: true, amount: true },
-  });
-
-  let income = 0, expenses = 0;
-  for (const t of txMonth) {
-    if (t.type === 'INCOME') income += Number(t.amount);
-    else expenses += Number(t.amount);
+  let income = 0;
+  let expenses = 0;
+  for (const transaction of transactions) {
+    if (transaction.type === 'INCOME') income += Number(transaction.amount);
+    else expenses += Number(transaction.amount);
   }
 
   const xpNow = xpCurrent._sum.xpAmount ?? 0;
   const xpBefore = xpPrev._sum.xpAmount ?? 0;
   const xpChange = xpBefore > 0 ? Math.round(((xpNow - xpBefore) / xpBefore) * 100) : 0;
-
   const questChange = questsPrev > 0 ? Math.round(((questsCurrent - questsPrev) / questsPrev) * 100) : 0;
-
-  const bestStreak = Math.max(
-    user.longestStreak,
-    ...streakData.map((h) => h.longestStreak)
-  );
+  const bestStreak = Math.max(user.longestStreak, ...streakData.map((habit) => habit.longestStreak));
 
   return {
     xp: { value: xpNow, change: xpChange },
     quests: {
       completed: questsCurrent,
       change: questChange,
-      total: await prisma.quest.count({ where: { userId, createdAt: { gte: start } } }),
+      total: questsCreatedInPeriod,
     },
+    currentStreak: user.currentStreak,
     bestStreak,
     finance: { income, expenses, balance: income - expenses },
+    totals: {
+      xpEarned: totalXp._sum.xpAmount ?? 0,
+      questsCompleted: totalQuestCompletions,
+      habitCompletions: totalHabitCompletions,
+      workouts: totalWorkouts,
+    },
   };
 }
 
