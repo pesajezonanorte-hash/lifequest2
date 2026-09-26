@@ -48,7 +48,9 @@ export function SageWidget() {
       }
     : {
         position: 'fixed',
-        bottom: 96,
+        // El dock de acciones vive centrado; el Sabio puede quedarse anclado
+        // en la esquina inferior derecha, sin flotar sobre el contenido.
+        bottom: 24,
         right: 24,
         width: 52,
         height: 52,
