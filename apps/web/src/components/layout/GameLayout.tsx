@@ -84,16 +84,13 @@ const NAV_GROUPS: { id: NavItem['group']; label: string }[] = [
 function SidebarGroupLabel({ label }: { label: string }) {
   const { open, animate } = useSidebar();
   return (
-    open ? (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]"
-        style={{ color: 'var(--text-3)' }}
-      >
-        {label}
-      </motion.div>
-    ) : null
+    <motion.div
+      animate={{ opacity: open ? 1 : 0 }}
+      className="px-[10px] pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-[0.12em]"
+      style={{ color: 'var(--text-3)' }}
+    >
+      {label}
+    </motion.div>
   );
 }
 
@@ -292,31 +289,21 @@ export function GameLayout({ children }: Props) {
     <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen}>
         <SidebarBody className="justify-between gap-2 py-2">
-          <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+          <div className="flex min-w-[252px] flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {/* marca */}
-            {sidebarOpen ? (
-              <div className="relative flex items-center gap-2.5 px-3 pt-1 pb-4">
-                <img
-                  src="/brand/lifequest-logo.png"
-                  alt="LifeQuest"
-                  className="h-[42px] w-[42px] rounded-[12px] border border-[var(--border)] bg-white object-cover"
-                />
-                <div>
-                  <div className="text-[17px] font-extrabold tracking-[-0.02em] leading-none">LifeQuest</div>
-                  <div className="mt-[2px] text-[10.5px] font-semibold uppercase tracking-[0.1em]" style={{ color: 'var(--text-3)' }}>
-                    v0.3 · alpha
-                  </div>
+            <div className="relative flex items-center gap-2.5 px-2 pt-1 pb-4">
+              <img
+                src="/brand/lifequest-logo.png"
+                alt="LifeQuest"
+                className="h-9 w-9 rounded-[12px] border border-[var(--border)] bg-white object-cover flex-shrink-0"
+              />
+              <motion.div animate={{ opacity: sidebarOpen ? 1 : 0 }} className="min-w-0">
+                <div className="text-[17px] font-extrabold tracking-[-0.02em] leading-none">LifeQuest</div>
+                <div className="mt-[2px] text-[10.5px] font-semibold uppercase tracking-[0.1em]" style={{ color: 'var(--text-3)' }}>
+                  v0.3 · alpha
                 </div>
-              </div>
-            ) : (
-              <div className="flex justify-center pt-1 pb-4">
-                <img
-                  src="/brand/lifequest-logo.png"
-                  alt="LifeQuest"
-                  className="h-[38px] w-[38px] rounded-[12px] border border-[var(--border)] bg-white object-cover"
-                />
-              </div>
-            )}
+              </motion.div>
+            </div>
 
             {/* nav agrupada (toda la info) */}
             <nav className="flex flex-col gap-3.5 px-1">
@@ -357,97 +344,26 @@ export function GameLayout({ children }: Props) {
 
           {/* hero card */}
           {user && (
-            <div className="relative px-1 pt-2 pb-2">
-              {sidebarOpen ? (
-                <button
-                  onClick={() => navigate('/character')}
-                  className="block w-full text-left"
-                  style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
+            <div className="relative min-w-[252px] px-1 pt-2 pb-2">
+              <button
+                onClick={() => navigate('/character')}
+                className="block w-full text-left"
+                style={{ all: 'unset', cursor: 'pointer', display: 'block', width: '100%' }}
+              >
+                <div
+                  style={{
+                    padding: 8,
+                    borderRadius: 14,
+                    background:
+                      'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
+                    border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
+                    display: 'flex', flexDirection: 'column', gap: 10,
+                  }}
                 >
-                  <div
-                    style={{
-                      padding: 12,
-                      borderRadius: 14,
-                      background:
-                        'linear-gradient(160deg, color-mix(in oklab, var(--primary) 18%, var(--surface)), var(--surface))',
-                      border: '1px solid color-mix(in oklab, var(--primary) 22%, var(--border))',
-                      display: 'flex', flexDirection: 'column', gap: 10,
-                    }}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        style={{
-                          width: 42, height: 42, borderRadius: 12,
-                          background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
-                          border: '1px solid var(--border)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 22,
-                        }}
-                      >
-                        <E e="🧙" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
-                          <span
-                            style={{
-                              fontSize: 9.5,
-                              padding: '1px 5px',
-                              borderRadius: 5,
-                              background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
-                              color: 'var(--c-xp)',
-                              fontWeight: 800,
-                              letterSpacing: '.06em',
-                            }}
-                          >
-                            NV {user.level}
-                          </span>
-                        </div>
-                        <div className="mt-px text-[11px]" style={{ color: 'var(--text-2)' }}>
-                          {getLevelTitle(user.level)}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <div
-                        className="mb-1 flex justify-between text-[10px] tabular-nums"
-                        style={{ color: 'var(--text-3)' }}
-                      >
-                        <span>XP</span>
-                        <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
-                      </div>
-                      <div
-                        style={{
-                          height: 5,
-                          background: 'var(--ring-track)',
-                          borderRadius: 999,
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: `${xpPctSide}%`,
-                            height: '100%',
-                            background:
-                              'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
-                            boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
-                            transition: 'width 1s cubic-bezier(.22,1,.36,1)',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ) : (
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => navigate('/character')}
-                    title={user.displayName}
-                    style={{ all: 'unset', cursor: 'pointer' }}
-                  >
+                  <div className="flex items-center gap-2.5">
                     <div
                       style={{
-                        width: 40, height: 40, borderRadius: 12,
+                        width: 36, height: 36, borderRadius: 12, flexShrink: 0,
                         background: 'linear-gradient(160deg, var(--surface-2), var(--bg-soft))',
                         border: '1px solid var(--border)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -456,9 +372,59 @@ export function GameLayout({ children }: Props) {
                     >
                       <E e="🧙" />
                     </div>
-                  </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate text-[14px] font-extrabold tracking-[-0.01em]">{user.displayName}</span>
+                        <span
+                          style={{
+                            fontSize: 9.5,
+                            padding: '1px 5px',
+                            borderRadius: 5,
+                            background: 'color-mix(in oklab, var(--c-xp) 18%, transparent)',
+                            color: 'var(--c-xp)',
+                            fontWeight: 800,
+                            letterSpacing: '.06em',
+                            flexShrink: 0,
+                          }}
+                        >
+                          NV {user.level}
+                        </span>
+                      </div>
+                      <div className="mt-px text-[11px] truncate" style={{ color: 'var(--text-2)' }}>
+                        {getLevelTitle(user.level)}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div
+                      className="mb-1 flex justify-between text-[10px] tabular-nums"
+                      style={{ color: 'var(--text-3)' }}
+                    >
+                      <span>XP</span>
+                      <span>{user.xp.toLocaleString()}/{user.xpToNextLevel.toLocaleString()}</span>
+                    </div>
+                    <div
+                      style={{
+                        height: 5,
+                        background: 'var(--ring-track)',
+                        borderRadius: 999,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${xpPctSide}%`,
+                          height: '100%',
+                          background:
+                            'linear-gradient(90deg, var(--c-xp), color-mix(in oklab, var(--c-xp) 60%, white))',
+                          boxShadow: '0 0 8px color-mix(in oklab, var(--c-xp) 60%, transparent)',
+                          transition: 'width 1s cubic-bezier(.22,1,.36,1)',
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
+              </button>
             </div>
           )}
         </SidebarBody>
