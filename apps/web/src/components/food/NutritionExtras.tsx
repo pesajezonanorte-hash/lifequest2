@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Settings2, X } from 'lucide-react';
 import { PixelPanel } from '../ui/PixelPanel';
 import { PixelButton } from '../ui/PixelButton';
+import { useToast } from '../../hooks/useToast';
 import api from '../../lib/api';
 import { E } from '@/components/ui/glyphs';
 import ModernLoader from '@/components/ui/modern-loader';
@@ -13,20 +15,23 @@ interface DailyMacros { calories: number; protein: number; carbs: number; fat: n
 interface SavedMeal { id: string; name: string; calories?: number; protein?: number; carbs?: number; fat?: number }
 interface AIParsed { name: string; estimatedCalories: number; estimatedProtein: number; estimatedCarbs: number; estimatedFat: number; aiAvailable?: boolean; aiSucceeded?: boolean }
 
+const inputClass =
+  'min-h-11 w-full min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-deep)] px-3 py-2.5 text-base text-[var(--text-primary)] outline-none transition-colors placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent-gold)_16%,transparent)]';
+
 function MacroBar({ label, value, goal, color }: { label: string; value: number; goal: number; color: string }) {
   const pct = goal > 0 ? Math.min((value / goal) * 100, 100) : 0;
   const over = goal > 0 && value > goal;
   return (
     <div>
-      <div className="flex justify-between mb-1">
-        <span className="font-pixel text-text-secondary" style={{ fontSize: '12px' }}>{label}</span>
-        <span className="font-pixel" style={{ fontSize: '12px', color: over ? 'var(--accent-red)' : 'var(--text-secondary)' }}>
-          {Math.round(value)}/{goal}g
+      <div className="mb-1.5 flex items-baseline justify-between gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">{label}</span>
+        <span className="text-xs font-semibold tabular-nums" style={{ color: over ? 'var(--accent-red)' : 'var(--text-secondary)' }}>
+          {Math.round(value)}/{goal} g
         </span>
       </div>
-      <div className="stat-bar h-3">
+      <div className="h-2.5 overflow-hidden rounded-full bg-[var(--bg-muted)]">
         <motion.div
-          className="h-full transition-colors"
+          className="h-full rounded-full transition-colors"
           style={{ background: over ? 'var(--accent-red)' : color }}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
@@ -77,52 +82,60 @@ export function MacroGoalsWidget({ date }: { date: string }) {
   const goal = data.goal ?? { calories: 2000, protein: 150, carbs: 200, fat: 70 };
 
   return (
-    <PixelPanel className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>MACROS HOY</p>
-        <button onClick={() => setEditGoal(e => !e)} className="font-pixel text-text-secondary hover:text-accent-gold transition-colors" style={{ fontSize: '12px' }}>
-          {editGoal ? <><E e="✕" s={11} /> CERRAR</> : <><E e="⚙" s={11} /> META</>}
+    <PixelPanel className="p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-[var(--text-primary)]"><E e="📊" s={15} /> Macros de hoy</p>
+        <button
+          type="button"
+          onClick={() => setEditGoal(e => !e)}
+          aria-expanded={editGoal}
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]"
+        >
+          {editGoal ? <><X className="h-3.5 w-3.5" aria-hidden="true" /> Cerrar</> : <><Settings2 className="h-3.5 w-3.5" aria-hidden="true" /> Editar meta</>}
         </button>
       </div>
 
       {editGoal ? (
-        <div className="space-y-2">
-          {([['Calorías (kcal)', 'calories'], ['Proteína (g)', 'protein'], ['Carbs (g)', 'carbs'], ['Grasa (g)', 'fat']] as [string, keyof typeof form][]).map(([label, key]) => (
-            <div key={key} className="flex items-center gap-2">
-              <span className="font-pixel text-text-secondary w-28" style={{ fontSize: '12px' }}>{label}</span>
-              <input
-                type="number"
-                value={form[key]}
-                onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                className="flex-1 bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-2 py-1 focus:border-accent-gold outline-none"
-              />
-            </div>
-          ))}
+        <div className="mt-4 space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {([['Calorías (kcal)', 'calories'], ['Proteína (g)', 'protein'], ['Carbs (g)', 'carbs'], ['Grasa (g)', 'fat']] as [string, keyof typeof form][]).map(([label, key]) => (
+              <label key={key} className="block">
+                <span className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">{label}</span>
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={form[key]}
+                  onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                  className={inputClass}
+                />
+              </label>
+            ))}
+          </div>
           <PixelButton variant="primary" onClick={saveGoal} disabled={saving} className="w-full">
-            {saving ? 'Guardando...' : 'GUARDAR META'}
+            {saving ? 'Guardando…' : 'Guardar meta'}
           </PixelButton>
         </div>
       ) : (
-        <>
-          <div className="flex justify-between items-end">
+        <div className="mt-4 space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="font-pixel text-text-secondary" style={{ fontSize: '12px' }}>CALORÍAS</p>
-              <p className="font-vt text-2xl" style={{ color: data.calories > goal.calories ? 'var(--accent-red)' : 'var(--accent-gold)' }}>
-                {Math.round(data.calories)} <span className="text-base text-text-secondary">/ {goal.calories}</span>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Calorías</p>
+              <p className="mt-1 text-3xl font-semibold leading-none tabular-nums" style={{ color: data.calories > goal.calories ? 'var(--accent-red)' : 'var(--text-primary)' }}>
+                {Math.round(data.calories)}
+                <span className="ml-1.5 text-sm font-medium text-[var(--text-secondary)]">/ {goal.calories} kcal</span>
               </p>
             </div>
-            <div className="text-right">
-              <p className="font-pixel text-accent-green" style={{ fontSize: '12px' }}>
-                {Math.max(0, goal.calories - data.calories)} kcal restantes
-              </p>
-            </div>
+            <p className="text-sm font-semibold tabular-nums text-[var(--accent-green)]">
+              {Math.max(0, goal.calories - data.calories)} kcal restantes
+            </p>
           </div>
-          <div className="space-y-2">
-            <MacroBar label="PROTEÍNA" value={data.protein} goal={goal.protein} color="var(--accent-red)" />
-            <MacroBar label="CARBOS" value={data.carbs} goal={goal.carbs} color="var(--accent-gold)" />
-            <MacroBar label="GRASA" value={data.fat} goal={goal.fat} color="var(--accent-purple)" />
+          <div className="space-y-3.5">
+            <MacroBar label="Proteína" value={data.protein} goal={goal.protein} color="var(--accent-red)" />
+            <MacroBar label="Carbos" value={data.carbs} goal={goal.carbs} color="var(--accent-gold)" />
+            <MacroBar label="Grasa" value={data.fat} goal={goal.fat} color="var(--accent-purple)" />
           </div>
-        </>
+        </div>
       )}
     </PixelPanel>
   );
@@ -178,15 +191,20 @@ export function AIQuickLog({ onLogged }: { onLogged: (meal: { name: string; calo
   }
 
   return (
-    <PixelPanel className="p-4 space-y-3">
-      <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}><E e="🤖" /> REGISTRO RÁPIDO CON IA</p>
-      <div className="flex flex-col gap-2 sm:flex-row">
+    <PixelPanel className="p-4 sm:p-5">
+      <p className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+        <E e="🤖" s={16} /> Registro rápido con IA
+      </p>
+      <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+        Escribe lo que comiste y el Sabio estima las calorías y macros por ti.
+      </p>
+      <div className="mt-3.5 flex flex-col gap-2 sm:flex-row">
         <input
           value={text}
           onChange={e => setText(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && parse()}
           placeholder="Ej: pollo con arroz y ensalada"
-          className="min-w-0 w-full flex-1 bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-3 py-2 focus:border-accent-gold outline-none"
+          className={`${inputClass} sm:flex-1`}
         />
         <PixelButton
           variant="secondary"
@@ -194,53 +212,62 @@ export function AIQuickLog({ onLogged }: { onLogged: (meal: { name: string; calo
           disabled={parsing || !text.trim()}
           className="w-full shrink-0 sm:w-auto"
         >
-          {parsing ? '...' : '→ ANALIZAR'}
+          {parsing ? 'Analizando…' : '→ ANALIZAR'}
         </PixelButton>
       </div>
 
       {aiError && (
-        <p className="font-vt text-[var(--accent-gold)] text-sm"><E e="⚠" /> {aiError}</p>
+        <p className="mt-3 text-sm font-medium text-[var(--accent-gold)]"><E e="⚠" s={13} /> {aiError}</p>
       )}
+
       {parsed && (
-        <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-          <input
-            value={parsed.name}
-            onChange={e => setParsed({ ...parsed, name: e.target.value })}
-            className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-lg px-2 py-1 focus:border-accent-gold outline-none"
-          />
-          <div className="grid grid-cols-4 gap-1">
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 space-y-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-panel-light)] p-4"
+        >
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">Nombre</span>
+            <input
+              value={parsed.name}
+              onChange={e => setParsed({ ...parsed, name: e.target.value })}
+              className={inputClass}
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {([
               ['Kcal',  'estimatedCalories', parsed.estimatedCalories, 'var(--accent-gold)'],
               ['Prot',  'estimatedProtein',  parsed.estimatedProtein,  'var(--accent-red)'],
               ['Carbs', 'estimatedCarbs',    parsed.estimatedCarbs,    'var(--accent-cyan)'],
               ['Grasa', 'estimatedFat',      parsed.estimatedFat,      'var(--accent-purple)'],
             ] as [string, 'estimatedCalories' | 'estimatedProtein' | 'estimatedCarbs' | 'estimatedFat', number, string][]).map(([label, key, val, color]) => (
-              <div key={label} className="text-center border border-border-pixel py-2">
-                <p className="font-pixel text-text-secondary" style={{ fontSize: '12px' }}>{label}</p>
+              <div key={key} className="rounded-lg border border-[var(--border)] bg-[var(--bg-panel)] px-2 py-2.5 text-center">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">{label}</p>
                 <input
                   type="number"
                   min={0}
+                  inputMode="numeric"
                   value={val}
                   onChange={e => updateMacro(key, e.target.value)}
-                  className="w-full bg-transparent text-center font-vt text-xl outline-none"
+                  className="mt-1 w-full min-w-0 bg-transparent text-center text-lg font-semibold tabular-nums outline-none"
                   style={{ color }}
                 />
               </div>
             ))}
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={mealType}
               onChange={e => setMealType(e.target.value)}
-              className="flex-1 bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-2 py-1 focus:border-accent-gold outline-none"
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--bg-deep)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--accent-gold)] sm:max-w-44"
             >
               <option value="BREAKFAST">Desayuno</option>
               <option value="LUNCH">Almuerzo</option>
               <option value="DINNER">Cena</option>
               <option value="SNACK">Snack</option>
             </select>
-            <PixelButton variant="primary" onClick={confirmLog}><E e="✓" /> AGREGAR</PixelButton>
-            <PixelButton variant="ghost" onClick={() => setParsed(null)}><E e="✕" /></PixelButton>
+            <PixelButton variant="primary" onClick={confirmLog}><E e="✓" s={13} /> Agregar</PixelButton>
+            <PixelButton variant="ghost" onClick={() => setParsed(null)} aria-label="Descartar análisis"><E e="✕" s={13} /></PixelButton>
           </div>
         </motion.div>
       )}
@@ -254,6 +281,7 @@ export function SavedMealsPanel({ onAdd }: { onAdd: (meal: SavedMeal) => void })
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', calories: '', protein: '', carbs: '', fat: '' });
   const [mealType, setMealType] = useState('LUNCH');
+  const toast = useToast();
 
   useEffect(() => {
     api.get('/nutrition/saved-meals').then((r: any) => setMeals(r.data ?? [])).finally(() => setLoading(false));
@@ -261,62 +289,101 @@ export function SavedMealsPanel({ onAdd }: { onAdd: (meal: SavedMeal) => void })
 
   async function handleCreate() {
     if (!form.name.trim()) return;
-    const r: any = await api.post('/nutrition/saved-meals', {
-      name: form.name,
-      calories: form.calories ? Number(form.calories) : undefined,
-      protein: form.protein ? Number(form.protein) : undefined,
-      carbs: form.carbs ? Number(form.carbs) : undefined,
-      fat: form.fat ? Number(form.fat) : undefined,
-    });
-    setMeals(prev => [...prev, r.data]);
-    setShowForm(false);
-    setForm({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+    try {
+      const r: any = await api.post('/nutrition/saved-meals', {
+        name: form.name,
+        calories: form.calories ? Number(form.calories) : undefined,
+        protein: form.protein ? Number(form.protein) : undefined,
+        carbs: form.carbs ? Number(form.carbs) : undefined,
+        fat: form.fat ? Number(form.fat) : undefined,
+      });
+      setMeals(prev => [...prev, r.data]);
+      setShowForm(false);
+      setForm({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+    } catch {
+      toast.error('No se pudo guardar la comida');
+    }
   }
 
   async function handleDelete(id: string) {
-    await api.delete(`/nutrition/saved-meals/${id}`);
-    setMeals(prev => prev.filter(m => m.id !== id));
+    try {
+      await api.delete(`/nutrition/saved-meals/${id}`);
+      setMeals(prev => prev.filter(m => m.id !== id));
+    } catch {
+      toast.error('No se pudo eliminar');
+    }
   }
 
   async function handleAdd(meal: SavedMeal) {
-    await api.post('/meals', {
-      name: meal.name,
-      mealType,
-      calories: meal.calories,
-      protein: meal.protein,
-      carbs: meal.carbs,
-      fat: meal.fat,
-    });
-    onAdd(meal);
+    try {
+      await api.post('/meals', {
+        name: meal.name,
+        mealType,
+        calories: meal.calories,
+        protein: meal.protein,
+        carbs: meal.carbs,
+        fat: meal.fat,
+      });
+      toast.success(`"${meal.name}" agregada al registro de hoy`);
+      onAdd(meal);
+    } catch {
+      toast.error('No se pudo agregar al registro de hoy');
+    }
   }
 
   return (
-    <PixelPanel className="p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}><E e="⭐" /> COMIDAS GUARDADAS</p>
-        <button onClick={() => setShowForm(f => !f)} className="font-pixel text-text-secondary hover:text-accent-gold transition-colors" style={{ fontSize: '12px' }}>
-          {showForm ? <E e="✕" s={11} /> : '+ NUEVA'}
+    <PixelPanel className="p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-[var(--text-primary)]"><E e="⭐" s={15} /> Comidas guardadas</p>
+        <button
+          type="button"
+          onClick={() => setShowForm(f => !f)}
+          aria-expanded={showForm}
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-semibold text-[var(--text-secondary)] transition-colors hover:text-[var(--accent-gold)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-gold)]"
+        >
+          {showForm ? <><X className="h-3.5 w-3.5" aria-hidden="true" /> Cancelar</> : '+ Nueva'}
         </button>
       </div>
 
       {showForm && (
-        <div className="space-y-2 border-t border-border-pixel pt-3">
-          <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Nombre de la comida" className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-3 py-2 focus:border-accent-gold outline-none" />
-          <div className="grid grid-cols-4 gap-1">
+        <div className="mt-4 space-y-3 rounded-xl border border-[var(--border)] bg-[var(--bg-panel-light)] p-4">
+          <input
+            value={form.name}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            placeholder="Nombre de la comida"
+            className={inputClass}
+          />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {(['calories', 'protein', 'carbs', 'fat'] as const).map(k => (
-              <div key={k}>
-                <p className="font-pixel text-text-secondary mb-0.5" style={{ fontSize: '12px' }}>{k === 'calories' ? 'KCAL' : k.toUpperCase()}</p>
-                <input type="number" value={form[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} placeholder="0" className="w-full bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-base px-1 py-1 focus:border-accent-gold outline-none" />
-              </div>
+              <label key={k} className="block">
+                <span className="mb-1 block text-xs font-medium text-[var(--text-secondary)]">
+                  {k === 'calories' ? 'Kcal' : k === 'protein' ? 'Proteína (g)' : k === 'carbs' ? 'Carbs (g)' : 'Grasa (g)'}
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  inputMode="numeric"
+                  value={form[k]}
+                  onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))}
+                  placeholder="0"
+                  className="min-h-11 w-full min-w-0 rounded-lg border border-[var(--border)] bg-[var(--bg-deep)] px-2 py-2 text-sm text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--accent-gold)]"
+                />
+              </label>
             ))}
           </div>
-          <PixelButton variant="primary" onClick={handleCreate} className="w-full">GUARDAR COMIDA</PixelButton>
+          <PixelButton variant="primary" onClick={handleCreate} disabled={!form.name.trim()} className="w-full">
+            Guardar comida
+          </PixelButton>
         </div>
       )}
 
-      <div className="flex gap-2 items-center">
-        <span className="font-pixel text-text-secondary" style={{ fontSize: '12px' }}>AGREGAR COMO:</span>
-        <select value={mealType} onChange={e => setMealType(e.target.value)} className="flex-1 bg-bg-deep border-2 border-border-pixel text-text-primary font-vt text-sm px-2 py-1 outline-none">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Agregar como:</span>
+        <select
+          value={mealType}
+          onChange={e => setMealType(e.target.value)}
+          className="min-h-11 min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-deep)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] outline-none transition-colors focus:border-[var(--accent-gold)] sm:w-44"
+        >
           <option value="BREAKFAST">Desayuno</option>
           <option value="LUNCH">Almuerzo</option>
           <option value="DINNER">Cena</option>
@@ -324,26 +391,43 @@ export function SavedMealsPanel({ onAdd }: { onAdd: (meal: SavedMeal) => void })
         </select>
       </div>
 
-      <LoadingGate loading={loading} fallback={<ModernLoader words={[...LOADING_COPY.nutrition]} />}>
-        {loading ? null : meals.length === 0 ? (
-        <p className="font-vt text-text-secondary text-base text-center py-4 italic">Sin comidas guardadas</p>
-      ) : (
-        <div className="space-y-1">
-          {meals.map(m => (
-            <div key={m.id} className="flex items-center justify-between py-2 border-b border-border-pixel/30 last:border-0">
-              <div>
-                <p className="font-vt text-text-primary text-lg">{m.name}</p>
-                {m.calories && <p className="font-pixel text-accent-gold" style={{ fontSize: '12px' }}>{m.calories} kcal · P:{m.protein ?? 0}g · C:{m.carbs ?? 0}g · G:{m.fat ?? 0}g</p>}
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => handleAdd(m)} className="font-pixel text-accent-green hover:opacity-70 transition-opacity" style={{ fontSize: '12px' }}>+ AGREGAR</button>
-                <button onClick={() => handleDelete(m.id)} className="font-pixel text-accent-red hover:opacity-70 transition-opacity" style={{ fontSize: '12px' }}><E e="✕" /></button>
-              </div>
-            </div>
-          ))}
-        </div>
-        )}
-      </LoadingGate>
+      <div className="mt-2">
+        <LoadingGate loading={loading} fallback={<ModernLoader words={[...LOADING_COPY.nutrition]} />}>
+          {loading ? null : meals.length === 0 ? (
+            <p className="py-8 text-center text-sm italic text-[var(--text-secondary)]">
+              Guarda tus comidas frecuentes para registrarlas con un toque.
+            </p>
+          ) : (
+            <ul className="divide-y divide-[var(--border-soft,var(--border))]">
+              {meals.map(m => (
+                <li key={m.id} className="flex items-start gap-3 py-3.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-[var(--text-primary)] sm:text-base">{m.name}</p>
+                    {typeof m.calories === 'number' && (
+                      <p className="mt-0.5 text-xs tabular-nums text-[var(--text-secondary)]">
+                        {m.calories} kcal · P {m.protein ?? 0} g · C {m.carbs ?? 0} g · G {m.fat ?? 0} g
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <PixelButton variant="green" size="sm" onClick={() => handleAdd(m)} className="min-h-10">
+                      + Agregar
+                    </PixelButton>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(m.id)}
+                      aria-label={`Eliminar ${m.name}`}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--accent-red)]/10 hover:text-[var(--accent-red)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-red)]"
+                    >
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </LoadingGate>
+      </div>
     </PixelPanel>
   );
 }

@@ -192,8 +192,9 @@ const GLYPHS: Record<string, LucideIcon> = {
   '📅': Calendar, '📆': CalendarDays, '🗓': CalendarDays,
   // comida / salud
   '🍎': Cherry, '🥗': Salad, '🍕': Pizza, '🍔': Sandwich, '🍖': Drumstick,
-  '🍲': Soup, '🍽': Utensils, '☕': Coffee, '🍵': Coffee,
+  '🍲': Soup, '🍽': Utensils, '☕': Coffee, '🍵': Coffee, '🍅': Salad,
   '💧': Droplet, '🩺': HeartPulse,
+  '⭐': Star, '🌅': Sun, '🃏': Layers,
   // deporte / sueño
   '🏋': Dumbbell, '🏃': Activity, '🚴': Bike, '🚶': Footprints,
   '🤸': Sparkles, '🧘': PersonStanding, '🏄': Waves, '🏊': Waves, '🛏': Bed,
@@ -207,7 +208,7 @@ const GLYPHS: Record<string, LucideIcon> = {
   '🪴': Leaf, '💭': HelpCircle, '🗯': HelpCircle, '🗨': MessageCircle,
   '🗣': Mic, '🫶': HeartHandshake, '🫰': Heart,
   '▶': Activity, '⏸': Square,
-  '💾': Save, '💽': Database, '🖥': Laptop, '⌨': Laptop, '🖱': Target,
+  '💾': Save, '💽': Database, '🖥': Laptop, '⌨': Laptop, '🖱': Target, '💻': Laptop,
   '📳': Smartphone, '📇': Copy,
   '✔': Check, '➕': Plus, '➖': Minus,
   '🧼': Brush, '🪣': Brush, '🚰': Droplet, '🪥': Brush,
